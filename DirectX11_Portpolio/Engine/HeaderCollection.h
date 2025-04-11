@@ -1,0 +1,50 @@
+#pragma once
+
+#include <Windows.h>
+
+#include<chrono>
+#include <string>
+#include <vector>
+#include <memory>
+#include <wrl/client.h>
+#include <map>
+#include <functional>
+#include <bitset>
+#include "Utility/Delegate.h"
+
+
+using namespace std;
+using namespace chrono;
+using Microsoft::WRL::ComPtr;
+
+#include <d3dcommon.h>
+#include <d3d11.h>
+#include <DirectXMath.h>
+#include <directxtk/SimpleMath.h>
+#include <dxgi.h>    // DXGIFactory
+#include <dxgi1_4.h> // DXGIFactory4
+using namespace DirectX;
+
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3d11.lib")
+
+
+
+#include <imgui.h>
+#include <ImGuizmo.h>
+#include <imgui_impl_dx11.h>
+#include <imgui_impl_win32.h>
+
+
+
+#include "Definition.h"
+#include "Systems/D3D.h"
+
+
+#include "Timer/Timer.h"
+#include"Timer/TimerManager.h"
+#include "Systems/Keyboard.h"
+#include "Systems/Mouse.h"
+
+
+#include "UI/Gui.h"
