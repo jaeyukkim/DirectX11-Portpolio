@@ -7,6 +7,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{9D4822D1-777F-4FF2-A78F-88FA9FF82153}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HLSL", "HLSL", "{41607995-DF67-4499-9277-8A2F00B457EC}"
+	ProjectSection(SolutionItems) = preProject
+		HLSL\Common.hlsli = HLSL\Common.hlsli
+		HLSL\Material.hlsl = HLSL\Material.hlsl
+		HLSL\PS_SkeletalMesh.hlsl = HLSL\PS_SkeletalMesh.hlsl
+		HLSL\VS_SkeletalMesh.hlsl = HLSL\VS_SkeletalMesh.hlsl
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

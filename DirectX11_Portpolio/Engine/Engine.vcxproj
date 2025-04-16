@@ -143,15 +143,24 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Frameworks\Actor.h" />
-    <ClInclude Include="Frameworks\APawn.h" />
+    <ClInclude Include="Frameworks\ACharacter.h" />
     <ClInclude Include="Frameworks\EActorComponent.h" />
+    <ClInclude Include="Frameworks\EMeshComponent.h" />
     <ClInclude Include="Frameworks\EObject.h" />
     <ClInclude Include="Frameworks\EPrimitiveComponent.h" />
     <ClInclude Include="Frameworks\ESceneComponent.h" />
+    <ClInclude Include="Frameworks\ESkeletalMeshComponent.h" />
+    <ClInclude Include="Frameworks\Material.h" />
+    <ClInclude Include="Frameworks\Skeletal.h" />
+    <ClInclude Include="Frameworks\SkeletalMesh.h" />
+    <ClInclude Include="Frameworks\Texture.h" />
     <ClInclude Include="HeaderCollection.h" />
     <ClInclude Include="MathLibrary\FTransform.h" />
     <ClInclude Include="Render\Buffers.h" />
     <ClInclude Include="Definition.h" />
+    <ClInclude Include="Render\RenderData.h" />
+    <ClInclude Include="Render\Shader.h" />
+    <ClInclude Include="Render\VertexData.h" />
     <ClInclude Include="Systems\Application.h" />
     <ClInclude Include="Systems\D3D.h" />
     <ClInclude Include="Systems\IExecutable.h" />
@@ -160,19 +169,30 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Timer\Timer.h" />
     <ClInclude Include="Timer\TimerManager.h" />
     <ClInclude Include="UI\Gui.h" />
+    <ClInclude Include="Utility\BinaryFile.h" />
+    <ClInclude Include="Utility\Converter.h" />
     <ClInclude Include="Utility\Delegate.h" />
+    <ClInclude Include="Utility\Path.h" />
+    <ClInclude Include="Utility\String.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Frameworks\Actor.cpp" />
-    <ClCompile Include="Frameworks\APawn.cpp" />
+    <ClCompile Include="Frameworks\ACharacter.cpp" />
     <ClCompile Include="Frameworks\EActorComponent.cpp" />
+    <ClCompile Include="Frameworks\EMeshComponent.cpp" />
     <ClCompile Include="Frameworks\EObject.cpp" />
     <ClCompile Include="Frameworks\EPrimitiveComponent.cpp" />
     <ClCompile Include="Frameworks\ESceneComponent.cpp" />
+    <ClCompile Include="Frameworks\ESkeletalMeshComponent.cpp" />
+    <ClCompile Include="Frameworks\Material.cpp" />
+    <ClCompile Include="Frameworks\Skeletal.cpp" />
+    <ClCompile Include="Frameworks\SkeletalMesh.cpp" />
+    <ClCompile Include="Frameworks\Texture.cpp" />
     <ClCompile Include="HeaderCollection.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Render\Buffers.cpp" />
+    <ClCompile Include="Render\Shader.cpp" />
     <ClCompile Include="Systems\Application.cpp" />
     <ClCompile Include="Systems\D3D.cpp" />
     <ClCompile Include="Systems\Keyboard.cpp" />
@@ -180,7 +200,11 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Timer\Timer.cpp" />
     <ClCompile Include="Timer\TimerManager.cpp" />
     <ClCompile Include="UI\Gui.cpp" />
+    <ClCompile Include="Utility\BinaryFile.cpp" />
+    <ClCompile Include="Utility\Converter.cpp" />
     <ClCompile Include="Utility\Delegate.cpp" />
+    <ClCompile Include="Utility\Path.cpp" />
+    <ClCompile Include="Utility\String.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

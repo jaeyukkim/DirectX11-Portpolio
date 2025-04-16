@@ -46,8 +46,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE InPrevInstance
 	desc.Instance = hInInstance;
 	desc.Handle = nullptr;
 
-	desc.Width = 1280;
-	desc.Height = 720;
+	desc.Width = 1600;
+	desc.Height = 900;
 	
 
 	D3D::SetDesc(desc);

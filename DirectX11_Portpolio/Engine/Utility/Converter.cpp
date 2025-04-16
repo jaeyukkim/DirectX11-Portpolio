@@ -1,0 +1,355 @@
+
+#include "HeaderCollection.h"
+#include "Render/VertexData.h"
+#include "Render/RenderData.h"
+#include <json/json.h>
+#include <fstream>
+#include "BinaryFile.h"
+#include <directxtk/WICTextureLoader.h>
+#include <wincodec.h>
+
+#pragma comment(lib, "windowscodecs.lib")
+
+#include "Converter.h"
+
+Converter::Converter()
+{
+	Loader = make_shared<Assimp::Importer>();
+}
+
+Converter::~Converter()
+{
+
+}
+
+void Converter::ReadFile(const wstring InFileName)
+{
+	ReadFilePath = L"../Contents/_Assets/" + InFileName;
+	
+
+	Scene = Loader->ReadFile
+	(
+		String::ToString(ReadFilePath).c_str(),
+		aiProcess_ConvertToLeftHanded
+		| aiProcess_Triangulate
+		| aiProcess_GenUVCoords
+		| aiProcess_GenNormals
+		| aiProcess_CalcTangentSpace
+		| aiProcess_GenBoundingBoxes
+	);
+
+	Assert(Scene != nullptr, "모델 정상 로드 않됨");
+}
+
+void Converter::ExportMaterial(wstring InSaveFileName, bool InOverwrite)
+{
+	//../../_Models/Airplane/Airplane.material
+	InSaveFileName = L"../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".material";
+
+	ReadMaterials();
+	WriteMaterial(InSaveFileName, InOverwrite);
+}
+
+void Converter::ReadMaterials()
+{
+	//printf("mNumMaterials : %d\n", Scene->mNumMaterials);
+
+	for (UINT i = 0; i < Scene->mNumMaterials; i++)
+	{
+		aiMaterial* material = Scene->mMaterials[i];
+		MaterialData* data = new MaterialData();
+		
+		data->Name = material->GetName().C_Str();
+		data->VertexShaderPath = "";
+		data->PixelShaderPath = "";
+
+		aiColor4D color;
+
+		material->Get(AI_MATKEY_COLOR_AMBIENT, color);
+		data->Ambient = Color(color.r, color.g, color.b, color.a);
+
+		material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+		data->Diffuse = Color(color.r, color.g, color.b, color.a);
+
+		material->Get(AI_MATKEY_COLOR_SPECULAR, color);
+		material->Get(AI_MATKEY_SHININESS, color.a);
+		data->Specular = Color(color.r, color.g, color.b, color.a);
+
+		material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
+		data->Emissive = Color(color.r, color.g, color.b, color.a);
+
+
+		aiString textureFile;
+		
+		material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFile);
+		data->DiffuseFile = textureFile.C_Str();
+
+		material->GetTexture(aiTextureType_SPECULAR, 0, &textureFile);
+		data->SpecularFile = textureFile.C_Str();
+
+		material->GetTexture(aiTextureType_NORMALS, 0, &textureFile);
+		data->NormalFile = textureFile.C_Str();
+
+		
+		Materials.push_back(data);
+	}
+}
+
+void Converter::WriteMaterial(wstring InSaveFileName, bool InOverwrite)
+{
+	if (InOverwrite == false)
+	{
+		if (Path::ExistFile(InSaveFileName) == true)
+			return;
+	}
+
+
+	string folderName = String::ToString(Path::GetDirectoryName(InSaveFileName));
+	string fileName = String::ToString(Path::GetFileName(InSaveFileName));
+
+	Path::CreateFolders(folderName);
+
+
+	Json::Value root;
+
+	for (MaterialData* data : Materials)
+	{
+		Json::Value value;
+
+		value["VertexShaderPath"] = data->VertexShaderPath;
+		value["PixelShaderPath"] = data->PixelShaderPath;
+		value["Ambient"] = ColorToJson(data->Ambient);
+		value["Diffuse"] = ColorToJson(data->Diffuse);
+		value["Specular"] = ColorToJson(data->Specular);
+		value["Emissive"] = ColorToJson(data->Emissive);
+		value["DiffuseMap"] = SaveTexture(folderName, data->DiffuseFile);
+		value["SpecularMap"] = SaveTexture(folderName, data->SpecularFile);
+		value["NormalMap"] = SaveTexture(folderName, data->NormalFile);
+		root[data->Name.c_str()] = value;
+
+		Delete(data);
+	}
+
+
+	fileName = folderName + fileName;
+
+	Json::StyledWriter writer;
+	string str = writer.write(root);
+
+	ofstream stream;
+	stream.open(fileName);
+	stream << str;
+	stream.close();
+}
+
+string Converter::ColorToJson(const Color& InColor)
+{
+	return String::Format("%f,%f,%f,%f", InColor.x, InColor.y, InColor.z, InColor.w);
+}
+
+string Converter::SaveTexture(string InSaveFolder, string InFileName)
+{
+	CheckTrueResult(InFileName.length() < 1, "");
+	CheckTrueResult(InSaveFolder.length() < 1, "");
+
+
+	string fileName = Path::GetFileName(InFileName);
+	const aiTexture* texture = Scene->GetEmbeddedTexture(InFileName.c_str());
+
+	if (texture != nullptr)
+	{
+		if (texture->mHeight < 1)
+		{
+			BinaryWriter writer;
+			writer.Open(String::ToWString(InSaveFolder + fileName));
+			writer.ToByte(texture->pcData, texture->mWidth);
+			writer.Close();
+
+			return InSaveFolder + fileName;
+		}
+
+		D3D11_TEXTURE2D_DESC desc;
+		ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
+		desc.Width = texture->mWidth;
+		desc.Height = texture->mHeight;
+		desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+
+		D3D11_SUBRESOURCE_DATA subResource;
+		ZeroMemory(&subResource, sizeof(D3D11_SUBRESOURCE_DATA));
+		subResource.pSysMem = texture->pcData;
+
+
+		ID3D11Texture2D* saveTexture;
+		Check(D3D::Get()->GetDevice()->CreateTexture2D(&desc, &subResource, &saveTexture));
+
+		ScratchImage scratch;
+		HRESULT hr = CaptureTexture(D3D::Get()->GetDevice(), D3D::Get()->GetDeviceContext(), saveTexture, scratch);
+
+		Check(hr);
+		
+		std::wstring savePath = String::ToWString(InSaveFolder + fileName);
+		
+		hr = SaveToWICFile(
+			*scratch.GetImage(0, 0, 0),          // Get first mip level image
+			WIC_FLAGS_NONE,
+			GUID_ContainerFormatPng,
+			savePath.c_str()
+		);
+		return InSaveFolder + fileName;
+	}
+
+
+	string directory = Path::GetDirectoryName(String::ToString(ReadFilePath));
+	string origin = directory + InFileName;
+	String::Replace(&origin, "\\", "/");
+
+	CheckFalseResult(Path::ExistFile(origin), "");
+
+
+	string path = InSaveFolder + fileName;
+	CopyFileA(origin.c_str(), path.c_str(), FALSE);
+
+	return InSaveFolder + Path::GetFileName(path);
+}
+
+void Converter::ExportMesh(wstring InSaveFileName)
+{
+	InSaveFileName = L"../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
+
+	ReadBoneData(Scene->mRootNode, 0, -1);
+	ReadMeshData();
+
+	WriteMeshData(InSaveFileName);
+}
+
+void Converter::ReadBoneData(aiNode* InNode, int InIndex, int InParent)
+{
+	BoneData* bone = new BoneData();
+	bone->Index = InIndex;
+	bone->Parent = InParent;
+	bone->Name = InNode->mName.C_Str();
+
+	bool check = sizeof(Matrix) == sizeof(aiMatrix4x4);
+	Assert(check, "Matrix와 aiMatrix4x4 사이즈 다름");
+	memcpy(&bone->Transform, &InNode->mTransformation, sizeof(Matrix));
+	bone->Transform = bone->Transform.Transpose();
+
+	
+	Matrix parent;
+
+	if (InParent < 0)
+		parent = Matrix::Identity;
+	else
+		parent = Bones[InParent]->Transform;
+
+	bone->Transform = bone->Transform * parent;
+
+	Bones.push_back(bone);
+
+
+	for (UINT i = 0; i < InNode->mNumMeshes; i++)
+		bone->MeshNumbers.push_back(InNode->mMeshes[i]);
+
+	for (UINT i = 0; i < InNode->mNumChildren; i++)
+		ReadBoneData(InNode->mChildren[i], (int)Bones.size(), InIndex);
+}
+
+void Converter::ReadMeshData()
+{
+	for (UINT i = 0; i < Scene->mNumMeshes; i++)
+	{
+		MeshData* data = new MeshData();
+
+		aiMesh* mesh = Scene->mMeshes[i];
+		
+		UINT materialIndex = mesh->mMaterialIndex;
+		aiMaterial* material = Scene->mMaterials[materialIndex];
+		
+		
+		data->Name = mesh->mName.C_Str();
+
+		data->MaterialName = material->GetName().C_Str();
+
+
+		for (UINT v = 0; v < mesh->mNumVertices; v++)
+		{
+			VertexModel vertex;
+
+			
+			memcpy_s(&vertex.Position, sizeof(Vector3), &mesh->mVertices[v], sizeof(Vector3));
+
+			if(mesh->HasTextureCoords(0))
+				memcpy_s(&vertex.Uv, sizeof(Vector2), &mesh->mTextureCoords[0][v], sizeof(Vector2));
+
+			if(mesh->HasVertexColors(0))
+				memcpy_s(&vertex.Color, sizeof(Color), &mesh->mColors[0][v], sizeof(Color));
+
+			if (mesh->HasNormals())
+				memcpy_s(&vertex.Normal, sizeof(Vector3), &mesh->mNormals[v], sizeof(Vector3));
+
+			if (mesh->HasTangentsAndBitangents())
+				memcpy_s(&vertex.Tangent, sizeof(Vector3), &mesh->mTangents[v], sizeof(Vector3));
+
+			data->Vertices.push_back(vertex);
+		}
+
+		for (UINT f = 0; f < mesh->mNumFaces; f++)
+		{
+			aiFace& face = mesh->mFaces[f];
+
+			for (UINT k = 0; k < face.mNumIndices; k++)
+				data->Indices.push_back(face.mIndices[k]);
+		}
+
+		Meshes.push_back(data);
+	}
+}
+
+void Converter::WriteMeshData(wstring InSaveFileName)
+{
+	Path::CreateFolders(Path::GetDirectoryName(InSaveFileName));
+
+	shared_ptr<BinaryWriter> w = make_shared<BinaryWriter>();
+	w->Open(InSaveFileName);
+
+	w->ToUInt((UINT)Bones.size());
+	for (BoneData* data : Bones)
+	{
+		w->ToUInt(data->Index);
+		w->ToString(data->Name);
+
+		w->ToInt(data->Parent);
+		w->ToMatrix(data->Transform);
+
+		
+		w->ToUInt((UINT)data->MeshNumbers.size());
+
+		if(data->MeshNumbers.size() > 0)
+			w->ToByte(&data->MeshNumbers[0], (UINT)(sizeof(UINT) * data->MeshNumbers.size()));
+
+		Delete(data);
+	}
+
+	w->ToUInt((UINT)Meshes.size());
+	for (MeshData* data : Meshes)
+	{
+		w->ToString(data->Name);
+		w->ToString(data->MaterialName);
+
+		w->ToUInt((UINT)data->Vertices.size());
+		w->ToByte(&data->Vertices[0], (UINT)(sizeof(VertexModel) * data->Vertices.size()));
+
+		w->ToUInt((UINT)data->Indices.size());
+		w->ToByte(&data->Indices[0], (UINT)(sizeof(UINT) * data->Indices.size()));
+
+		Delete(data);
+	}
+	
+	w->Close();
+	
+}

@@ -1,12 +1,16 @@
 #include "Pch.h"
 #include "TestGui.h"
+
+#include "AKachujin.h"
 #include "Systems/Application.h"
 
 
 
 void TestGui::Initialize()
 {
-	
+	AKachujin* kachujin = new AKachujin();
+
+	testval++;
 }
 
 void TestGui::Tick(float deltaTime)

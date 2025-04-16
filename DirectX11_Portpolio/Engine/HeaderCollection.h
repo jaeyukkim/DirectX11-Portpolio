@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include<chrono>
+#include <chrono>
 #include <string>
 #include <vector>
 #include <memory>
@@ -10,23 +10,36 @@
 #include <map>
 #include <functional>
 #include <bitset>
-#include "Utility/Delegate.h"
 
 
 using namespace std;
 using namespace chrono;
 using Microsoft::WRL::ComPtr;
 
+#include "Utility/Delegate.h"
+#include "Utility/String.h"
+#include "Utility/Path.h"
+
+
 #include <d3dcommon.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
+
 #include <directxtk/SimpleMath.h>
 #include <dxgi.h>    // DXGIFactory
 #include <dxgi1_4.h> // DXGIFactory4
-using namespace DirectX;
+#include <DirectXTex.h>
+
 
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "DirectXTex.lib")
+#pragma comment(lib, "DirectXTK.lib")
+
+
+
+using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 
 

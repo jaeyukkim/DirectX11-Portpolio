@@ -12,8 +12,8 @@ public:
 	UINT GetCount() { return Count; }
 	UINT GetStride() { return Stride; }
 
-	void Mapping();
-	void Render();
+	void UpdateVertexBuffer();
+	void IASetVertexBuffer();
 
 private:
 	ComPtr<ID3D11Buffer> Buffer = nullptr;
@@ -36,9 +36,9 @@ public:
 	IndexBuffer(UINT* InData, UINT InCount);
 
 
-	UINT GetCount() { return Count; }
+	UINT GetCount() const { return Count; } 
 
-	void Render();
+	void IASetIndexBuffer() const;
 
 private:
 	ComPtr<ID3D11Buffer> Buffer;
@@ -57,7 +57,7 @@ public:
 	operator ID3D11Buffer* () { return Buffer.Get(); }
 	operator const ID3D11Buffer* () { return Buffer.Get(); }
 
-	void Render();
+	void UpdateConstBuffer() const;
 
 private:
 	ComPtr<ID3D11Buffer> Buffer;
@@ -109,7 +109,7 @@ class RawBuffer : public CsResource
 {
 public:
 	RawBuffer(void* InInputData, UINT InInputSize, UINT InOutputSize);
-	~RawBuffer();
+	virtual ~RawBuffer() override;
 
 private:
 	void CreateInput() override;
@@ -135,7 +135,7 @@ class TextureBuffer : public CsResource
 {
 public:
 	TextureBuffer(ID3D11Texture2D* InSource);
-	~TextureBuffer();
+	virtual ~TextureBuffer() override;
 
 private:
 	void CreateSRV() override;

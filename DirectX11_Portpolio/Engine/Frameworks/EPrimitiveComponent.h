@@ -1,6 +1,7 @@
 #pragma once
+#include "ESceneComponent.h"
 
-class EPrimitiveComponent
+class EPrimitiveComponent : public ESceneComponent
 {
 public:
     

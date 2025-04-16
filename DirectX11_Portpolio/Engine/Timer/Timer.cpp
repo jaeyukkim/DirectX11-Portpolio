@@ -18,6 +18,7 @@ void Timer::Destroy()
 Timer* Timer::Get()
 {
 	return Instance;
+	
 }
 
 Timer::Timer()

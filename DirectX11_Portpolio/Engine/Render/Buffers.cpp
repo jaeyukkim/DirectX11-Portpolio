@@ -41,21 +41,24 @@ VertexBuffer::VertexBuffer(void* InData, UINT InCount, UINT InStride, UINT InSlo
 	Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, &subResource, Buffer.GetAddressOf()));
 }
 
+VertexBuffer::~VertexBuffer()
+{
+}
 
 
-void VertexBuffer::Mapping()
+void VertexBuffer::UpdateVertexBuffer()
 {
 	CheckFalse(bCpuWrite);
 
 	D3D11_MAPPED_SUBRESOURCE subResource;
 	D3D::Get()->GetDeviceContext()->Map(Buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource);
 	{
-		memcpy(subResource.pData, Data, Stride * Count);
+		memcpy(subResource.pData, Data, (size_t)Stride * Count);
 	}
 	D3D::Get()->GetDeviceContext()->Unmap(Buffer.Get(), 0);
 }
 
-void VertexBuffer::Render()
+void VertexBuffer::IASetVertexBuffer()
 {
 	UINT offset = 0;
 
@@ -81,7 +84,7 @@ IndexBuffer::IndexBuffer(UINT* InData, UINT InCount)
 }
 
 
-void IndexBuffer::Render()
+void IndexBuffer::IASetIndexBuffer() const
 {
 	D3D::Get()->GetDeviceContext()->IASetIndexBuffer(Buffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 }
@@ -102,7 +105,7 @@ ConstantBuffer::ConstantBuffer(void* InData, UINT InDataSize)
 }
 
 
-void ConstantBuffer::Render()
+void ConstantBuffer::UpdateConstBuffer() const
 {
 	D3D11_MAPPED_SUBRESOURCE subResource;
 	D3D::Get()->GetDeviceContext()->Map(Buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource);
@@ -115,6 +118,10 @@ void ConstantBuffer::Render()
 //-----------------------------------------------------------------------------
 
 CsResource::CsResource()
+{
+}
+
+CsResource::~CsResource()
 {
 }
 
@@ -189,7 +196,7 @@ void RawBuffer::CreateSRV()
 
 void RawBuffer::CreateOuput()
 {
-	Assert(OutputSize > 0, "Àß¸øµÈ OutputSize");
+	Assert(OutputSize > 0, "ìž˜ëª»ëœ OutputSize");
 
 	ID3D11Buffer* buffer = nullptr;
 
@@ -207,7 +214,7 @@ void RawBuffer::CreateOuput()
 
 void RawBuffer::CreateUAV()
 {
-	Assert(OutputSize > 0, "Àß¸øµÈ OutputSize");
+	Assert(OutputSize > 0, "ìž˜ëª»ëœ OutputSize");
 
 	ID3D11Buffer* buffer = (ID3D11Buffer*)Output.Get();
 
@@ -226,7 +233,7 @@ void RawBuffer::CreateUAV()
 
 void RawBuffer::CreateResult()
 {
-	Assert(OutputSize > 0, "Àß¸øµÈ OutputSize");
+	Assert(OutputSize > 0, "ìž˜ëª»ëœ OutputSize");
 
 	D3D11_BUFFER_DESC desc;
 	((ID3D11Buffer*)Output.Get())->GetDesc(&desc);

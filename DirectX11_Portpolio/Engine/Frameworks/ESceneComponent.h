@@ -11,6 +11,6 @@ public:
 	ESceneComponent();
 	~ESceneComponent();
 
-	FTransform Transform;
+	Matrix Transform;
 
 };
