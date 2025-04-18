@@ -21,7 +21,6 @@ struct VertexShaderInput
     float4 blendIndicies : BLENDINDICES;
     float4 blendWeight : BLENDWEIGHTS;
     
-    
 };
 
 struct VertexOutput

@@ -1,10 +1,7 @@
 #include "HeaderCollection.h"
-
-#include "Material.h"
-#include "MathLibrary/FTransform.h"
-#include "Render/VertexData.h"
 #include "Utility/BinaryFile.h"
 #include "SkeletalMesh.h"
+
 
 
 SkeletalMesh::SkeletalMesh()
@@ -28,27 +25,33 @@ void SkeletalMesh::Tick()
 	// scale, transform, rotation 업데이트
 }
 
+
+
 void SkeletalMesh::Render()
 {
+
 	VBuffer->IASetVertexBuffer();
 	IBuffer->IASetIndexBuffer();
+
 	BoneBuffer->UpdateConstBuffer();
+	BoneBuffer->VSSetConstantBuffer(EConstBufferSlot::Bone, 1);
+
+	MaterialData->Render();
 	
-	//FrameRender->Render();
-	//sBoneBuffer->SetConstantBuffer(*BoneBuffer);
-	//World->Render();
+	
+	//World->RenderComponent();
 
 
-	D3D::Get()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	//MaterialData->GetShader()->DrawIndexed(0, 0, IndexCount);
+	MaterialData->GetRenderer()->DrawIndexed(IBuffer->GetCount());
+		
+	
 }
 
 void SkeletalMesh::SetWorld(const FTransform* InTransform)
 {
-	meshWorld->SetTranslation(InTransform->Translation);
-	meshWorld->SetRotationFromEuler(InTransform->Rotation);
-	meshWorld->SetScale(InTransform->Scale);
+	MeshWorld->SetPosition(InTransform->GetPosition());
+	MeshWorld->SetRotationFromEuler(InTransform->GetRotation());
+	MeshWorld->SetScale(InTransform->GetScale());
 }
 
 
@@ -102,11 +105,8 @@ void SkeletalMesh::CreateBuffer()
 	VBuffer = make_shared<VertexBuffer>(Vertices, VertexCount, sizeof(VertexModel));
 	IBuffer = make_shared<IndexBuffer>(Indices, IndexCount);
 		
-
-	//FrameRender = new Frame(MaterialData->GetShader());
 	
 	BoneBuffer = make_shared<ConstantBuffer>(&BoneData, sizeof(BoneDesc));
-	//sBoneBuffer = MaterialData->GetShader()->AsConstantBuffer("CB_ModelBones");
-
-	meshWorld = make_shared<FTransform>();
+	
+	MeshWorld = make_shared<FTransform>();
 }

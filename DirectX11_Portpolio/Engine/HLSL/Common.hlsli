@@ -1,6 +1,7 @@
 #ifndef __COMMON_HLSLI__
 #define __COMMON_HLSLI__
 
+#include "Material.hlsli"
 // 쉐이더에서 include할 내용들은 .hlsli 파일에 작성
 // Properties -> Item Type: Does not participate in build으로 설정
 
@@ -8,61 +9,22 @@
 // 세부 구현은 이해하기 편하도록 대학 강의 스타일로 단순화하였습니다.
 
 
-#define MAX_LIGHTS 3 // 쉐이더에서도 #define 사용 가능
-#define NUM_DIR_LIGHTS 1
-#define NUM_POINT_LIGHTS 1
-#define NUM_SPOT_LIGHTS 1
 
-#define MATERIAL_TEXTURE_Diffuse 0
-#define MATERIAL_TEXTURE_Specular 1
-#define MATERIAL_TEXTURE_NORMAL 2
-#define MAX_MATERIAL_TEXTURE_COUNT 3
-
-Texture2D MaterialMaps[MAX_MATERIAL_TEXTURE_COUNT];
-
-
-cbuffer CB_World
+cbuffer CB_World : register(b1)
 {
     matrix World;
 };
 
-cbuffer CB_Context
+cbuffer CB_ViewContext : register(b2)
 {
     matrix View;
     matrix ViewInverse;
     matrix Projection;
     matrix ViewProjection;
 
-    float Time;
-    uint3 Options;
 }
 
-struct MaterialDesc
-{
-    float4 Ambient;
-    float4 Diffuse;
-    float4 Specular;
-    float4 Emissive;
-    
-    float2 Tiling;
-};
 
-cbuffer CB_Material
-{
-    MaterialDesc Material;
-};
-
-
-// 재질
-struct Material
-{
-    float4 Ambient;
-    float4 Diffuse;
-    float4 Specular;
-    float4 Emissive;
-
-    float2 Tiling;
-};
 
 // 조명
 struct Light
@@ -164,6 +126,25 @@ float3 ComputeSpotLight(Light L, MaterialDesc mat, float3 pos, float3 normal,
 
 }
 
+struct VertexShaderInput
+{
+    float3 posModel : POSITION; //모델 좌표계의 위치 position
+    float2 texCoord : TEXCOORD; // <- 다음 예제에서 사용
+    float4 modelColor : COLOR;
+    float3 modelNormal : NORMAL; // 모델 좌표계의 normal    
+    float3 tanzent : TANGENT;
+    float4 blendIndicies : BLENDINDICES;
+    float4 blendWeight : BLENDWEIGHTS;
 
+};
+
+struct VertexOutput
+{
+    float4 posProj : SV_POSITION; // Screen position
+    float3 posWorld : POSITION; // World position (조명 계산에 사용)
+    float3 normalWorld : NORMAL;
+    float2 texCoord : TEXCOORD;
+    float3 color : COLOR; // Normal lines 쉐이더에서 사용
+};
 
 #endif // __COMMON_HLSLI__

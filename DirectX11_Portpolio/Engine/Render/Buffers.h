@@ -1,5 +1,15 @@
 #pragma once
 
+
+enum class EConstBufferSlot : UINT8
+{
+	MaterialDesc = 0,
+	World = 1,
+	ViewContext = 2,
+	Bone = 3
+};
+
+
 class VertexBuffer
 {
 public:
@@ -58,7 +68,8 @@ public:
 	operator const ID3D11Buffer* () { return Buffer.Get(); }
 
 	void UpdateConstBuffer() const;
-
+	void VSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot);
+	void PSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot);
 private:
 	ComPtr<ID3D11Buffer> Buffer;
 

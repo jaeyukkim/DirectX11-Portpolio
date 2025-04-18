@@ -23,5 +23,5 @@ private:
     vector<UINT> MeshNumbers;
 
 private:
-    friend class ESkeletalMeshComponent;
+    friend class USkeletalMeshComponent;
 };

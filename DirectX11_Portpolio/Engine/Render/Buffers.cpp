@@ -115,6 +115,17 @@ void ConstantBuffer::UpdateConstBuffer() const
 	D3D::Get()->GetDeviceContext()->Unmap(Buffer.Get(), 0);
 }
 
+void ConstantBuffer::VSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot)
+{
+	D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(static_cast<UINT>(bufferSlot), numSlot, Buffer.GetAddressOf());
+}
+
+void ConstantBuffer::PSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot)
+{
+	D3D::Get()->GetDeviceContext()->PSSetConstantBuffers(static_cast<UINT>(bufferSlot), numSlot, Buffer.GetAddressOf());
+
+}
+
 //-----------------------------------------------------------------------------
 
 CsResource::CsResource()

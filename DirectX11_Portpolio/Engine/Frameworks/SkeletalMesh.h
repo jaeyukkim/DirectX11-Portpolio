@@ -51,7 +51,7 @@ private:
 private:
   //  Frame* FrameRender = nullptr;
     //Transform* World = nullptr;
-    shared_ptr<FTransform> meshWorld;
+    shared_ptr<FTransform> MeshWorld;
     shared_ptr<ConstantBuffer> BoneBuffer = nullptr;
     shared_ptr<VertexBuffer> VBuffer = nullptr;
     shared_ptr<IndexBuffer> IBuffer = nullptr;
@@ -66,7 +66,9 @@ private:
     } BoneData;
 
 
+    
+
 
 private:
-    friend class ESkeletalMeshComponent;
+    friend class USkeletalMeshComponent;
 };

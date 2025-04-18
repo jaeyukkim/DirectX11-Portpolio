@@ -3,7 +3,7 @@
 
 #include "Systems/IExecutable.h"
 
-
+class Actor;
 
 class TestGui : public IExecutable
 {
@@ -16,6 +16,7 @@ public:
 
 	void Interact();
 
+	vector<shared_ptr<Actor>> Actors;
 
 	float testval = 0.0f;
 };

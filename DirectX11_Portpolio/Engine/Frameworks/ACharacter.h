@@ -1,17 +1,19 @@
 #pragma once
 #include "Actor.h"
-#include "ESkeletalMeshComponent.h"
+#include "USkeletalMeshComponent.h"
 
 
-class ESceneComponent;
+class USceneComponent;
 
 
 class ACharacter : public Actor
 {
 public:
 	ACharacter();
-	~ACharacter();
+	virtual ~ACharacter();
+	virtual void Tick(float deltaTime) override;
+	virtual void Render() override;
 
-	shared_ptr<ESkeletalMeshComponent> Mesh;
+	shared_ptr<USkeletalMeshComponent> Mesh;
 	
 }; 

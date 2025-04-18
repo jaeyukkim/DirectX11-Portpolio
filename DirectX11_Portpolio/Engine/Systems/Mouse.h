@@ -14,8 +14,8 @@ public:
 	static Mouse* Get();
 
 public:
-	XMFLOAT3 GetPosition() { return Position; }
-	XMFLOAT3 GetMoveDelta() { return WheelMoveDelta; }
+	Vector3 GetPosition() { return Position; }
+	Vector3 GetMoveDelta() { return WheelMoveDelta; }
 
 public:
 	bool Down(int InType);
@@ -45,13 +45,13 @@ private:
 	};
 
 private:
-	XMFLOAT3 Position;
+	Vector3 Position;
 
 	BYTE ButtonStatus[(int)MouseButton::Max];
 	BYTE ButtonOldStatus[(int)MouseButton::Max];
 	MouseButtonState ButtonMaps[(int)MouseButton::Max];
 
-	XMFLOAT3 WheelStatus;
-	XMFLOAT3 WheelOldStatus;
-	XMFLOAT3 WheelMoveDelta;
+	Vector3 WheelStatus;
+	Vector3 WheelOldStatus;
+	Vector3 WheelMoveDelta;
 };

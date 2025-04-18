@@ -2,6 +2,7 @@
 
 #define Check(x) { assert((x) >= (0)); }
 #define Assert(x, message) { assert((x) && (message)); }
+#define AssertHR(x, message) { assert((SUCCEEDED(x)) && (message)); }
 
 #define Delete(x)\
 {\
@@ -20,3 +21,5 @@
 
 #define CheckNull(x) { if(x == nullptr) return; }
 #define CheckNotNull(x) { if(x != nullptr) return; }
+
+#define Super  __super

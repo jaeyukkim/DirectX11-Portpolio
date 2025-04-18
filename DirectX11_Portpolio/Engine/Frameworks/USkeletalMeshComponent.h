@@ -1,19 +1,21 @@
 #pragma once
-#include "EMeshComponent.h"
-#include "Material.h"
+#include "UMeshComponent.h"
 #include "Skeletal.h"
 #include "SkeletalMesh.h"
 
 
-class ESkeletalMeshComponent : public EMeshComponent
+class USkeletalMeshComponent : public UMeshComponent
 {
 public:
-    ESkeletalMeshComponent(wstring InFileName);
-    ~ESkeletalMeshComponent();
+    USkeletalMeshComponent(wstring InFileName);
+    virtual ~USkeletalMeshComponent();
 
-    void TickComponent();
+public:
+    virtual void TickComponent(float deltaTime) override;
+    virtual void RenderComponent() override;
+
     void InitRenderer() const;
-    void Render();
+    
     
 private:
     

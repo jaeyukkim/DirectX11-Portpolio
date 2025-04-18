@@ -1,7 +1,7 @@
 #pragma once
-#include "Texture.h"
-#include "Render/Buffers.h"
-#include "Render/Shader.h"
+
+
+class Shader;
 
 
 #define MATERIAL_TEXTURE_DIFFUSE 0
@@ -15,9 +15,9 @@ public:
     Material();
     ~Material();
 
+    void Render();
 
 private:
-    void Render();
     void Initialize();
 
 public:
@@ -37,7 +37,7 @@ public:
     void SetNormalMap(wstring InFilePath);
 
     Shader* GetRenderer() const { return Renderer.get(); }
-
+    ConstantBuffer* GetConstantBuffer() const { return CBuffer.get(); }
 
 
 private:

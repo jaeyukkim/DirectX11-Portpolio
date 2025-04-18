@@ -144,16 +144,18 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
   <ItemGroup>
     <ClInclude Include="Frameworks\Actor.h" />
     <ClInclude Include="Frameworks\ACharacter.h" />
-    <ClInclude Include="Frameworks\EActorComponent.h" />
-    <ClInclude Include="Frameworks\EMeshComponent.h" />
-    <ClInclude Include="Frameworks\EObject.h" />
-    <ClInclude Include="Frameworks\EPrimitiveComponent.h" />
-    <ClInclude Include="Frameworks\ESceneComponent.h" />
-    <ClInclude Include="Frameworks\ESkeletalMeshComponent.h" />
-    <ClInclude Include="Frameworks\Material.h" />
+    <ClInclude Include="Frameworks\UActorComponent.h" />
+    <ClInclude Include="Frameworks\UCameraComponent.h" />
+    <ClInclude Include="Frameworks\UMeshComponent.h" />
+    <ClInclude Include="Frameworks\UObject.h" />
+    <ClInclude Include="Frameworks\UPrimitiveComponent.h" />
+    <ClInclude Include="Frameworks\USceneComponent.h" />
+    <ClInclude Include="Frameworks\USkeletalMeshComponent.h" />
+    <ClInclude Include="Render\FSceneView.h" />
+    <ClInclude Include="Render\Material.h" />
     <ClInclude Include="Frameworks\Skeletal.h" />
     <ClInclude Include="Frameworks\SkeletalMesh.h" />
-    <ClInclude Include="Frameworks\Texture.h" />
+    <ClInclude Include="Render\Texture.h" />
     <ClInclude Include="HeaderCollection.h" />
     <ClInclude Include="MathLibrary\FTransform.h" />
     <ClInclude Include="Render\Buffers.h" />
@@ -178,16 +180,18 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
   <ItemGroup>
     <ClCompile Include="Frameworks\Actor.cpp" />
     <ClCompile Include="Frameworks\ACharacter.cpp" />
-    <ClCompile Include="Frameworks\EActorComponent.cpp" />
-    <ClCompile Include="Frameworks\EMeshComponent.cpp" />
-    <ClCompile Include="Frameworks\EObject.cpp" />
-    <ClCompile Include="Frameworks\EPrimitiveComponent.cpp" />
-    <ClCompile Include="Frameworks\ESceneComponent.cpp" />
-    <ClCompile Include="Frameworks\ESkeletalMeshComponent.cpp" />
-    <ClCompile Include="Frameworks\Material.cpp" />
+    <ClCompile Include="Frameworks\UActorComponent.cpp" />
+    <ClCompile Include="Frameworks\UCameraComponent.cpp" />
+    <ClCompile Include="Frameworks\UMeshComponent.cpp" />
+    <ClCompile Include="Frameworks\UObject.cpp" />
+    <ClCompile Include="Frameworks\UPrimitiveComponent.cpp" />
+    <ClCompile Include="Frameworks\USceneComponent.cpp" />
+    <ClCompile Include="Frameworks\USkeletalMeshComponent.cpp" />
+    <ClCompile Include="Render\FSceneView.cpp" />
+    <ClCompile Include="Render\Material.cpp" />
     <ClCompile Include="Frameworks\Skeletal.cpp" />
     <ClCompile Include="Frameworks\SkeletalMesh.cpp" />
-    <ClCompile Include="Frameworks\Texture.cpp" />
+    <ClCompile Include="Render\Texture.cpp" />
     <ClCompile Include="HeaderCollection.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -205,6 +209,30 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Utility\Delegate.cpp" />
     <ClCompile Include="Utility\Path.cpp" />
     <ClCompile Include="Utility\String.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="HLSL\PS_SkeletalMesh.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="HLSL\VS_SkeletalMesh.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HLSL\Common.hlsli" />
+    <None Include="HLSL\Material.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

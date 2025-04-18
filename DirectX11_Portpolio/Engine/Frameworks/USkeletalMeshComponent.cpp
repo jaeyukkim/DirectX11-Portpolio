@@ -1,5 +1,5 @@
 #include "HeaderCollection.h"
-#include "ESkeletalMeshComponent.h"
+#include "USkeletalMeshComponent.h"
 
 #include <filesystem>
 #include <fstream>
@@ -8,7 +8,7 @@
 
 #include "Utility/Converter.h"
 
-ESkeletalMeshComponent::ESkeletalMeshComponent(wstring InFileName)
+USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName)
 {
 	MeshWorld = make_shared<FTransform>();
 	
@@ -30,13 +30,15 @@ ESkeletalMeshComponent::ESkeletalMeshComponent(wstring InFileName)
 	InitRenderer();
 }
 
-ESkeletalMeshComponent::~ESkeletalMeshComponent()
+USkeletalMeshComponent::~USkeletalMeshComponent()
 {
 
 }
 
-void ESkeletalMeshComponent::TickComponent()
+void USkeletalMeshComponent::TickComponent(float deltaTime)
 {
+	Super::TickComponent(deltaTime);
+
 	for (const shared_ptr<SkeletalMesh>& meshPtr : SkeletalMeshes)
 	{
 		meshPtr->SetWorld(MeshWorld.get());
@@ -44,7 +46,7 @@ void ESkeletalMeshComponent::TickComponent()
 	}
 }
 
-void ESkeletalMeshComponent::InitRenderer() const
+void USkeletalMeshComponent::InitRenderer() const
 {
 	std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements =
 	{
@@ -74,15 +76,17 @@ void ESkeletalMeshComponent::InitRenderer() const
 	}
 }
 
-void ESkeletalMeshComponent::Render()
+void USkeletalMeshComponent::RenderComponent()
 {
+	Super::RenderComponent();
+
 	for (const shared_ptr<SkeletalMesh>& meshPtr : SkeletalMeshes)
 	{
 		meshPtr->Render();
 	}
 }
 
-void ESkeletalMeshComponent::ReadFile(wstring InFileName)
+void USkeletalMeshComponent::ReadFile(wstring InFileName)
 {
 	// 1. JSON 파일을 읽기 위한 입력 스트림 선언
 	ifstream stream;
@@ -128,7 +132,7 @@ void ESkeletalMeshComponent::ReadFile(wstring InFileName)
 	Vector3 r = Vector3(stof(rString[0]), stof(rString[1]), stof(rString[2])); // 회전
 
 	// 11. 모델의 위치, 크기, 회전을 설정
-	MeshWorld->SetTranslation(p);
+	MeshWorld->SetPosition(p);
 	MeshWorld->SetScale(s);
 	MeshWorld->SetRotationFromEuler(r.x, r.y, r.z);
 
@@ -141,7 +145,7 @@ void ESkeletalMeshComponent::ReadFile(wstring InFileName)
 	
 }
 
-void ESkeletalMeshComponent::ReadMaterial(wstring InFilePath)
+void USkeletalMeshComponent::ReadMaterial(wstring InFilePath)
 {
 	
 	// 1. 머티리얼 파일(.material)의 경로를 설정
@@ -207,7 +211,7 @@ void ESkeletalMeshComponent::ReadMaterial(wstring InFilePath)
 	stream.close();
 }
 
-void ESkeletalMeshComponent::ReadMesh(wstring InFilePath)
+void USkeletalMeshComponent::ReadMesh(wstring InFilePath)
 {
 	// 1. 파일 경로를 설정 (모델 데이터가 저장된 경로)
 	InFilePath = L"../Contents/_Models/" + InFilePath  + L".mesh";
@@ -255,7 +259,7 @@ void ESkeletalMeshComponent::ReadMesh(wstring InFilePath)
 	}
 }
 
-Color ESkeletalMeshComponent::JsonStringToColor(string InString)
+Color USkeletalMeshComponent::JsonStringToColor(string InString)
 {
 	vector<string> v;
 	String::SplitString(&v, InString, ",");

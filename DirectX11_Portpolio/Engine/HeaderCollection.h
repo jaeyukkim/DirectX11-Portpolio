@@ -25,6 +25,7 @@ using Microsoft::WRL::ComPtr;
 #include <d3d11.h>
 #include <DirectXMath.h>
 
+
 #include <directxtk/SimpleMath.h>
 #include <dxgi.h>    // DXGIFactory
 #include <dxgi1_4.h> // DXGIFactory4
@@ -35,6 +36,7 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "DirectXTex.lib")
 #pragma comment(lib, "DirectXTK.lib")
+#pragma
 
 
 
@@ -53,6 +55,13 @@ using namespace DirectX::SimpleMath;
 #include "Definition.h"
 #include "Systems/D3D.h"
 
+#include "Render/Buffers.h"
+#include "Render/Texture.h"
+#include "Render/Material.h"
+#include "Render/Shader.h"
+
+#include "MathLibrary/FTransform.h"
+#include "Render/VertexData.h"
 
 #include "Timer/Timer.h"
 #include"Timer/TimerManager.h"

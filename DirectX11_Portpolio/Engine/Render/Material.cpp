@@ -38,15 +38,8 @@ void Material::SetShader(wstring InFileName)
 void Material::Render()
 {
 	
-	// 머티리얼의 상수 버퍼(Constant Buffer)를 셰이더에 설정
-	CBuffer->UpdateConstBuffer();
-
-	// 셰이더에 텍스처 리소스 뷰(SRV) 배열을 설정
-	/*sSRVs->SetResourceArray(
-		(ID3D11ShaderResourceView**)&SRVs, // 텍스처 리소스 배열
-		0,                                 // 시작 인덱스
-		MAX_MATERIAL_TEXTURE_COUNT         // 사용할 텍스처 개수
-	);*/
+	GetConstantBuffer()->UpdateConstBuffer();
+	GetConstantBuffer()->VSSetConstantBuffer(EConstBufferSlot::MaterialDesc, 1);
 	
 }
 

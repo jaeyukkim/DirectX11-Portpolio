@@ -8,7 +8,7 @@ public:
     
     void InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC> &InInputElements, const D3D11_SAMPLER_DESC& InSamplerDesc);
     void Bind() const;
-    void RenderIndexed(const int nIndex, D3D_PRIMITIVE_TOPOLOGY& primitive) const;
+    void DrawIndexed(const int nIndex) const;
     
 
 public:
@@ -18,8 +18,8 @@ public:
     
     void VSSetConstantBuffers(UINT StartSlot, const vector<ID3D11Buffer*>& InBuffers) const;
     void PSSetConstantBuffers(UINT StartSlot, const vector<ID3D11Buffer*>& InBuffers) const;
-    void SetVertexShaderPath(const wstring& InVertexShaderPath) {PixelShaderPath = InVertexShaderPath;}
-    void SetPixelShaderPath(const wstring& InPixelShaderPath) {PixelShaderPath = InPixelShaderPath;}
+    void SetVertexShaderPath(const wstring& InVertexShaderPath);
+    void SetPixelShaderPath(const wstring& InPixelShaderPath);
 
 private:
     void CompileVertexShader();
@@ -39,4 +39,6 @@ private:
     wstring VertexShaderPath;
     wstring PixelShaderPath;
     
+private:
+    void Assert_IF_FailedCompile(HRESULT hr);
 };

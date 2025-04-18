@@ -3,6 +3,7 @@
 #include "HeaderCollection.h"
 #include "IExecutable.h"
 #include "Application.h"
+#include "Render/FSceneView.h"
 
 IExecutable* Application::Main = nullptr;
 
@@ -27,6 +28,7 @@ WPARAM Application::Run(IExecutable* InMain)
 	 Gui::Create();
 	 Keyboard::Create();
 	 Mouse::Create();
+	 FSceneView::Create();
 
 	Main = InMain;
 	Main->Initialize();
@@ -124,6 +126,7 @@ void Application::Destroy()
 	Keyboard::Destroy();
 	Timer::Destroy();
 	Gui::Destroy();
+	FSceneView::Destroy();
 	D3D::Destroy();
 
 	D3DDesc desc = D3D::GetDesc();
@@ -182,13 +185,11 @@ void Application::MainRender()
 
 	//Rendering
 	{
-	
+		FSceneView::Get()->PreRender();
+
 		D3D::Get()->ClearRenderTargetView();
-
 		Main->Render();
-
 		Gui::Get()->Render();
-
 		D3D::Get()->Present();
 	}
 }

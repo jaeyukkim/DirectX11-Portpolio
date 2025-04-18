@@ -1,14 +1,15 @@
 #pragma once
-#include "EObject.h"
-#include "ESceneComponent.h"
+#include "UObject.h"
+#include "USceneComponent.h"
 
 
-class Actor : public EObject
+class Actor : public UObject
 {
 public:
 	Actor();
-	~Actor();
-
+	virtual ~Actor();
+	virtual void Tick(float deltaTime);
+	virtual void Render();
 	
-	shared_ptr<ESceneComponent> RootComponent;
+	shared_ptr<USceneComponent> RootComponent;
 };

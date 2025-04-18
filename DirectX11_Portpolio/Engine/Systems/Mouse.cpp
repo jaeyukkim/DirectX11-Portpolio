@@ -92,10 +92,8 @@ void Mouse::Tick(float deltaTime)
 	XMVECTOR vStatus = XMLoadFloat3(&WheelStatus);
 	XMVECTOR vOldStatus = XMLoadFloat3(&WheelOldStatus);
 
-	XMVECTOR vDelta = XMVectorSubtract(vStatus, vOldStatus);
+	Vector3 WheelMoveDelta = XMVectorSubtract(vStatus, vOldStatus);
 
-	XMFLOAT3 WheelMoveDelta;
-	XMStoreFloat3(&WheelMoveDelta, vDelta);
 
 	WheelOldStatus.z = WheelStatus.z;
 }
@@ -115,18 +113,12 @@ void Mouse::WndProc(UINT InMessage, WPARAM InwParam, LPARAM InlParam)
 	}
 }
 
-Mouse::Mouse()
+Mouse::Mouse() :
+	Position(Vector3(0.0f, 0.0f, 0.0f)), WheelOldStatus(Vector3(0.0f, 0.0f, 0.0f)), WheelMoveDelta(Vector3(0.0f, 0.0f, 0.0f))
 {
-	Position = XMFLOAT3(0, 0, 0);
-
 	ZeroMemory(ButtonStatus, sizeof(BYTE) * (int)MouseButton::Max);
 	ZeroMemory(ButtonOldStatus, sizeof(BYTE) * (int)MouseButton::Max);
 	ZeroMemory(ButtonMaps, sizeof(MouseButtonState) * (int)MouseButton::Max);
-
-
-	WheelStatus = XMFLOAT3(0, 0, 0);
-	WheelOldStatus = XMFLOAT3(0, 0, 0);
-	WheelMoveDelta = XMFLOAT3(0.f, 0.f, 0.f);
 }
 
 Mouse::~Mouse()
