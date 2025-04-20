@@ -3,6 +3,26 @@
 
 Mouse* Mouse::Instance = nullptr;
 
+Mouse::Mouse() :
+	Position(Vector3(0.0f, 0.0f, 0.0f)), WheelOldStatus(Vector3(0.0f, 0.0f, 0.0f)), WheelMoveDelta(Vector3(0.0f, 0.0f, 0.0f)), WheelStatus(Vector3(0.0f, 0.0f, 0.0f))
+{
+	ZeroMemory(ButtonStatus, sizeof(BYTE) * (int)MouseButton::Max);
+	ZeroMemory(ButtonOldStatus, sizeof(BYTE) * (int)MouseButton::Max);
+	ZeroMemory(ButtonMaps, sizeof(MouseButtonState) * (int)MouseButton::Max);
+
+	D3D::Get()->WinSizeChanged.Add([this]()
+		{
+			UpdateScreenCenter();
+		});
+
+	UpdateScreenCenter();
+}
+
+Mouse::~Mouse()
+{
+}
+
+
 void Mouse::Create()
 {
 	assert(Instance == nullptr);
@@ -79,23 +99,36 @@ void Mouse::Tick(float deltaTime)
 	}
 
 	
-	POINT point;
-	GetCursorPos(&point);
-	ScreenToClient(D3D::GetDesc().Handle, &point);
+	// 2. 마우스 델타 계산
+	POINT screenPoint;
+	GetCursorPos(&screenPoint); // 스크린 좌표계에서 마우스 위치 가져오기
 
-	WheelOldStatus.x = WheelStatus.x;
-	WheelOldStatus.y = WheelStatus.y;
+	/*WheelMoveDelta = Vector3(
+		(float)(screenPoint.x - ScreenCenter.x),
+		(float)(screenPoint.y - ScreenCenter.y),
+		0.0f
+	);*/
+	WheelMoveDelta = Vector3(0.0f, 0.0f, 0.0f);
+	// 3. 다시 마우스 커서를 가운데로 위치시킴 (스크린 좌표 기준)
+	
+	//SetCursorPos(ScreenCenter.x, ScreenCenter.y);
+	
+	
+}
 
-	WheelStatus.x = (float)point.x;
-	WheelStatus.y = (float)point.y;
+void Mouse::UpdateScreenCenter()
+{
+	D3DDesc desc = D3D::GetDesc();
 
-	XMVECTOR vStatus = XMLoadFloat3(&WheelStatus);
-	XMVECTOR vOldStatus = XMLoadFloat3(&WheelOldStatus);
+	// 클라이언트 중심을 먼저 계산
+	POINT center = { desc.Width / 2, desc.Height / 2 };
 
-	Vector3 WheelMoveDelta = XMVectorSubtract(vStatus, vOldStatus);
+	// 클라이언트 중심을 스크린 좌표계로 변환
+	ClientToScreen(desc.Handle, &center);
 
-
-	WheelOldStatus.z = WheelStatus.z;
+	// 변환된 스크린 좌표 저장
+	ScreenCenter.x = center.x;
+	ScreenCenter.y = center.y;
 }
 
 void Mouse::WndProc(UINT InMessage, WPARAM InwParam, LPARAM InlParam)
@@ -113,14 +146,4 @@ void Mouse::WndProc(UINT InMessage, WPARAM InwParam, LPARAM InlParam)
 	}
 }
 
-Mouse::Mouse() :
-	Position(Vector3(0.0f, 0.0f, 0.0f)), WheelOldStatus(Vector3(0.0f, 0.0f, 0.0f)), WheelMoveDelta(Vector3(0.0f, 0.0f, 0.0f))
-{
-	ZeroMemory(ButtonStatus, sizeof(BYTE) * (int)MouseButton::Max);
-	ZeroMemory(ButtonOldStatus, sizeof(BYTE) * (int)MouseButton::Max);
-	ZeroMemory(ButtonMaps, sizeof(MouseButtonState) * (int)MouseButton::Max);
-}
 
-Mouse::~Mouse()
-{
-}

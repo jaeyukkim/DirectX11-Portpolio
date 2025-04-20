@@ -6,7 +6,10 @@ enum class EConstBufferSlot : UINT8
 	MaterialDesc = 0,
 	World = 1,
 	ViewContext = 2,
-	Bone = 3
+	Bone = 3,
+	MaterialTex = 4,
+	LightMap = 5,
+	LightCnt = 6
 };
 
 
@@ -75,6 +78,30 @@ private:
 
 	void* Data;
 	UINT DataSize;
+};
+
+
+//------------------------------------------------------------------------
+
+
+class StructuredBuffer
+{
+public:
+	StructuredBuffer(void* data, UINT elementSize, UINT elementCount);
+	~StructuredBuffer() = default;
+
+	void UpdateBuffer();
+	void PSSetStructuredBuffer(const EConstBufferSlot bufferSlot);
+	void VSSetStructuredBuffer(const EConstBufferSlot bufferSlot);
+	void UpdateData(void* Indata);
+
+private:
+	ComPtr<ID3D11Buffer> buffer;
+	ComPtr<ID3D11ShaderResourceView> srv;
+
+	void* data = nullptr;
+	UINT elementSize = 0;
+	UINT elementCount = 0;
 };
 
 //------------------------------------------------------------------------------

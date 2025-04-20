@@ -25,7 +25,7 @@ public:
     void SetDiffuse(const Color& InColor) { ColorData.Diffuse = InColor; }
     void SetSpecular(const Color& InColor) { ColorData.Specular = InColor; }
     void SetEmissive(const Color& InColor) { ColorData.Emissive = InColor; }
-
+    void SetSamplerDesc(const D3D11_SAMPLER_DESC& InsampDesc);
 	
     void SetDiffuseMap(string InFilePath);
     void SetDiffuseMap(wstring InFilePath);
@@ -37,8 +37,8 @@ public:
     void SetNormalMap(wstring InFilePath);
 
     Shader* GetRenderer() const { return Renderer.get(); }
-    ConstantBuffer* GetConstantBuffer() const { return CBuffer.get(); }
-
+    ConstantBuffer* GetConstantBuffer() const { return ColorConstantBuffer.get(); }
+    const D3D11_SAMPLER_DESC& GetSamplerDesc() const { return SampDesc;  }
 
 private:
     struct Colors
@@ -50,12 +50,14 @@ private:
     } ColorData;
 
 private:
-    shared_ptr<ConstantBuffer> CBuffer = nullptr;
- //   ECB* sCBuffer = nullptr;	
+    shared_ptr<ConstantBuffer> ColorConstantBuffer = nullptr;
+   
+
 
 private:
     shared_ptr<Shader> Renderer = nullptr;
     shared_ptr<Texture> Textures[MAX_MATERIAL_TEXTURE_COUNT];
     ComPtr<ID3D11ShaderResourceView> SRVs[MAX_MATERIAL_TEXTURE_COUNT];
+    D3D11_SAMPLER_DESC SampDesc;
  //   ESRV* sSRVs = nullptr;
 };

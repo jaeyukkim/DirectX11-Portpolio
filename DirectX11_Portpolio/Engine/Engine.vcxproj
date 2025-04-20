@@ -151,6 +151,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Frameworks\UPrimitiveComponent.h" />
     <ClInclude Include="Frameworks\USceneComponent.h" />
     <ClInclude Include="Frameworks\USkeletalMeshComponent.h" />
+    <ClInclude Include="Light\ULightComponent.h" />
     <ClInclude Include="Render\FSceneView.h" />
     <ClInclude Include="Render\Material.h" />
     <ClInclude Include="Frameworks\Skeletal.h" />
@@ -187,6 +188,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Frameworks\UPrimitiveComponent.cpp" />
     <ClCompile Include="Frameworks\USceneComponent.cpp" />
     <ClCompile Include="Frameworks\USkeletalMeshComponent.cpp" />
+    <ClCompile Include="Light\ULightComponent.cpp" />
     <ClCompile Include="Render\FSceneView.cpp" />
     <ClCompile Include="Render\Material.cpp" />
     <ClCompile Include="Frameworks\Skeletal.cpp" />
@@ -232,6 +234,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Common.hlsli" />
+    <None Include="HLSL\Lighting.hlsli" />
     <None Include="HLSL\Material.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

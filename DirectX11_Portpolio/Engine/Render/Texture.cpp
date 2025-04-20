@@ -81,7 +81,7 @@ void Texture::LoadTexture()
 	}
 
 	
-	hr = DirectX::CreateShaderResourceView(D3D::Get()->GetDevice(), image.GetImages(), image.GetImageCount(), Metadata, &SRV);
+	hr = CreateShaderResourceView(D3D::Get()->GetDevice(), image.GetImages(), image.GetImageCount(), Metadata, SRV.GetAddressOf());
 	Check(hr);
 }
 
@@ -125,7 +125,6 @@ D3D11_TEXTURE2D_DESC Texture::ReadPixel(ID3D11Texture2D* InSource, DXGI_FORMAT I
 
 	ComPtr<ID3D11Texture2D> texture;
 	Check(D3D::Get()->GetDevice()->CreateTexture2D(&desc, nullptr, &texture));
-	//Check(D3DX11LoadTextureFromTexture(D3D::Get()->GetDeviceContext(), InSource, nullptr, texture));
 	D3D::Get()->GetDeviceContext()->CopyResource(texture.Get(), InSource);
 
 	//UINT* colors = new UINT[desc.Width * desc.Height];

@@ -1,10 +1,11 @@
 #include "HeaderCollection.h"
 #include "UCameraComponent.h"
-#include "Render/FSceneView.h"
+
 
 UCameraComponent::UCameraComponent()
 {
-	ViewMatrix = Matrix::Identity;
+	FTransform* T = GetTransform();
+	T->SetRotationFromEuler(90.0f, 0.0f, 180.0f);
 	SetViewMatrix();
 }
 
@@ -18,36 +19,57 @@ void UCameraComponent::TickComponent(float deltaTime)
 	Super::TickComponent(deltaTime);
 
 
-	//CheckFalse(Mouse::Get()->Press(MouseButton::Right));
+	if (Mouse::Get()->Press(MouseButton::Right))
+	{
+		SetViewMatrix();
+		return;
+	}
 
+	
 	FTransform* T = GetTransform();
 
-	Vector3 pos = T->GetPosition();
+	Vector3 moveDelta = Vector3::Zero;
 
 	if (Keyboard::Get()->Press('W'))
-		T->SetPosition(pos + T->GetForwardVector() * MoveSpeed * deltaTime);
-	
-	else if (Keyboard::Get()->Press('S'))
-		T->SetPosition(pos - T->GetForwardVector() * MoveSpeed * deltaTime);
+		moveDelta += T->GetForwardVector() * MoveSpeed * deltaTime;
+
+	if (Keyboard::Get()->Press('S'))
+		moveDelta -= T->GetForwardVector() * MoveSpeed * deltaTime;
 
 	if (Keyboard::Get()->Press('D'))
-		T->SetPosition(pos - T->GetRightVector() * MoveSpeed * deltaTime);
-	
-	else if (Keyboard::Get()->Press('A'))
-		T->SetPosition(pos - T->GetRightVector() * MoveSpeed * deltaTime);
+		moveDelta += T->GetRightVector() * MoveSpeed * deltaTime;
+
+	if (Keyboard::Get()->Press('A'))
+		moveDelta -= T->GetRightVector() * MoveSpeed * deltaTime;
+
+	if (moveDelta.LengthSquared() > 0.0f) // 이동량이 있으면
+	{
+		Vector3 pos = T->GetPosition();
+		T->SetPosition(pos + moveDelta);
+	}
+
+	Vector3 mouseDelta = Mouse::Get()->GetMoveDelta();
 
 
-	Vector3 delta = Mouse::Get()->GetMoveDelta();
-
-	float pitch = delta.y * RotationSpeed * deltaTime;
-	float yaw = delta.x * RotationSpeed * deltaTime;
+	float pitch = mouseDelta.y * RotationSpeed * deltaTime;
+	float yaw = mouseDelta.x * RotationSpeed * deltaTime;
 
 	T->AddRotation(yaw, pitch, 0.0f);
 
 	SetViewMatrix();
 
-	
-	FSceneView::Get()->UpdateSceneView(ViewMatrix, PerspectiveProjection);
+
+	string str = string("FrameRate : ") + to_string((int)ImGui::GetIO().Framerate);
+	Gui::Get()->RenderText(5, 5, 1, 1, 1, str);
+
+	str = String::Format("Camera Rotation : %3.0f, %3.0f, %3.0f", T->GetRotation().x, T->GetRotation().y, T->GetRotation().z);
+	Gui::Get()->RenderText(5, 20, 1, 1, 1, str);
+
+	str = String::Format("Camera Position : %3.0f, %3.0f, %3.0f", T->GetPosition().x, T->GetPosition().y, T->GetPosition().z);
+	Gui::Get()->RenderText(5, 35, 1, 1, 1, str);
+
+	str = String::Format("MoveDelta : %f, %f, %f", moveDelta.x, moveDelta.y, moveDelta.z);
+	Gui::Get()->RenderText(5, 50, 1, 1, 1, str);
 }
 
 
@@ -55,14 +77,29 @@ void UCameraComponent::TickComponent(float deltaTime)
 void UCameraComponent::SetViewMatrix()
 {
 	FTransform* T = GetTransform();
-	
-	ViewMatrix = Matrix::CreateLookAt(T->GetPosition(),
-		(T->GetPosition() + T->GetForwardVector()), T->GetUpVector());
+    
+	// 카메라의 위치와 방향 설정
+	Vector3 position = T->GetPosition();
+	Vector3 target = position + T->GetForwardVector();
+	Vector3 up = T->GetUpVector();
 
-	PerspectiveProjection = Matrix::CreatePerspectiveFieldOfView(
-		XMConvertToRadians(45.0f),
-		D3D::Get()->GetDesc().Width / D3D::Get()->GetDesc().Height,
-		0.1f, 1000.0f);
+	if (up.Length() <= 0.f)
+	{
+		up = Vector3(0, 1, 0);
+		target = Vector3(0, 0, 1);
+	}
+	// View 행렬 생성
+	aspect = D3D::Get()->GetDesc().Width / D3D::Get()->GetDesc().Height;
+	ViewContext.Projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0f), aspect, 0.1f, 1000.0f);
+	ViewContext.View = XMMatrixLookAtLH(position, target, up);
+	ViewContext.ViewInverse = ViewContext.View.Invert();
+	ViewContext.ViewProjection = ViewContext.View * ViewContext.Projection;
+	ViewContext.EyePos = position;
+
+	
+	FSceneView::Get()->UpdateSceneView(ViewContext);
 }
+
+
 
 

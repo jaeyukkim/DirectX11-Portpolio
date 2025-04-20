@@ -2,6 +2,7 @@
 #include <fstream>
 #include <d3dcompiler.h>
 #include "FSceneView.h"
+#include "Shader.h"
 
 
 Shader::Shader()
@@ -15,7 +16,7 @@ Shader::~Shader()
     
 }
 
-void Shader::InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC> &InInputElements, const D3D11_SAMPLER_DESC& InSamplerDesc)
+void Shader::InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements, const D3D11_SAMPLER_DESC& InSamplerDesc)
 {
     CompileVertexShader();
     CreateInputLayout(InInputElements);
@@ -36,6 +37,8 @@ void Shader::CompileVertexShader()
     hr = D3D::Get()->GetDevice()->CreateVertexShader(VsBlob->GetBufferPointer(),
         VsBlob->GetBufferSize(), nullptr, VertexShader.GetAddressOf());
     AssertHR(hr, "CreateVertexShader 에서 실패");
+
+
 }
 
 void Shader::CompilePixelShader()
@@ -69,13 +72,14 @@ void Shader::Assert_IF_FailedCompile(HRESULT hr)
 }
 
 
-void Shader::CreateInputLayout(const vector<D3D11_INPUT_ELEMENT_DESC> &InInputElements)
+void Shader::CreateInputLayout(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements)
 {
-    
-    HRESULT hr = D3D::Get()->GetDevice()->CreateInputLayout(InInputElements.data(), static_cast<UINT>(InInputElements.size()),
-                    VsBlob->GetBufferPointer(),VsBlob->GetBufferSize(), InputLayout.GetAddressOf());
-    
+   
+    HRESULT hr = D3D::Get()->GetDevice()->CreateInputLayout(&InInputElements[0], UINT(InInputElements.size()),
+        VsBlob->GetBufferPointer(), VsBlob->GetBufferSize(), &InputLayouts);
+
     FAILED(hr);
+    
 }
 
 void Shader::CreateSamplerState(const D3D11_SAMPLER_DESC& InSamplerDesc)
@@ -86,9 +90,10 @@ void Shader::CreateSamplerState(const D3D11_SAMPLER_DESC& InSamplerDesc)
 
 void Shader::Bind() const
 {
-    D3D::Get()->GetDeviceContext()->IASetInputLayout(InputLayout.Get());
+    D3D::Get()->GetDeviceContext()->IASetInputLayout(InputLayouts.Get());
     D3D::Get()->GetDeviceContext()->VSSetShader(VertexShader.Get(), nullptr, 0);
     D3D::Get()->GetDeviceContext()->PSSetShader(PixelShader.Get(), nullptr, 0);
+    D3D::Get()->GetDeviceContext()->PSSetSamplers(0, 1, SamplerState.GetAddressOf());
 }
 
 void Shader::VSSetConstantBuffers(UINT StartSlot, const vector<ID3D11Buffer*>& InBuffers) const
@@ -117,14 +122,8 @@ void Shader::SetPixelShaderPath(const wstring& InPixelShaderPath)
     PixelShaderPath = InPixelShaderPath;
 }
 
-void Shader::DrawIndexed(const int nIndex) const
+void Shader::DrawIndexed(const int nIndex)
 {
-
-    D3D::Get()->GetDeviceContext()->VSSetShader(VertexShader.Get(), 0, 0);
-   
-    D3D::Get()->GetDeviceContext()->PSSetShader(PixelShader.Get(), 0, 0);
-    D3D::Get()->GetDeviceContext()->IASetInputLayout(InputLayout.Get());
-    
     D3D::Get()->GetDeviceContext()->IASetPrimitiveTopology(FSceneView::Get()->GetPrimitiveType());
     D3D::Get()->GetDeviceContext()->DrawIndexed(nIndex, 0, 0);
 }

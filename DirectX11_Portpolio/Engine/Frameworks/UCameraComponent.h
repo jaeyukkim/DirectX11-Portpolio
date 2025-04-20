@@ -1,17 +1,20 @@
 #pragma once
 
 #include "USceneComponent.h"
+#include "Render/FSceneView.h"
+
+struct FViewContext;
 
 class UCameraComponent : public USceneComponent
 {
 public:
 	UCameraComponent();
-	virtual ~UCameraComponent();
+	virtual ~UCameraComponent() override;
 
 	virtual void TickComponent(float deltaTime) override;
 
 public:
-	Matrix& GetViewMatrix() { return ViewMatrix; }
+	FViewContext& GetViewMatrix() { return ViewContext; }
 
 public:
 	void SetMoveSpeed(float InValue) { MoveSpeed = InValue; }
@@ -23,9 +26,10 @@ private:
 
 private:
 	float MoveSpeed = 20.f;
-	float RotationSpeed = 250.f;
+	float RotationSpeed = 10.f;
+	float aspect = 0.f;
+	
 
 private:
-	Matrix ViewMatrix;
-	Matrix PerspectiveProjection;
+	FViewContext ViewContext;
 };

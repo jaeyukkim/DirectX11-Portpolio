@@ -35,6 +35,16 @@ void D3D::SetDesc(const D3DDesc& InDesc)
 	D3dDesc = InDesc;
 }
 
+void D3D::SetRenderTarget()
+{
+	DeviceContext->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), DepthStencilView.Get());
+}
+
+void D3D::ClearDepthStencilView()
+{
+	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1, 0);
+}
+
 void D3D::ClearRenderTargetView()
 {
 	DeviceContext->ClearRenderTargetView(RenderTargetView.Get(), clearColor);
@@ -59,12 +69,17 @@ void D3D::ResizeScreen(float InWidth, float InHeight)
 	}
 	CreateRTV();
 	CreateViewport();
+	CreateDSV();
+
+	WinSizeChanged.Broadcast();
 }
 
 D3D::D3D()
+	:clearColor(Color(0.5f, 0.5f, 0.5f, 1.0f))
 {
 	CreateDevice();
 	CreateRTV();
+	CreateDSV();
 	CreateViewport();
 }
 
@@ -134,12 +149,8 @@ void D3D::CreateRTV()
 	hr = Device->CreateRenderTargetView(backBuffer.Get(), nullptr, RenderTargetView.GetAddressOf());
 	assert(hr >= 0 && "RTV 생성 실패");
 
-	backBuffer->Release();
-
 	assert(RenderTargetView != nullptr);
 
-	DeviceContext->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
-	
 }
 
 void D3D::CreateViewport()
@@ -153,4 +164,38 @@ void D3D::CreateViewport()
 	Viewport->MaxDepth = 0;
 
 	DeviceContext->RSSetViewports(1, Viewport.get());
+}
+
+void D3D::CreateDSV()
+{
+	DXGI_FORMAT format = DXGI_FORMAT_D32_FLOAT;
+
+
+
+	//Create Texture - DSV
+	{
+		D3D11_TEXTURE2D_DESC desc;
+		ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
+		desc.Width = (UINT)D3dDesc.Width;
+		desc.Height = (UINT)D3dDesc.Height;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = format;
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+
+		Check(Device->CreateTexture2D(&desc, nullptr, DSV_Texture.GetAddressOf()));
+	}
+
+	//Create DSV
+	{
+		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+		ZeroMemory(&desc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+		desc.Format = format;
+		desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
+		Check(Device->CreateDepthStencilView(DSV_Texture.Get(), &desc, DepthStencilView.GetAddressOf()));
+	}
 }

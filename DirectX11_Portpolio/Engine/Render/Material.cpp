@@ -6,7 +6,7 @@ Material::Material()
 {
 	Initialize();
 
-	CBuffer = make_shared<ConstantBuffer>(&ColorData, sizeof(Colors));
+	ColorConstantBuffer = make_shared<ConstantBuffer>(&ColorData, sizeof(Colors));
 	Renderer = make_shared<Shader>();
 		
 }
@@ -18,38 +18,39 @@ Material::~Material()
 }
 
 
-/*
-void Material::SetShader(Shader* InDrawer)
-{
-	Drawer = InDrawer;
-	
-	sCBuffer = Drawer->AsConstantBuffer("CB_Material");
-	sSRVs = Drawer->AsSRV("MaterialMaps");
-}
-
-void Material::SetShader(wstring InFileName)
-{
-	assert(InFileName.size() > 0);
-
-	SetShader(new Shader(InFileName));
-}
-*/
 
 void Material::Render()
 {
 	
 	GetConstantBuffer()->UpdateConstBuffer();
-	GetConstantBuffer()->VSSetConstantBuffer(EConstBufferSlot::MaterialDesc, 1);
+	GetConstantBuffer()->PSSetConstantBuffer(EConstBufferSlot::MaterialDesc, 1);
+	D3D::Get()->GetDeviceContext()->PSSetShaderResources(0, MAX_MATERIAL_TEXTURE_COUNT, SRVs->GetAddressOf());
 	
 }
 
 void Material::Initialize()
 {
+	// 기본 Sampler로 초기화
+	ZeroMemory(&SampDesc, sizeof(SampDesc));
+	SampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	SampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	SampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	SampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	SampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	SampDesc.MinLOD = 0;
+	SampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+
 	for (int i = 0; i < MAX_MATERIAL_TEXTURE_COUNT; i++)
 	{
 		Textures[i] = nullptr;		//// 텍스처 포인터 초기화
 		SRVs[i] = nullptr;		// Shader Resource View 초기화
 	}
+}
+
+void Material::SetSamplerDesc(const D3D11_SAMPLER_DESC& InsampDesc)
+{
+	SampDesc = InsampDesc;
 }
 
 void Material::SetDiffuseMap(string InFilePath)

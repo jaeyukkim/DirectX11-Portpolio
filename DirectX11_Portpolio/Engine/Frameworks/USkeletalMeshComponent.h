@@ -32,7 +32,6 @@ private:
 
     Matrix Transforms[MAX_MODEL_TRANSFORM];
 
-private:
-    shared_ptr<FTransform> MeshWorld;
+   
 };
  

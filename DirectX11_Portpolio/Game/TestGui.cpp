@@ -2,12 +2,14 @@
 #include "TestGui.h"
 
 #include "AKachujin.h"
+#include "LightActor.h"
 #include "Systems/Application.h"
 
 
 
 void TestGui::Initialize()
 {
+	Actors.push_back(make_shared<LightActor>());
 	Actors.push_back(make_shared<AKachujin>());
 
 	testval++;
@@ -15,12 +17,13 @@ void TestGui::Initialize()
 
 void TestGui::Tick(float deltaTime)
 {
-	ImGui::SliderFloat("PositionY", &testval, -100.0f, 100.0f);
 	
 	for (shared_ptr<Actor>& actor : Actors)
 	{
 		actor->Tick(deltaTime);
 	}
+
+	
 }
 
 void TestGui::Destroy()

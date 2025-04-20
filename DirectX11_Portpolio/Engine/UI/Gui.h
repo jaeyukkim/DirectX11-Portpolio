@@ -39,8 +39,8 @@ private:
 private:
 	struct GuiText
 	{
-		XMFLOAT2 Position;
-		XMFLOAT4 Color;
+		Vector2 Position;
+		Color Color;
 		string Content;
 	};
 

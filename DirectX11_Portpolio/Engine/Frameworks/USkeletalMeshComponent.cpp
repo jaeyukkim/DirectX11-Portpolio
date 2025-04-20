@@ -10,8 +10,6 @@
 
 USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName)
 {
-	MeshWorld = make_shared<FTransform>();
-	
 	
 	wstring objectName = InFileName;
 	InFileName = L"../Contents/_Models/" + objectName + L".model";
@@ -41,38 +39,30 @@ void USkeletalMeshComponent::TickComponent(float deltaTime)
 
 	for (const shared_ptr<SkeletalMesh>& meshPtr : SkeletalMeshes)
 	{
-		meshPtr->SetWorld(MeshWorld.get());
+		meshPtr->SetWorld(GetTransform());
 		meshPtr->Tick();
 	}
 }
 
 void USkeletalMeshComponent::InitRenderer() const
 {
-	std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements =
+	vector<D3D11_INPUT_ELEMENT_DESC> inputElements =
 	{
-		{ "POSITION",     0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR",        0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TANGENT",      0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BLENDWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 0,   D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
+		{ "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,        0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 8 bytes
+		{ "COLOR",        0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 20,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 16 bytes
+		{ "NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 36,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
+		{ "TANGENT",      0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 48,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
+		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 60,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 16 bytes
+		{ "BLENDWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 76,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 16 bytes
 	};
 
-	D3D11_SAMPLER_DESC sampDesc;
-	ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
 	
 	for (const shared_ptr<SkeletalMesh>& meshPtr : SkeletalMeshes)
 	{
-		meshPtr->MaterialData->GetRenderer()->Bind();
-		meshPtr->MaterialData->GetRenderer()->InitRenderer(inputElements, sampDesc);
+		meshPtr->MaterialData->GetRenderer()->InitRenderer(inputElements, meshPtr->MaterialData->GetSamplerDesc());
+		
 	}
 }
 
@@ -132,9 +122,9 @@ void USkeletalMeshComponent::ReadFile(wstring InFileName)
 	Vector3 r = Vector3(stof(rString[0]), stof(rString[1]), stof(rString[2])); // 회전
 
 	// 11. 모델의 위치, 크기, 회전을 설정
-	MeshWorld->SetPosition(p);
-	MeshWorld->SetScale(s);
-	MeshWorld->SetRotationFromEuler(r.x, r.y, r.z);
+	GetTransform()->SetPosition(p);
+	GetTransform()->SetScale(s);
+	GetTransform()->SetRotationFromEuler(r.x, r.y, r.z);
 
 	stream.close();
 

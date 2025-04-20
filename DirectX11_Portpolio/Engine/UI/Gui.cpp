@@ -61,6 +61,15 @@ void Gui::Render()
 		ImGuiWindowFlags_NoBringToFrontOnFocus |
 		ImGuiWindowFlags_NoNavFocus
 	);
+
+	for (GuiText content : Contents)
+	{
+		ImVec2 position = ImVec2(content.Position.x, content.Position.y);
+		ImColor color = ImColor(content.Color.x, content.Color.y, content.Color.z, content.Color.w);
+
+		ImGui::GetWindowDrawList()->AddText(position, color, content.Content.c_str());
+	}
+	Contents.clear();
 	
 	
 	ImGui::End();
@@ -88,8 +97,8 @@ void Gui::RenderText(float x, float y, float r, float g, float b, string content
 void Gui::RenderText(float x, float y, float r, float g, float b, float a, string content)
 {
 	GuiText text;
-	text.Position = XMFLOAT2(x, y);
-	text.Color = XMFLOAT4(r, g, b, a);
+	text.Position = Vector2(x, y);
+	text.Color = Color(r, g, b, a);
 	text.Content = content;
 
 	Contents.push_back(text);

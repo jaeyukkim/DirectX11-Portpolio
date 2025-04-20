@@ -10,6 +10,8 @@ private:
     Quaternion Rotation;    // 쿼터니언
     Vector3 Scale;       // 스케일
 
+    float Yaw = 0.0f;
+    float Pitch = 0.0f;
 
 public:
     FTransform()
@@ -49,7 +51,7 @@ public:
     // 회전 설정 (Euler → Quaternion)
     void SetRotationFromEuler(float pitch, float yaw, float roll)
     {
-        Rotation = XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
+        Rotation = XMVector3Normalize(XMQuaternionRotationRollPitchYaw(pitch, yaw, roll));
     }
     void SetRotationFromEuler(Quaternion InRotation)
     {
@@ -79,50 +81,49 @@ public:
 
     Vector3 GetForwardVector() const
     {
-        return XMVector3Rotate(Vector3::Forward, Rotation); // (0, 0, 1)
+        return XMVector3Normalize(XMVector3Rotate(Vector3::Forward, Rotation)); // (0, 0, 1)
     }
 
     Vector3 GetRightVector() const
     {
-        return XMVector3Rotate(Vector3::Right, Rotation);   // (1, 0, 0)
+        return XMVector3Normalize(XMVector3Rotate(Vector3::Right, Rotation));   // (1, 0, 0)
     }
 
     Vector3 GetUpVector() const
     {
-        return XMVector3Rotate(Vector3::Up, Rotation);      // (0, 1, 0)
+        return XMVector3Normalize(XMVector3Rotate(Vector3::Up, Rotation));      // (0, 1, 0)
     }
 
     // ======= 방향 벡터 설정 (회전을 방향 벡터로 설정) =======
 
     void SetForwardVector(Vector3 InForward, Vector3 Up = Vector3::Up)
     {
-        Rotation = XMQuaternionRotationMatrix(XMMatrixLookToRH(XMVectorZero(), InForward, Up));
+        Rotation = XMQuaternionRotationMatrix(XMMatrixLookToLH(XMVectorZero(), InForward, Up));
     }
 
     void SetRightVector(Vector3 InRight, Vector3 Up = Vector3::Up)
     {
         Vector3 Forward = XMVector3Cross(Up, InRight);
-        Rotation = XMQuaternionRotationMatrix(XMMatrixLookToRH(XMVectorZero(), Forward, Up));
+        Rotation = XMQuaternionRotationMatrix(XMMatrixLookToLH(XMVectorZero(), Forward, Up));
     }
 
     void SetUpVector(Vector3 InUp, Vector3 Forward = Vector3::Forward)
     {
-        Rotation = XMQuaternionRotationMatrix(XMMatrixLookToRH(XMVectorZero(), Forward, InUp));
+        Rotation = XMQuaternionRotationMatrix(XMMatrixLookToLH(XMVectorZero(), Forward, InUp));
     }
 
 
     void FTransform::AddRotation(float yawDelta, float pitchDelta, float rollDelta)
     {
-        // Δ값들을 Quaternion으로 변환 (Yaw → Y축, Pitch → X축, Roll → Z축 기준)
-        Quaternion qPitch = XMQuaternionRotationAxis(Vector3::Right, pitchDelta);
-        Quaternion qYaw = XMQuaternionRotationAxis(Vector3::Up, yawDelta);
-        Quaternion qRoll = XMQuaternionRotationAxis(Vector3::Forward, rollDelta);
+        Yaw += yawDelta;
+        Pitch += pitchDelta;
 
-        // 회전 순서: Roll → Pitch → Yaw (보통은 이 순서, 필요에 따라 바꿔도 됨)
-        Quaternion deltaRotation = XMQuaternionMultiply(qRoll, XMQuaternionMultiply(qPitch, qYaw));
+        // Clamp pitch to avoid flipping
+        Pitch = std::clamp(Pitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);
 
-        // 기존 회전에 곱해줌 (주의: 순서에 따라 결과가 다름)
-        Rotation = XMQuaternionNormalize(XMQuaternionMultiply(deltaRotation, Rotation));
+
+        SetRotationFromEuler(Pitch, Yaw, 0.0f);
+        
     }
 
 };

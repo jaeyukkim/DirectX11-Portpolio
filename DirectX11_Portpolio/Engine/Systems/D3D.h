@@ -12,7 +12,7 @@ struct D3DDesc
 	float Background[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 };
 
-DECLARE_DYNAMIC_DELEGATE(FTestDelegate);
+DECLARE_DYNAMIC_DELEGATE(FWinSizeChangedSignature);
 
 
 class D3D
@@ -27,20 +27,23 @@ public:
 	static const D3DDesc& GetDesc();
 	static void SetDesc(const D3DDesc& InDesc);
 
-	FTestDelegate testDel;
+	FWinSizeChangedSignature WinSizeChanged;
 
 private:
 	void CreateDevice();
 	void CreateRTV();
 	void CreateViewport();
+	void CreateDSV();
 
 private:
-	const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	Color clearColor;
 
 public:
 	ID3D11Device* GetDevice() { return Device.Get(); }
 	ID3D11DeviceContext* GetDeviceContext() { return DeviceContext.Get(); }
 
+	void SetRenderTarget();
+	void ClearDepthStencilView();
 	void ClearRenderTargetView();
 	void Present();
 
@@ -64,4 +67,7 @@ private:
 
 	ComPtr<ID3D11RenderTargetView> RenderTargetView;
 	shared_ptr<D3D11_VIEWPORT> Viewport;
+
+	ComPtr<ID3D11Texture2D> DSV_Texture;
+	ComPtr<ID3D11DepthStencilView> DepthStencilView;
 };

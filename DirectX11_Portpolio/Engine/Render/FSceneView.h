@@ -1,36 +1,86 @@
 #pragma once
 
+#define MAX_LIGHT_COUNT 30
+
 struct FViewContext
 {
     Matrix View = Matrix::Identity;
     Matrix ViewInverse = Matrix::Identity;
     Matrix Projection = Matrix::Identity;
     Matrix ViewProjection = Matrix::Identity;
+    Vector3 EyePos = Vector3(0, 0, 0);
+    float padding;
 };
+
+enum class ELightType : int
+{
+    CubeMap,
+    Directional,
+    Spot,
+    Point
+};
+
+// 조명 정보
+struct LightInformation
+{
+    ELightType LightType; //4
+    int LightID; //4
+    Vector3 strength = Vector3(1.0f);              // 12
+    float fallOffStart = 0.0f;                     // 4
+    Vector3 direction = Vector3(0.0f, 0.0f, 1.0f); // 12
+    float fallOffEnd = 10.0f;                      // 4
+    Vector3 position = Vector3(0.0f, 0.0f, -2.0f); // 12
+    float spotPower = 100.0f;                      // 4
+    Color color;  //4
+    float padding[3] = { 0.0f };
+};
+
+
 
 struct FSceneView
 {
+public:
+    FSceneView() = default;
+    ~FSceneView() = default;
+
+
 public:
     static FSceneView* Get();
     static void Create();
     static void Destroy();
     static void PreRender();
 
-    void UpdateSceneView(const Matrix& Inview, const Matrix& Inprojection);
-    D3D_PRIMITIVE_TOPOLOGY GetPrimitiveType() const { return Instance->IAPrimitive; }
-    FViewContext* GetSceneViewContext() { Context; }
 
 public:
-    FSceneView() = default;
-    ~FSceneView() = default;
+    void UpdateSceneView(const FViewContext& InContext);
+    D3D_PRIMITIVE_TOPOLOGY GetPrimitiveType() const { return Instance->IAPrimitive; }
+    FViewContext& GetSceneViewContext() { return Context; }
+
+public:
+    void AddToLightMap(LightInformation* InLightInfo);
+    void UpdateLightMap(LightInformation& InLightInfo);
 
 private:
-  
     FViewContext Context;
     shared_ptr<ConstantBuffer> ViewConstantBuffer;
 
+private:
+    struct CLightCnt
+    {
+        int CurrentLightCnt = 0;
+        float padding[3];
+    }LightCntCbuffer;
+    
+    static atomic<uint8_t> LightCounter;
+    
+    shared_ptr<ConstantBuffer> LightCountCBuffer;
+    unordered_map<uint8_t, LightInformation> LightMap;
+    shared_ptr<StructuredBuffer> LightConstantBuffer;
 
-    static FSceneView* Instance;
+private:
+    static FSceneView* Instance; 
+    
 
+private:
     D3D_PRIMITIVE_TOPOLOGY IAPrimitive = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 };

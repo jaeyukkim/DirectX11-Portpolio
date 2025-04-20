@@ -38,7 +38,13 @@ VertexBuffer::VertexBuffer(void* InData, UINT InCount, UINT InStride, UINT InSlo
 	ZeroMemory(&subResource, sizeof(D3D11_SUBRESOURCE_DATA));
 	subResource.pSysMem = Data;
 
-	Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, &subResource, Buffer.GetAddressOf()));
+	auto hr = D3D::Get()->GetDevice()->CreateBuffer(&desc, &subResource, Buffer.GetAddressOf());
+
+	if (FAILED(hr)) 
+	{
+		std::cout << "CreateVertexBuffer() CreateVertexBuffer failed()."
+			<< std::endl;
+	}
 }
 
 VertexBuffer::~VertexBuffer()
@@ -61,8 +67,9 @@ void VertexBuffer::UpdateVertexBuffer()
 void VertexBuffer::IASetVertexBuffer()
 {
 	UINT offset = 0;
+	
 
-	D3D::Get()->GetDeviceContext()->IASetVertexBuffers(Slot, 1, &Buffer, &Stride, &offset);
+	D3D::Get()->GetDeviceContext()->IASetVertexBuffers(Slot, 1, Buffer.GetAddressOf(), &Stride, &offset);
 }
 
 //------------------------------------------------------------------------------
@@ -125,6 +132,59 @@ void ConstantBuffer::PSSetConstantBuffer(const EConstBufferSlot bufferSlot, cons
 	D3D::Get()->GetDeviceContext()->PSSetConstantBuffers(static_cast<UINT>(bufferSlot), numSlot, Buffer.GetAddressOf());
 
 }
+
+
+//----------------------------------------------------------------------------
+
+StructuredBuffer::StructuredBuffer(void* inData, UINT inElementSize, UINT inElementCount)
+	: data(inData), elementSize(inElementSize), elementCount(inElementCount)
+{
+	D3D11_BUFFER_DESC desc = {};
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.ByteWidth = elementSize * elementCount;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	desc.StructureByteStride = elementSize;
+
+	Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, nullptr, buffer.GetAddressOf()));
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.ElementOffset = 0;
+	srvDesc.Buffer.ElementWidth = elementCount;
+
+	Check(D3D::Get()->GetDevice()->CreateShaderResourceView(buffer.Get(), &srvDesc, srv.GetAddressOf()));
+}
+
+
+void StructuredBuffer::UpdateBuffer()
+{
+	D3D11_MAPPED_SUBRESOURCE mapped;
+	D3D::Get()->GetDeviceContext()->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+	{
+		memcpy(mapped.pData, data, elementSize * elementCount);
+	}
+	D3D::Get()->GetDeviceContext()->Unmap(buffer.Get(), 0);
+}
+
+void StructuredBuffer::PSSetStructuredBuffer(const EConstBufferSlot bufferSlot)
+{
+	D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(bufferSlot), 1, srv.GetAddressOf());
+}
+
+void StructuredBuffer::VSSetStructuredBuffer(const EConstBufferSlot bufferSlot)
+{
+	D3D::Get()->GetDeviceContext()->VSSetShaderResources(static_cast<UINT>(bufferSlot), 1, srv.GetAddressOf());
+}
+
+void StructuredBuffer::UpdateData(void* Indata)
+{
+	data = Indata;
+	UpdateBuffer();
+}
+
 
 //-----------------------------------------------------------------------------
 

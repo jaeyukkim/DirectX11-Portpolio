@@ -28,8 +28,10 @@ public:
 
 public:
 	void Tick(float deltaTime);
-
 	void WndProc(UINT InMessage, WPARAM InwParam, LPARAM InlParam);
+
+private:
+	void UpdateScreenCenter();
 
 private:
 	static Mouse* Instance;
@@ -54,4 +56,5 @@ private:
 	Vector3 WheelStatus;
 	Vector3 WheelOldStatus;
 	Vector3 WheelMoveDelta;
+	POINT ScreenCenter;
 };

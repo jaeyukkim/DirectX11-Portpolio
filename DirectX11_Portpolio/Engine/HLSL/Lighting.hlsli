@@ -1,80 +1,33 @@
-#ifndef __COMMON_HLSLI__
-#define __COMMON_HLSLI__
+#ifndef __LIGHTING_HLSLI__
+#define __LIGHTING_HLSLI__
 
-// 쉐이더에서 include할 내용들은 .hlsli 파일에 작성
-// Properties -> Item Type: Does not participate in build으로 설정
+#include "Common.hlsli"
 
-// BlinnPhong 구현의 전체 구조는 Luna DX12 교재와 비슷하지만 
-// 세부 구현은 이해하기 편하도록 대학 강의 스타일로 단순화하였습니다.
-
-
-#define MAX_LIGHTS 3 // 쉐이더에서도 #define 사용 가능
-#define NUM_DIR_LIGHTS 1
-#define NUM_POINT_LIGHTS 1
-#define NUM_SPOT_LIGHTS 1
-
-#define MATERIAL_TEXTURE_Diffuse 0
-#define MATERIAL_TEXTURE_Specular 1
-#define MATERIAL_TEXTURE_NORMAL 2
-#define MAX_MATERIAL_TEXTURE_COUNT 3
-
-Texture2D MaterialMaps[MAX_MATERIAL_TEXTURE_COUNT];
+#define LIGHT_CubeMap 0
+#define LIGHT_Directional 1
+#define LIGHT_Spot 2
+#define LIGHT_Point 3
 
 
-cbuffer CB_World
-{
-    matrix World;
-};
-
-cbuffer CB_Context
-{
-    matrix View;
-    matrix ViewInverse;
-    matrix Projection;
-    matrix ViewProjection;
-
-    float Time;
-    uint3 Options;
-}
-
-struct MaterialDesc
-{
-    float4 Ambient;
-    float4 Diffuse;
-    float4 Specular;
-    float4 Emissive;
-    
-    float2 Tiling;
-};
-
-cbuffer CB_Material
-{
-    MaterialDesc Material;
-};
-
-
-// 재질
-struct Material
-{
-    float4 Ambient;
-    float4 Diffuse;
-    float4 Specular;
-    float4 Emissive;
-
-    float2 Tiling;
-};
-
-// 조명
 struct Light
 {
+    int LightType;
+    int LightID;
     float3 strength;
     float fallOffStart;
     float3 direction;
     float fallOffEnd;
     float3 position;
     float spotPower;
+    float4 color;
 };
 
+cbuffer CBLightCnt : register(b6)
+{
+    int LightCnt;
+}
+
+StructuredBuffer<Light> lights : register(t5);
 
 
 float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal,
@@ -166,4 +119,4 @@ float3 ComputeSpotLight(Light L, MaterialDesc mat, float3 pos, float3 normal,
 
 
 
-#endif // __COMMON_HLSLI__
+#endif // __LIGHTING_HLSLI__

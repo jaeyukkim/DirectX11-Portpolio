@@ -30,6 +30,9 @@ void SkeletalMesh::Tick()
 void SkeletalMesh::Render()
 {
 
+	MaterialData->GetRenderer()->Bind();
+
+	
 	VBuffer->IASetVertexBuffer();
 	IBuffer->IASetIndexBuffer();
 
@@ -38,13 +41,9 @@ void SkeletalMesh::Render()
 
 	MaterialData->Render();
 	
-	
-	//World->RenderComponent();
-
 
 	MaterialData->GetRenderer()->DrawIndexed(IBuffer->GetCount());
 		
-	
 }
 
 void SkeletalMesh::SetWorld(const FTransform* InTransform)

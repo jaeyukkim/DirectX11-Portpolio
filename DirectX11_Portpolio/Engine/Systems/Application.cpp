@@ -178,6 +178,8 @@ LRESULT Application::WndProc(HWND InHandle, UINT InMessage, WPARAM InwParam, LPA
 void Application::MainRender()
 {
 	Timer::Get()->Tick();
+	TimerManager::Get().Tick();
+
 	float deltaTime = Timer::Get()->GetDeltaTime();
 	Gui::Get()->Tick(deltaTime);
 	Mouse::Get()->Tick(deltaTime);
@@ -185,9 +187,11 @@ void Application::MainRender()
 
 	//Rendering
 	{
-		FSceneView::Get()->PreRender();
-
+		D3D::Get()->SetRenderTarget();
 		D3D::Get()->ClearRenderTargetView();
+		D3D::Get()->ClearDepthStencilView();
+		
+		FSceneView::Get()->PreRender();
 		Main->Render();
 		Gui::Get()->Render();
 		D3D::Get()->Present();
