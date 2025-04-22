@@ -17,7 +17,8 @@ enum class ELightType : int
     CubeMap,
     Directional,
     Spot,
-    Point
+    Point,
+    Lim
 };
 
 // 조명 정보

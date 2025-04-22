@@ -30,12 +30,22 @@ struct BoneData
     vector<UINT> MeshNumbers;
 };
 
-struct MeshData
+struct SkeletalMeshData
 {
     string Name;
 
     string MaterialName;
 
     vector<VertexModel> Vertices;
+    vector<UINT> Indices;
+};
+
+struct StaticMeshData
+{
+    string Name;
+
+    string MaterialName;
+
+    vector<VertexObject> Vertices;
     vector<UINT> Indices;
 };

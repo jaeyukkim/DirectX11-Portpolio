@@ -17,12 +17,10 @@ USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName)
 	
 	if (!filesystem::exists(InFileName))
 	{
-		
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadFile(objectName + L"/" + objectName + L".fbx");
-		converter->ExportMaterial(objectName, true);
-		converter->ExportMesh(objectName);
-		
+		converter->ExportMaterial(objectName, true,  EMeshType::SkeletalMeshType);
+		converter->ExportMesh(objectName, EMeshType::SkeletalMeshType);
 	}
 	ReadFile(InFileName);
 	InitRenderer();
@@ -62,7 +60,6 @@ void USkeletalMeshComponent::InitRenderer() const
 	for (const shared_ptr<SkeletalMesh>& meshPtr : SkeletalMeshes)
 	{
 		meshPtr->MaterialData->GetRenderer()->InitRenderer(inputElements, meshPtr->MaterialData->GetSamplerDesc());
-		
 	}
 }
 

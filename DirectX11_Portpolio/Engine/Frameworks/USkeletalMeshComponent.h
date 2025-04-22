@@ -1,10 +1,11 @@
 #pragma once
-#include "UMeshComponent.h"
+#include "UPrimitiveComponent.h"
 #include "Skeletal.h"
 #include "SkeletalMesh.h"
 
 
-class USkeletalMeshComponent : public UMeshComponent
+
+class USkeletalMeshComponent : public UPrimitiveComponent
 {
 public:
     USkeletalMeshComponent(wstring InFileName);
@@ -32,6 +33,5 @@ private:
 
     Matrix Transforms[MAX_MODEL_TRANSFORM];
 
-   
 };
  

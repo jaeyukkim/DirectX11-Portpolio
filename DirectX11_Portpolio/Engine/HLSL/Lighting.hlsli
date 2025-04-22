@@ -7,7 +7,7 @@
 #define LIGHT_Directional 1
 #define LIGHT_Spot 2
 #define LIGHT_Point 3
-
+#define LIGHT_Lim 4
 
 struct Light
 {

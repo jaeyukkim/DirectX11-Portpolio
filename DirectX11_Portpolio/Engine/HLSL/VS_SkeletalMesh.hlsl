@@ -34,7 +34,7 @@ VertexOutput VS_Main(VertexShaderInput input)
     
     output.posWorld = posWorld.xyz;
 
-    output.modelNormal = mul(input.modelNormal, (float3x3)World);
+    output.modelNormal = normalize(mul(input.modelNormal, (float3x3)World));
     output.texCoord = input.texCoord;
     output.color = input.modelColor;
 

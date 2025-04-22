@@ -41,27 +41,34 @@ void Converter::ReadFile(const wstring InFileName)
 	Assert(Scene != nullptr, "모델 정상 로드 않됨");
 }
 
-void Converter::ExportMaterial(wstring InSaveFileName, bool InOverwrite)
+void Converter::ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType)
 {
-	//../../_Models/Airplane/Airplane.material
-	InSaveFileName = L"../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".material";
+	switch (InMeshType)
+	{
+	case EMeshType::StaticMeshType:
+		InSaveFileName = L"../Contents/_Objects/" + InSaveFileName + L"/" + InSaveFileName + L".material";
+		break;
 
-	ReadMaterials();
+	case EMeshType::SkeletalMeshType:
+		InSaveFileName = L"../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".material";
+		break;
+	}
+	
+	ReadMaterials(InMeshType);
 	WriteMaterial(InSaveFileName, InOverwrite);
 }
 
-void Converter::ReadMaterials()
+void Converter::ReadMaterials(EMeshType InMeshType)
 {
-	//printf("mNumMaterials : %d\n", Scene->mNumMaterials);
-
+	
 	for (UINT i = 0; i < Scene->mNumMaterials; i++)
 	{
 		aiMaterial* material = Scene->mMaterials[i];
 		MaterialData* data = new MaterialData();
 		
 		data->Name = material->GetName().C_Str();
-		data->VertexShaderPath = "";
-		data->PixelShaderPath = "";
+		data->VertexShaderPath = GetVertexShaderFileName(InMeshType);
+		data->PixelShaderPath = GetPixelShaderFileName(InMeshType);
 
 		aiColor4D color;
 
@@ -217,14 +224,25 @@ string Converter::SaveTexture(string InSaveFolder, string InFileName)
 	return InSaveFolder + Path::GetFileName(path);
 }
 
-void Converter::ExportMesh(wstring InSaveFileName)
+void Converter::ExportMesh(wstring InSaveFileName, EMeshType FileType)
 {
-	InSaveFileName = L"../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
+	
+	switch (FileType)
+	{
+	case EMeshType::StaticMeshType:
+		InSaveFileName = L"../Contents/_Objects/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
+		ReadStaticMeshData();
+		WriteStaticMeshData(InSaveFileName);
+		break;
 
-	ReadBoneData(Scene->mRootNode, 0, -1);
-	ReadMeshData();
-
-	WriteMeshData(InSaveFileName);
+	case EMeshType::SkeletalMeshType:
+		InSaveFileName = L"../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
+		ReadBoneData(Scene->mRootNode, 0, -1);
+		ReadSkeletalMeshData();
+		WriteSkeletalMeshData(InSaveFileName);
+		break;
+	}
+	
 }
 
 void Converter::ReadBoneData(aiNode* InNode, int InIndex, int InParent)
@@ -259,11 +277,11 @@ void Converter::ReadBoneData(aiNode* InNode, int InIndex, int InParent)
 		ReadBoneData(InNode->mChildren[i], (int)Bones.size(), InIndex);
 }
 
-void Converter::ReadMeshData()
+void Converter::ReadSkeletalMeshData()
 {
 	for (UINT i = 0; i < Scene->mNumMeshes; i++)
 	{
-		MeshData* data = new MeshData();
+		SkeletalMeshData* data = new SkeletalMeshData();
 
 		aiMesh* mesh = Scene->mMeshes[i];
 		
@@ -306,11 +324,11 @@ void Converter::ReadMeshData()
 				data->Indices.push_back(face.mIndices[k]);
 		}
 
-		Meshes.push_back(data);
+		SkeletalMeshes.push_back(data);
 	}
 }
 
-void Converter::WriteMeshData(wstring InSaveFileName)
+void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
 {
 	Path::CreateFolders(Path::GetDirectoryName(InSaveFileName));
 
@@ -335,8 +353,8 @@ void Converter::WriteMeshData(wstring InSaveFileName)
 		Delete(data);
 	}
 
-	w->ToUInt((UINT)Meshes.size());
-	for (MeshData* data : Meshes)
+	w->ToUInt((UINT)SkeletalMeshes.size());
+	for (SkeletalMeshData* data : SkeletalMeshes)
 	{
 		w->ToString(data->Name);
 		w->ToString(data->MaterialName);
@@ -352,4 +370,113 @@ void Converter::WriteMeshData(wstring InSaveFileName)
 	
 	w->Close();
 	
+}
+
+void Converter::ReadStaticMeshData()
+{
+	for (UINT i = 0; i < Scene->mNumMeshes; i++)
+	{
+		StaticMeshData* data = new StaticMeshData();
+
+		aiMesh* mesh = Scene->mMeshes[i];
+		
+		UINT materialIndex = mesh->mMaterialIndex;
+		aiMaterial* material = Scene->mMaterials[materialIndex];
+		
+		
+		data->Name = mesh->mName.C_Str();
+
+		data->MaterialName = material->GetName().C_Str();
+
+
+		for (UINT v = 0; v < mesh->mNumVertices; v++)
+		{
+			VertexObject vertex;
+
+			
+			memcpy_s(&vertex.Position, sizeof(Vector3), &mesh->mVertices[v], sizeof(Vector3));
+
+			if(mesh->HasTextureCoords(0))
+				memcpy_s(&vertex.Uv, sizeof(Vector2), &mesh->mTextureCoords[0][v], sizeof(Vector2));
+
+			if(mesh->HasVertexColors(0))
+				memcpy_s(&vertex.Color, sizeof(Color), &mesh->mColors[0][v], sizeof(Color));
+
+			if (mesh->HasNormals())
+				memcpy_s(&vertex.Normal, sizeof(Vector3), &mesh->mNormals[v], sizeof(Vector3));
+
+			if (mesh->HasTangentsAndBitangents())
+				memcpy_s(&vertex.Tangent, sizeof(Vector3), &mesh->mTangents[v], sizeof(Vector3));
+
+			data->Vertices.push_back(vertex);
+		}
+
+		for (UINT f = 0; f < mesh->mNumFaces; f++)
+		{
+			aiFace& face = mesh->mFaces[f];
+
+			for (UINT k = 0; k < face.mNumIndices; k++)
+				data->Indices.push_back(face.mIndices[k]);
+		}
+
+		StaticMeshes.push_back(data);
+	}
+}
+
+
+void Converter::WriteStaticMeshData(wstring InSaveFileName)
+{
+	Path::CreateFolders(Path::GetDirectoryName(InSaveFileName));
+
+	shared_ptr<BinaryWriter> w = make_shared<BinaryWriter>();
+	w->Open(InSaveFileName);
+	
+	w->ToUInt((UINT)StaticMeshes.size());
+	for (StaticMeshData* data : StaticMeshes)
+	{
+		w->ToString(data->Name);
+		w->ToString(data->MaterialName);
+
+		w->ToUInt((UINT)data->Vertices.size());
+		w->ToByte(&data->Vertices[0], (UINT)(sizeof(VertexObject) * data->Vertices.size()));
+
+		w->ToUInt((UINT)data->Indices.size());
+		w->ToByte(&data->Indices[0], (UINT)(sizeof(UINT) * data->Indices.size()));
+
+		Delete(data);
+	}
+	
+	w->Close();
+}
+
+string Converter::GetPixelShaderFileName(EMeshType InMeshType)
+{
+	string path = "";
+	switch (InMeshType)
+	{
+	case EMeshType::StaticMeshType:
+		path = "../Engine/HLSL/PS_StaticMesh.hlsl";
+		break;
+
+	case EMeshType::SkeletalMeshType:
+		path = "../Engine/HLSL/PS_SkeletalMesh.hlsl";
+		break;
+	}
+	return path;
+}
+
+string Converter::GetVertexShaderFileName(EMeshType InMeshType)
+{
+	string path = "";
+	switch (InMeshType)
+	{
+	case EMeshType::StaticMeshType:
+		path = "../Engine/HLSL/VS_StaticMesh.hlsl";
+		break;
+
+	case EMeshType::SkeletalMeshType:
+		path = "../Engine/HLSL/VS_SkeletalMesh.hlsl";
+		break;
+	}
+	return path;
 }

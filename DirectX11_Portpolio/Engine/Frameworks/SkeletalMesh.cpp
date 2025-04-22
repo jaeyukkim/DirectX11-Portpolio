@@ -16,43 +16,34 @@ SkeletalMesh::~SkeletalMesh()
 
 void SkeletalMesh::Tick()
 {
-	//FrameRender->Tick();
+	Super::Tick();
 
 	BoneData.BoneIndex = BoneIndex;
 	memcpy(BoneData.Transforms, Transforms, sizeof(Matrix) * MAX_MODEL_TRANSFORM);
 
-	//World->Tick();
-	// scale, transform, rotation 업데이트
+	
 }
 
+
+void SkeletalMesh::BindRenderStage()    
+{
+	BoneBuffer->UpdateConstBuffer();
+	BoneBuffer->VSSetConstantBuffer(EConstBufferSlot::Bone, 1);
+
+    Super::BindRenderStage(); //파생 클래스 정보 먼저 바인딩하고 다음 상위클래스 바인딩
+}
 
 
 void SkeletalMesh::Render()
 {
-
-	MaterialData->GetRenderer()->Bind();
-
+	Super::Render();
 	
-	VBuffer->IASetVertexBuffer();
-	IBuffer->IASetIndexBuffer();
-
-	BoneBuffer->UpdateConstBuffer();
-	BoneBuffer->VSSetConstantBuffer(EConstBufferSlot::Bone, 1);
-
-	MaterialData->Render();
-	
-
-	MaterialData->GetRenderer()->DrawIndexed(IBuffer->GetCount());
-		
 }
 
 void SkeletalMesh::SetWorld(const FTransform* InTransform)
 {
-	MeshWorld->SetPosition(InTransform->GetPosition());
-	MeshWorld->SetRotationFromEuler(InTransform->GetRotation());
-	MeshWorld->SetScale(InTransform->GetScale());
+    Super::SetWorld(InTransform);
 }
-
 
 
 void SkeletalMesh::ReadFile(BinaryReader* InReader, const map<string, shared_ptr<Material>>& InMaterialTable, vector<shared_ptr<SkeletalMesh>>& OutMeshes)
@@ -80,8 +71,8 @@ void SkeletalMesh::ReadFile(BinaryReader* InReader, const map<string, shared_ptr
 
         // 2.6 정점 데이터 할당 및 바이너리 파일에서 읽기
     	
-    	mesh->Vertices = new VertexModel[mesh->VertexCount];
-    	InReader->FromByte(mesh->Vertices, sizeof(VertexModel) * mesh->VertexCount);
+    	mesh->ModelVertices = new VertexModel[mesh->VertexCount];
+    	InReader->FromByte(mesh->ModelVertices, sizeof(VertexModel) * mesh->VertexCount);
 
     	// 2.7 인덱스(Index) 개수 읽기
     	mesh->IndexCount = InReader->FromUInt();
@@ -101,11 +92,8 @@ void SkeletalMesh::ReadFile(BinaryReader* InReader, const map<string, shared_ptr
 
 void SkeletalMesh::CreateBuffer()
 {
-	VBuffer = make_shared<VertexBuffer>(Vertices, VertexCount, sizeof(VertexModel));
+	VBuffer = make_shared<VertexBuffer>(ModelVertices, VertexCount, sizeof(VertexModel));
 	IBuffer = make_shared<IndexBuffer>(Indices, IndexCount);
-		
-	
-	BoneBuffer = make_shared<ConstantBuffer>(&BoneData, sizeof(BoneDesc));
-	
 	MeshWorld = make_shared<FTransform>();
+	BoneBuffer = make_shared<ConstantBuffer>(&BoneData, sizeof(BoneDesc));
 }

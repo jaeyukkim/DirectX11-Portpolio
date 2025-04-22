@@ -5,7 +5,7 @@
 
 struct FTransform
 {
-private:
+public:
     Vector3 Position; // 위치
     Quaternion Rotation;    // 쿼터니언
     Vector3 Scale;       // 스케일
@@ -49,9 +49,10 @@ public:
     }
 
     // 회전 설정 (Euler → Quaternion)
-    void SetRotationFromEuler(float pitch, float yaw, float roll)
+    void SetRotationFromEuler(float Inpitch, float Inyaw, float Inroll)
     {
-        Rotation = XMVector3Normalize(XMQuaternionRotationRollPitchYaw(pitch, yaw, roll));
+      
+        Rotation = XMVector3Normalize(XMQuaternionRotationRollPitchYaw(Inpitch, Inyaw, Inroll));
     }
     void SetRotationFromEuler(Quaternion InRotation)
     {

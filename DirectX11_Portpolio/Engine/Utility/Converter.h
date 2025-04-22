@@ -4,6 +4,12 @@
 #include <Assimp/PostProcess.h>
 #include <Assimp/Scene.h>
 
+enum class EMeshType
+{
+    StaticMeshType,
+    SkeletalMeshType
+};
+
 class Converter
 {
 public:
@@ -13,23 +19,33 @@ public:
     void ReadFile(const wstring InFileName);
 
 public:
-    void ExportMaterial(wstring InSaveFileName, bool InOverwrite = true);
+    void ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType);
 
-private:
-    void ReadMaterials();
-    void WriteMaterial(wstring InSaveFileName, bool InOverwrite);
 
     string ColorToJson(const Color& InColor);
+
+
+private:
+    void ReadMaterials(EMeshType InMeshType);
+    void WriteMaterial(wstring InSaveFileName, bool InOverwrite);
     string SaveTexture(string InSaveFolder, string InFileName);
 
 public:
-    void ExportMesh(wstring InSaveFileName);
-
+    void ExportMesh(wstring InSaveFileName, EMeshType FileType);
+    
+    
 private:
     void ReadBoneData(aiNode* InNode, int InIndex, int InParent);
-    void ReadMeshData();
+    void ReadSkeletalMeshData();
+    void WriteSkeletalMeshData(wstring InSaveFileName);
 
-    void WriteMeshData(wstring InSaveFileName);
+private:
+    void ReadStaticMeshData();
+    void WriteStaticMeshData(wstring InSaveFileName);
+
+private:
+    string GetPixelShaderFileName(EMeshType InMeshType);
+    string GetVertexShaderFileName(EMeshType InMeshType);
 
 private:
     wstring ReadFilePath;
@@ -39,5 +55,6 @@ private:
 
     vector<struct MaterialData*> Materials;
     vector<struct BoneData*> Bones;
-    vector<struct MeshData*> Meshes;
+    vector<struct SkeletalMeshData*> SkeletalMeshes;
+    vector<struct StaticMeshData*> StaticMeshes;
 };

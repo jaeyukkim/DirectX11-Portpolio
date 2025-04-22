@@ -80,3 +80,12 @@ struct VertexModel
     Vector4 Indices; //int4
     Vector4 Weights; //float4
 };
+
+struct VertexObject
+{
+    Vector3 Position;
+    Vector2 Uv;
+    Color Color;
+    Vector3 Normal;
+    Vector3 Tangent;
+};

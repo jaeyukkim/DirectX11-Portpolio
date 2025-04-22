@@ -144,9 +144,10 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
   <ItemGroup>
     <ClInclude Include="Frameworks\Actor.h" />
     <ClInclude Include="Frameworks\ACharacter.h" />
+    <ClInclude Include="Frameworks\StaticMesh.h" />
     <ClInclude Include="Frameworks\UActorComponent.h" />
     <ClInclude Include="Frameworks\UCameraComponent.h" />
-    <ClInclude Include="Frameworks\UMeshComponent.h" />
+    <ClInclude Include="Frameworks\UStaticMeshComponent.h" />
     <ClInclude Include="Frameworks\UObject.h" />
     <ClInclude Include="Frameworks\UPrimitiveComponent.h" />
     <ClInclude Include="Frameworks\USceneComponent.h" />
@@ -181,9 +182,10 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
   <ItemGroup>
     <ClCompile Include="Frameworks\Actor.cpp" />
     <ClCompile Include="Frameworks\ACharacter.cpp" />
+    <ClCompile Include="Frameworks\StaticMesh.cpp" />
     <ClCompile Include="Frameworks\UActorComponent.cpp" />
     <ClCompile Include="Frameworks\UCameraComponent.cpp" />
-    <ClCompile Include="Frameworks\UMeshComponent.cpp" />
+    <ClCompile Include="Frameworks\UStaticMeshComponent.cpp" />
     <ClCompile Include="Frameworks\UObject.cpp" />
     <ClCompile Include="Frameworks\UPrimitiveComponent.cpp" />
     <ClCompile Include="Frameworks\USceneComponent.cpp" />
@@ -222,12 +224,28 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Main</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
+    <FxCompile Include="HLSL\PS_StaticMesh.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="HLSL\VS_SkeletalMesh.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="HLSL\VS_StaticMesh.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Main</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>

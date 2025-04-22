@@ -2,6 +2,7 @@
 #include "Frameworks/Actor.h"
 
 
+class UStaticMeshComponent;
 class ULightComponent;
 
 class LightActor : public Actor
@@ -13,4 +14,5 @@ public:
 	virtual void Render() override;
 
 	shared_ptr<ULightComponent> LightComp;
+	shared_ptr<UStaticMeshComponent> Mesh;
 };
