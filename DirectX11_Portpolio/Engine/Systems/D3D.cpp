@@ -17,6 +17,11 @@ void D3D::Create()
 	assert(Instance == nullptr);
 
 	Instance = new D3D();
+	Instance->CreateDevice();
+	Instance->CreateRTV();
+	Instance->CreateDSV();
+	Instance->CreateViewport();
+	Shader::CreateDefaultDepthStencilState();
 }
 
 void D3D::Destroy()
@@ -42,7 +47,7 @@ void D3D::SetRenderTarget()
 
 void D3D::ClearDepthStencilView()
 {
-	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1, 0);
+	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 void D3D::ClearRenderTargetView()
@@ -77,10 +82,7 @@ void D3D::ResizeScreen(float InWidth, float InHeight)
 D3D::D3D()
 	:clearColor(Color(0.5f, 0.5f, 0.5f, 1.0f))
 {
-	CreateDevice();
-	CreateRTV();
-	CreateDSV();
-	CreateViewport();
+	
 }
 
 D3D::~D3D()
@@ -198,4 +200,7 @@ void D3D::CreateDSV()
 
 		Check(Device->CreateDepthStencilView(DSV_Texture.Get(), &desc, DepthStencilView.GetAddressOf()));
 	}
+
+	Shader::CreateDefaultDepthStencilState();
+	
 }

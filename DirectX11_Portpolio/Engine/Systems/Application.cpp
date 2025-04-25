@@ -1,4 +1,4 @@
-#pragma once
+
 
 #include "HeaderCollection.h"
 #include "IExecutable.h"
@@ -187,10 +187,11 @@ void Application::MainRender()
 
 	//Rendering
 	{
+		
 		D3D::Get()->SetRenderTarget();
 		D3D::Get()->ClearRenderTargetView();
 		D3D::Get()->ClearDepthStencilView();
-		
+		Shader::SetDefaultDepthStencilState();
 		FSceneView::Get()->PreRender();
 		Main->Render();
 		Gui::Get()->Render();

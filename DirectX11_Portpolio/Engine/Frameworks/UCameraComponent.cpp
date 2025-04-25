@@ -4,8 +4,8 @@
 
 UCameraComponent::UCameraComponent()
 {
-	FTransform* T = GetTransform();
-	T->SetRotationFromEuler(90.0f, 0.0f, 180.0f);
+	FTransform* T = GetWorldTransform();
+	T->SetRotation(90.0f, 0.0f, 180.0f);
 	SetViewMatrix();
 }
 
@@ -18,15 +18,9 @@ void UCameraComponent::TickComponent(float deltaTime)
 {
 	Super::TickComponent(deltaTime);
 
+	CheckFalse(Mouse::Get()->Press(MouseButton::Right));
 
-	if (Mouse::Get()->Press(MouseButton::Right))
-	{
-		SetViewMatrix();
-		return;
-	}
-
-	
-	FTransform* T = GetTransform();
+	FTransform* T = GetRelativeTransform();
 
 	Vector3 moveDelta = Vector3::Zero;
 
@@ -76,7 +70,7 @@ void UCameraComponent::TickComponent(float deltaTime)
 
 void UCameraComponent::SetViewMatrix()
 {
-	FTransform* T = GetTransform();
+	FTransform* T = GetWorldTransform();
     
 	// 카메라의 위치와 방향 설정
 	Vector3 position = T->GetPosition();

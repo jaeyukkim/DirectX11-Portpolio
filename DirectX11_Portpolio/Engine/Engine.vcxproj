@@ -153,6 +153,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Frameworks\USceneComponent.h" />
     <ClInclude Include="Frameworks\USkeletalMeshComponent.h" />
     <ClInclude Include="Light\ULightComponent.h" />
+    <ClInclude Include="Manager\TickTaskManager.h" />
     <ClInclude Include="Render\FSceneView.h" />
     <ClInclude Include="Render\Material.h" />
     <ClInclude Include="Frameworks\Skeletal.h" />
@@ -191,6 +192,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Frameworks\USceneComponent.cpp" />
     <ClCompile Include="Frameworks\USkeletalMeshComponent.cpp" />
     <ClCompile Include="Light\ULightComponent.cpp" />
+    <ClCompile Include="Manager\TickTaskManager.cpp" />
     <ClCompile Include="Render\FSceneView.cpp" />
     <ClCompile Include="Render\Material.cpp" />
     <ClCompile Include="Frameworks\Skeletal.cpp" />

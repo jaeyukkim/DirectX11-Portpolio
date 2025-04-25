@@ -8,6 +8,10 @@
 
 #include "Utility/Converter.h"
 
+
+/**
+ * @param InFileName SkeletalMesh의 바이너리 파일 이름
+ */
 USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName)
 {
 	
@@ -26,22 +30,10 @@ USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName)
 	InitRenderer();
 }
 
-USkeletalMeshComponent::~USkeletalMeshComponent()
-{
 
-}
-
-void USkeletalMeshComponent::TickComponent(float deltaTime)
-{
-	Super::TickComponent(deltaTime);
-
-	for (const shared_ptr<SkeletalMesh>& meshPtr : SkeletalMeshes)
-	{
-		meshPtr->SetWorld(GetTransform());
-		meshPtr->Tick();
-	}
-}
-
+/**
+ * 반드시 렌더링 이전에 실행되어야 하는 함수
+ */
 void USkeletalMeshComponent::InitRenderer() const
 {
 	vector<D3D11_INPUT_ELEMENT_DESC> inputElements =
@@ -63,6 +55,20 @@ void USkeletalMeshComponent::InitRenderer() const
 	}
 }
 
+
+
+void USkeletalMeshComponent::TickComponent(float deltaTime)
+{
+	Super::TickComponent(deltaTime);
+
+	for (const shared_ptr<SkeletalMesh>& meshPtr : SkeletalMeshes)
+	{
+		meshPtr->SetWorld(GetWorldTransform());
+		meshPtr->Tick();
+	}
+}
+
+
 void USkeletalMeshComponent::RenderComponent()
 {
 	Super::RenderComponent();
@@ -72,6 +78,7 @@ void USkeletalMeshComponent::RenderComponent()
 		meshPtr->Render();
 	}
 }
+
 
 void USkeletalMeshComponent::ReadFile(wstring InFileName)
 {
@@ -86,8 +93,6 @@ void USkeletalMeshComponent::ReadFile(wstring InFileName)
 
 	// 4. JSON 파일에서 데이터를 읽어 `root` 객체에 저장
 	stream >> root;
-
-	
 	
 	// 5. JSON에서 파일 정보(머티리얼, 메시 파일명) 가져오기
 	Json::Value material = root["File"]["Material"]; // "File" 섹션의 "Material" 필드
@@ -119,18 +124,18 @@ void USkeletalMeshComponent::ReadFile(wstring InFileName)
 	Vector3 r = Vector3(stof(rString[0]), stof(rString[1]), stof(rString[2])); // 회전
 
 	// 11. 모델의 위치, 크기, 회전을 설정
-	GetTransform()->SetPosition(p);
-	GetTransform()->SetScale(s);
-	GetTransform()->SetRotationFromEuler(r.x, r.y, r.z);
+	GetRelativeTransform()->SetPosition(p);
+	GetRelativeTransform()->SetScale(s);
+	GetRelativeTransform()->SetRotation(r.x, r.y, r.z);
 
 	stream.close();
 
 	// 12. 머티리얼과 메시 데이터를 로드
 	ReadMaterial(String::ToWString(material.asString())); // 머티리얼 로드
 	ReadMesh(String::ToWString(mesh.asString())); // 메시 로드
-
 	
 }
+
 
 void USkeletalMeshComponent::ReadMaterial(wstring InFilePath)
 {
@@ -198,6 +203,7 @@ void USkeletalMeshComponent::ReadMaterial(wstring InFilePath)
 	stream.close();
 }
 
+
 void USkeletalMeshComponent::ReadMesh(wstring InFilePath)
 {
 	// 1. 파일 경로를 설정 (모델 데이터가 저장된 경로)
@@ -245,6 +251,7 @@ void USkeletalMeshComponent::ReadMesh(wstring InFilePath)
 		}
 	}
 }
+
 
 Color USkeletalMeshComponent::JsonStringToColor(string InString)
 {

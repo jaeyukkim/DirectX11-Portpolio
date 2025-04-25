@@ -3,8 +3,8 @@
 class Shader
 {
 public:
-    Shader();
-    ~Shader();
+    Shader() = default;
+    ~Shader() = default;
     
     void InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements,
         const D3D11_SAMPLER_DESC& InSamplerDesc);
@@ -21,6 +21,10 @@ public:
     void PSSetConstantBuffers(UINT StartSlot, const vector<ID3D11Buffer*>& InBuffers) const;
     void SetVertexShaderPath(const wstring& InVertexShaderPath);
     void SetPixelShaderPath(const wstring& InPixelShaderPath);
+    static void CreateDefaultDepthStencilState();
+    static void SetDefaultDepthStencilState();
+    void CreateDepthStencilState(const D3D11_DEPTH_STENCIL_DESC& InDepthStencilDesc);
+    void SetCustomDepthStencilState();
 
 private:
     void CompileVertexShader();
@@ -32,10 +36,13 @@ private:
     ComPtr<ID3D11VertexShader> VertexShader;
     ComPtr<ID3D11PixelShader> PixelShader;
     ComPtr<ID3D11SamplerState> SamplerState;
+    static ComPtr<ID3D11DepthStencilState> DefaultDepthStencilState;
+    ComPtr<ID3D11DepthStencilState> CustomDepthStencilState;
     ComPtr<ID3D11InputLayout> InputLayouts;
     ComPtr<ID3DBlob> VsBlob;
     ComPtr<ID3DBlob> PsBlob;
     ComPtr<ID3DBlob> ErrorBlob;
+    
 
 
     wstring VertexShaderPath;

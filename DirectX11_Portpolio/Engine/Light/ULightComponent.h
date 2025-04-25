@@ -17,7 +17,7 @@ public:
     virtual void TickComponent(float deltaTime) override;
     virtual void RenderComponent() override;
 
-
+    LightInformation* GetLightInfo() { return &LightInfo; }
 private:
     
     LightInformation LightInfo;

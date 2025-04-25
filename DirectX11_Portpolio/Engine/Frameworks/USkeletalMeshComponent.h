@@ -9,7 +9,7 @@ class USkeletalMeshComponent : public UPrimitiveComponent
 {
 public:
     USkeletalMeshComponent(wstring InFileName);
-    virtual ~USkeletalMeshComponent();
+    virtual ~USkeletalMeshComponent() = default;
 
 public:
     virtual void TickComponent(float deltaTime) override;

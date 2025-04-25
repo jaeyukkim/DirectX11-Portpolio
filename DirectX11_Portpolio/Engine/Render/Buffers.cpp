@@ -179,9 +179,9 @@ void StructuredBuffer::VSSetStructuredBuffer(const EConstBufferSlot bufferSlot)
 	D3D::Get()->GetDeviceContext()->VSSetShaderResources(static_cast<UINT>(bufferSlot), 1, srv.GetAddressOf());
 }
 
-void StructuredBuffer::UpdateData(void* Indata)
+void StructuredBuffer::UpdateData(void* InData)
 {
-	data = Indata;
+	data = InData;
 	UpdateBuffer();
 }
 

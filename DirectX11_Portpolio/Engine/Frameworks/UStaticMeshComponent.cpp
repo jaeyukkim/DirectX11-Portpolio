@@ -11,7 +11,9 @@
 #include "Utility/Converter.h"
 
 
-
+/**
+ * @param InFileName StaticMesh의 바이너리 파일 이름
+ */
 UStaticMeshComponent::UStaticMeshComponent(wstring InFileName)
 {
 
@@ -21,38 +23,19 @@ UStaticMeshComponent::UStaticMeshComponent(wstring InFileName)
 
 	if (!filesystem::exists(InFileName))
 	{
-
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadFile(objectName + L"/" + objectName + L".fbx");
 		converter->ExportMaterial(objectName, true, EMeshType::StaticMeshType);
 		converter->ExportMesh(objectName, EMeshType::StaticMeshType);
-
 	}
 	ReadFile(InFileName);
 	InitRenderer();
 }
 
-UStaticMeshComponent::~UStaticMeshComponent()
-{
-
-}
-
-void UStaticMeshComponent::TickComponent(float deltaTime)
-{
-	Super::TickComponent(deltaTime);
-
-	/*
-	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
-	{
-		meshPtr->SetWorld(GetTransform());
-		meshPtr->Tick();
-	}
-	*/
-	m_Mesh[0]->SetWorld(GetTransform());
-	m_Mesh[0]->Tick();
-}
-
-void UStaticMeshComponent::InitRenderer() const
+/**
+ * 렌더링 이전에 반드시 실행해야 하는 함수
+ */
+void UStaticMeshComponent::InitRenderer()
 {
 	vector<D3D11_INPUT_ELEMENT_DESC> inputElements =
 	{
@@ -67,9 +50,29 @@ void UStaticMeshComponent::InitRenderer() const
 	{
 		meshPtr->MaterialData->GetRenderer()->InitRenderer(inputElements, meshPtr->MaterialData->GetSamplerDesc());
 	}
-	
+
+	bInitRenderComplete = true;
 }
 
+
+void UStaticMeshComponent::TickComponent(float deltaTime)
+{
+	Super::TickComponent(deltaTime);
+
+	/*
+	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
+	{
+		meshPtr->SetWorld(GetTransform());
+		meshPtr->Tick();
+	}
+	*/
+	m_Mesh[0]->SetWorld(GetWorldTransform());
+	m_Mesh[0]->Tick();
+}
+
+/**
+ * InitRenderer 완료되었으면 호출 가능
+ */
 void UStaticMeshComponent::RenderComponent()
 {
 	Super::RenderComponent();
@@ -80,6 +83,8 @@ void UStaticMeshComponent::RenderComponent()
 	}*/
 	m_Mesh[0]->Render();
 }
+
+
 
 void UStaticMeshComponent::ReadFile(wstring InFileName)
 {
@@ -125,9 +130,9 @@ void UStaticMeshComponent::ReadFile(wstring InFileName)
 	Vector3 r = Vector3(stof(rString[0]), stof(rString[1]), stof(rString[2])); // 회전
 
 	// 11. 모델의 위치, 크기, 회전을 설정
-	GetTransform()->SetPosition(p);
-	GetTransform()->SetScale(s);
-	GetTransform()->SetRotationFromEuler(r.x, r.y, r.z);
+	GetRelativeTransform()->SetPosition(p);
+	GetRelativeTransform()->SetScale(s);
+	GetRelativeTransform()->SetRotation(r.x, r.y, r.z);
 
 	stream.close();
 
@@ -138,6 +143,11 @@ void UStaticMeshComponent::ReadFile(wstring InFileName)
 
 }
 
+
+/**
+ * @param InFilePath ".material" 파일의 저장 경로 \n
+ * 메터리얼 파일을 읽어 MaterialTable에 저장
+ */	
 void UStaticMeshComponent::ReadMaterial(wstring InFilePath)
 {
 
@@ -204,6 +214,7 @@ void UStaticMeshComponent::ReadMaterial(wstring InFilePath)
 	stream.close();
 }
 
+
 void UStaticMeshComponent::ReadMesh(wstring InFilePath)
 {
 	// 1. 파일 경로를 설정 (모델 데이터가 저장된 경로)
@@ -225,6 +236,7 @@ void UStaticMeshComponent::ReadMesh(wstring InFilePath)
 
 
 }
+
 
 Color UStaticMeshComponent::JsonStringToColor(string InString)
 {

@@ -1,7 +1,7 @@
 {
   "File": {
-    "Material": "Cube/Cube",
-    "Mesh": "Cube/Cube"
+    "Material": "Lantern/Lantern",
+    "Mesh": "Lantern/Lantern"
   },
   "Transform": {
     "Position": "0,0,0",

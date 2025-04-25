@@ -93,7 +93,7 @@ public:
 	void UpdateBuffer();
 	void PSSetStructuredBuffer(const EConstBufferSlot bufferSlot);
 	void VSSetStructuredBuffer(const EConstBufferSlot bufferSlot);
-	void UpdateData(void* Indata);
+	void UpdateData(void* InData);
 
 private:
 	ComPtr<ID3D11Buffer> buffer;

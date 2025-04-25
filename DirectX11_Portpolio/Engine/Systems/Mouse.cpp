@@ -99,20 +99,33 @@ void Mouse::Tick(float deltaTime)
 	}
 
 	
-	// 2. 마우스 델타 계산
-	POINT screenPoint;
-	GetCursorPos(&screenPoint); // 스크린 좌표계에서 마우스 위치 가져오기
+	POINT point;
+	GetCursorPos(&point);
+	ScreenToClient(D3D::GetDesc().Handle, &point);
 
-	/*WheelMoveDelta = Vector3(
-		(float)(screenPoint.x - ScreenCenter.x),
-		(float)(screenPoint.y - ScreenCenter.y),
-		0.0f
-	);*/
-	WheelMoveDelta = Vector3(0.0f, 0.0f, 0.0f);
-	// 3. 다시 마우스 커서를 가운데로 위치시킴 (스크린 좌표 기준)
+	WheelOldStatus.x = WheelStatus.x;
+	WheelOldStatus.y = WheelStatus.y;
+
+	WheelStatus.x = (float)point.x;
+	WheelStatus.y = (float)point.y;
+
+	WheelMoveDelta = WheelStatus - WheelOldStatus;
+	WheelOldStatus.z = WheelStatus.z;
+
+	/*
+	* //  인게임용 마우스 좌표고정
+		POINT screenPoint;
+		GetCursorPos(&screenPoint); // 스크린 좌표계에서 마우스 위치 가져오기
+
+		WheelMoveDelta = Vector3(
+			(float)(screenPoint.x - ScreenCenter.x),
+			(float)(screenPoint.y - ScreenCenter.y),
+			0.0f);
 	
-	//SetCursorPos(ScreenCenter.x, ScreenCenter.y);
-	
+
+		// 3. 다시 마우스 커서를 가운데로 위치시킴 (스크린 좌표 기준)
+		SetCursorPos(ScreenCenter.x, ScreenCenter.y);
+	*/
 	
 }
 

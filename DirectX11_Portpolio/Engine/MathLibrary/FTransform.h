@@ -9,9 +9,8 @@ public:
     Vector3 Position; // 위치
     Quaternion Rotation;    // 쿼터니언
     Vector3 Scale;       // 스케일
-
-    float Yaw = 0.0f;
-    float Pitch = 0.0f;
+    
+  
 
 public:
     FTransform()
@@ -34,9 +33,55 @@ public:
         return S * R * T;
     }
 
+    void SetTransform(const FTransform& InTransform)
+    {
+        *this = InTransform;
+    }
+    //행렬을 변환으로 분해
+    void FTransform::SetTransformFromMatrix(const Matrix& M)
+    {
+        XMVECTOR outScale, outRotationQuat, outTranslation;
+
+        if (XMMatrixDecompose(&outScale, &outRotationQuat, &outTranslation, M))
+        {
+            Scale = outScale;
+            Rotation = outRotationQuat;
+            Position = outTranslation;
+        }
+        else
+        {
+            Scale = XMVectorSet(1, 1, 1, 0);
+            Rotation = XMQuaternionIdentity();
+            Position = XMVectorZero();
+        }
+    }
+
     inline Vector3 GetPosition() const { return Position; }
-    inline Quaternion GetRotation() const { return Rotation; }    // 쿼터니언
     inline Vector3 GetScale() const { return Scale; }
+    Vector3 FTransform::GetRotation() const
+    {
+        XMMATRIX rotMat = XMMatrixRotationQuaternion(Rotation);
+
+        float pitch = asinf(-rotMat.r[2].m128_f32[1]);
+
+        float yaw, roll;
+        if (fabs(cosf(pitch)) > 0.0001f)
+        {
+            yaw = atan2f(rotMat.r[2].m128_f32[0], rotMat.r[2].m128_f32[2]);
+            roll = atan2f(rotMat.r[0].m128_f32[1], rotMat.r[1].m128_f32[1]);
+        }
+        else
+        {
+            yaw = atan2f(-rotMat.r[1].m128_f32[0], rotMat.r[0].m128_f32[0]);
+            roll = 0.0f;
+        }
+
+        return Vector3(
+            XMConvertToDegrees(pitch),
+            XMConvertToDegrees(yaw),
+            XMConvertToDegrees(roll));
+    }
+
 
     // 위치 설정
     void SetPosition(float x, float y, float z)
@@ -49,14 +94,21 @@ public:
     }
 
     // 회전 설정 (Euler → Quaternion)
-    void SetRotationFromEuler(float Inpitch, float Inyaw, float Inroll)
+    void SetRotation(float Inpitch, float Inyaw, float Inroll)
     {
-      
-        Rotation = XMVector3Normalize(XMQuaternionRotationRollPitchYaw(Inpitch, Inyaw, Inroll));
+        Rotation = XMQuaternionRotationRollPitchYaw(
+            XMConvertToRadians(Inpitch),
+            XMConvertToRadians(Inyaw),
+            XMConvertToRadians(Inroll)
+        );
     }
-    void SetRotationFromEuler(Quaternion InRotation)
+    void SetRotation(Vector3 InRotation)
     {
-        Rotation = InRotation;
+        Rotation = XMQuaternionRotationRollPitchYaw(
+            XMConvertToRadians(InRotation.x),
+            XMConvertToRadians(InRotation.y),
+            XMConvertToRadians(InRotation.z)
+        );
     }
 
     // 스케일 설정
@@ -116,15 +168,9 @@ public:
 
     void FTransform::AddRotation(float yawDelta, float pitchDelta, float rollDelta)
     {
-        Yaw += yawDelta;
-        Pitch += pitchDelta;
-
-        // Clamp pitch to avoid flipping
-        Pitch = std::clamp(Pitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);
-
-
-        SetRotationFromEuler(Pitch, Yaw, 0.0f);
-        
+        Vector3 rot = GetRotation();
+        SetRotation(rot.x + pitchDelta, rot.y + yawDelta, rot.z + rollDelta);
+       
     }
 
 };

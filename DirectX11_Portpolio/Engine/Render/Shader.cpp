@@ -4,17 +4,8 @@
 #include "FSceneView.h"
 #include "Shader.h"
 
+ComPtr<ID3D11DepthStencilState> Shader::DefaultDepthStencilState = nullptr;
 
-Shader::Shader()
-{
-    
-    
-}
-
-Shader::~Shader()
-{
-    
-}
 
 void Shader::InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements, const D3D11_SAMPLER_DESC& InSamplerDesc)
 {
@@ -90,6 +81,7 @@ void Shader::CreateSamplerState(const D3D11_SAMPLER_DESC& InSamplerDesc)
 
 void Shader::Bind() const
 {
+    
     D3D::Get()->GetDeviceContext()->IASetInputLayout(InputLayouts.Get());
     D3D::Get()->GetDeviceContext()->VSSetShader(VertexShader.Get(), nullptr, 0);
     D3D::Get()->GetDeviceContext()->PSSetShader(PixelShader.Get(), nullptr, 0);
@@ -120,6 +112,43 @@ void Shader::SetVertexShaderPath(const wstring& InVertexShaderPath)
 void Shader::SetPixelShaderPath(const wstring& InPixelShaderPath)
 {
     PixelShaderPath = InPixelShaderPath;
+}
+
+void Shader::CreateDefaultDepthStencilState()
+{
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+    ZeroMemory(&depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+    depthStencilDesc.DepthEnable = true; // false
+    depthStencilDesc.DepthWriteMask =
+        D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthFunc =
+        D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+    
+
+    if (FAILED(D3D::Get()->GetDevice()->CreateDepthStencilState(
+        &depthStencilDesc, DefaultDepthStencilState.GetAddressOf())))
+    {
+        cout << "CreateDepthStencilState() failed." << endl;
+    }
+}
+
+void Shader::SetDefaultDepthStencilState()
+{
+    D3D::Get()->GetDeviceContext()->OMSetDepthStencilState(Shader::DefaultDepthStencilState.Get(), 0);
+}
+
+void Shader::CreateDepthStencilState(const D3D11_DEPTH_STENCIL_DESC& InDepthStencilDesc)
+{
+    if (FAILED(D3D::Get()->GetDevice()->CreateDepthStencilState(
+        &InDepthStencilDesc, CustomDepthStencilState.GetAddressOf())))
+    {
+        cout << "CreateDepthStencilState() failed." << endl;
+    }
+}
+
+void Shader::SetCustomDepthStencilState()
+{
+    D3D::Get()->GetDeviceContext()->OMSetDepthStencilState(CustomDepthStencilState.Get(), 0);
 }
 
 void Shader::DrawIndexed(const int nIndex)

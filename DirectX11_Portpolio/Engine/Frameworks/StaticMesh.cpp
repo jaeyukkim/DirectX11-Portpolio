@@ -39,7 +39,7 @@ void StaticMesh::Render()
 void StaticMesh::SetWorld(const FTransform* InTransform)
 {
 	MeshWorld->SetPosition(InTransform->GetPosition());
-	MeshWorld->SetRotationFromEuler(InTransform->GetRotation());
+	MeshWorld->SetRotation(InTransform->GetRotation());
 	MeshWorld->SetScale(InTransform->GetScale());
 }
 

@@ -2,14 +2,14 @@
 #include "TestGui.h"
 
 #include "AKachujin.h"
-#include "LightActor.h"
+#include "ALightActor.h"
 #include "Systems/Application.h"
 
 
 
 void TestGui::Initialize()
 {
-	Actors.push_back(make_shared<LightActor>());
+	Actors.push_back(make_shared<ALightActor>());
 	Actors.push_back(make_shared<AKachujin>());
 
 	testval++;

@@ -8,36 +8,41 @@ class USceneComponent : public UActorComponent
 {
 public:
 	USceneComponent();
-	virtual ~USceneComponent();
+	virtual ~USceneComponent() = default;
 
 	
 	virtual void TickComponent(float deltaTime) override;
 	virtual void RenderComponent();
 
 public:
-	void SetUpAttachment(USceneComponent* InParent, const string& InSocketName);
-	void AddChild(USceneComponent* Child);
-	void RemoveChild(USceneComponent* Child);
+	void SetUpAttachment(USceneComponent* InParent, const string& InSocketName = "");
+	void Deteach();
+	void AddChild(USceneComponent* InChild);
+	void RemoveChild(USceneComponent* InChild);
 	
 public:
-	FTransform* GetTransform() { return Transform.get(); }
+	FTransform* GetWorldTransform() const { return WorldTransform.get(); }
+	FTransform* GetRelativeTransform() const { return RelativeTransform.get(); }
+
+public:
+	vector<USceneComponent*> AttachChildren;
+	USceneComponent* AttachParent = nullptr;
+	string AttachSocketName;
+
+public:
+	bool bDirty = false;
+	int AttachDepth = 0;
+
 	
-	
+
 private:
 	struct WorldBufferDesc
 	{
 		Matrix World;
 	} WorldBufferData;
 
-	shared_ptr<FTransform> Transform;
+	shared_ptr<FTransform> WorldTransform;
+	shared_ptr<FTransform> RelativeTransform;
 	shared_ptr<ConstantBuffer> WorldConstantBuffer;
-
-
-private:
-	vector<USceneComponent*> AttachChildren;
-	USceneComponent* AttachParent;
-	string AttachSocketName;
-
-private:
-	bool bDirty = false;
+	
 };

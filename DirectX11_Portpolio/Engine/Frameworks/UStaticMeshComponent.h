@@ -9,14 +9,14 @@ class UStaticMeshComponent : public UPrimitiveComponent
 {
 public:
     UStaticMeshComponent(wstring InFileName);
-    virtual ~UStaticMeshComponent();
+    virtual ~UStaticMeshComponent() = default;
 
 public:
     virtual void TickComponent(float deltaTime) override;
     virtual void RenderComponent() override;
 
 
-    void InitRenderer() const;
+    void InitRenderer();
 
 
 private:
@@ -28,9 +28,10 @@ private:
     Color JsonStringToColor(string InString);
 
 private:
-
     vector<shared_ptr<StaticMesh>> m_Mesh;
     map<string, shared_ptr<Material>> MaterialTable;
 
+private:
+    mutable bool bInitRenderComplete = false;
 };
 
