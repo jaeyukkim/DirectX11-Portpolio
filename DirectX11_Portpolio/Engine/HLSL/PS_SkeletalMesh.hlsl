@@ -24,17 +24,18 @@ cbuffer BasicPixelConstantBuffer : register(b0)
  */
 float4 PS_Main(VertexOutput input) : SV_TARGET
 {
-    float3 toEye = normalize(EyePos - input.posWorld);
 
-    float3 color = float3(1.0f, 1.0f, 1.0f);
-    
+    float3 toEye = normalize(EyePos - input.posWorld);
+    float3 color = input.color;
+    float2 uv = input.texCoord * Material.UV_Tiling + Material.UV_Offset;
+    float3 finalNormal = ApplyNormalMapping(uv, input.modelNormal, input.tangent, g_sampler);
+
     int i = 0;
 
-  
+
     for (int i = 0; i < LightCnt; ++i)
     {
         Light L = lights[i];
-        color = L.color;
         switch (L.LightType)
         {
         case LIGHT_CubeMap:
@@ -42,19 +43,19 @@ float4 PS_Main(VertexOutput input) : SV_TARGET
                 break;
 
         case LIGHT_Directional:
-            color += ComputeDirectionalLight(L, Material, input.modelNormal, toEye);
+            color += ComputeDirectionalLight(L, Material, finalNormal, toEye);
             break;
 
         case LIGHT_Point:
-            color += ComputePointLight(L, Material, input.posWorld, input.modelNormal, toEye);
+            color += ComputePointLight(L, Material, input.posWorld, finalNormal, toEye);
             break;
 
         case LIGHT_Spot:
-            color += ComputeSpotLight(L, Material, input.posWorld, input.modelNormal, toEye);
+            color += ComputeSpotLight(L, Material, input.posWorld, finalNormal, toEye);
             break;
 
         case LIGHT_Lim:
-            float rim = (1.0f - dot(input.modelNormal, toEye));
+            float rim = (1.0f - dot(finalNormal, toEye));
             rim = smoothstep(0.0f, 1.0f, rim);
             rim = pow(abs(rim), L.spotPower);
             color += rim * color * length(L.strength);
@@ -62,8 +63,10 @@ float4 PS_Main(VertexOutput input) : SV_TARGET
         }
     }
 
-    return float4(color, 1.0f) * MaterialMaps[MATERIAL_TEXTURE_Diffuse].Sample(g_sampler, input.texCoord);
-    
+
+    return float4(color, 1.0f) * MaterialMaps[MATERIAL_TEXTURE_Diffuse].Sample(g_sampler, uv);
+
+
     
 }
 

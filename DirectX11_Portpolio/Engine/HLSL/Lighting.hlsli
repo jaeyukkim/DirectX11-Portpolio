@@ -3,11 +3,12 @@
 
 #include "Common.hlsli"
 
-#define LIGHT_CubeMap 0
-#define LIGHT_Directional 1
-#define LIGHT_Spot 2
-#define LIGHT_Point 3
-#define LIGHT_Lim 4
+#define LIGHT_None 0
+#define LIGHT_CubeMap 1
+#define LIGHT_Directional 2
+#define LIGHT_Spot 3
+#define LIGHT_Point 4
+#define LIGHT_Lim 5
 
 struct Light
 {
@@ -19,8 +20,10 @@ struct Light
     float fallOffEnd;
     float3 position;
     float spotPower;
-    float4 color;
+    float innerCone;
+    float outerCone;
 };
+
 
 cbuffer CBLightCnt : register(b6)
 {
@@ -86,37 +89,31 @@ float3 ComputePointLight(Light L, MaterialDesc mat, float3 pos, float3 normal,
     }
 }
 
-float3 ComputeSpotLight(Light L, MaterialDesc mat, float3 pos, float3 normal,
-    float3 toEye)
+
+float3 ComputeSpotLight(Light L, MaterialDesc mat, float3 pos, float3 normal, float3 toEye)
 {
     float3 lightVec = L.position - pos;
-
-    // 쉐이딩할 지점부터 조명까지의 거리 계산
     float d = length(lightVec);
 
-    // 너무 멀면 조명이 적용되지 않음
     if (d > L.fallOffEnd)
-    {
         return float3(0.0f, 0.0f, 0.0f);
-    }
-    else
-    {
-        lightVec /= d;
 
-        float ndotl = max(dot(lightVec, normal), 0.0f);
-        float3 lightStrength = L.strength * ndotl;
+    lightVec = normalize(lightVec);
 
-        float att = CalcAttenuation(d, L.fallOffStart, L.fallOffEnd);
-        lightStrength *= att;
+    float ndotl = max(dot(lightVec, normal), 0.0f);
+    float3 lightStrength = L.strength * ndotl;
 
-        float spotFactor = pow(max(-dot(lightVec, L.direction), 0.0f), L.spotPower);
-        lightStrength *= spotFactor;
+    float att = CalcAttenuation(d, L.fallOffStart, L.fallOffEnd);
+    lightStrength *= att;
 
-        return BlinnPhong(lightStrength, lightVec, normal, toEye, mat);
-    }
+   
+    float spotCos = dot(L.direction, -lightVec);
+    float rawSpotFactor = smoothstep(L.outerCone, L.innerCone, spotCos);
+    float spotFactor = pow(rawSpotFactor, L.spotPower);
 
+    lightStrength *= spotFactor;
+
+    return BlinnPhong(lightStrength, lightVec, normal, toEye, mat);
 }
-
-
 
 #endif // __LIGHTING_HLSLI__

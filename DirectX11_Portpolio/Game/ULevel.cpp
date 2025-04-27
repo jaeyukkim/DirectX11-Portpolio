@@ -2,6 +2,7 @@
 #include "ULevel.h"
 #include "AKachujin.h"
 #include "ALightActor.h"
+#include "Enviroment/AFloor.h"
 
 void ULevel::Initialize()
 {
@@ -10,6 +11,7 @@ void ULevel::Initialize()
 
     SpawnActor<ALightActor>(this);
     SpawnActor<AKachujin>(this);
+    SpawnActor<AFloor>(this);
 }
 
 void ULevel::Destroy()

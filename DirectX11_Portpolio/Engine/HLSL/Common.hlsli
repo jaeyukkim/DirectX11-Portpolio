@@ -27,6 +27,7 @@ struct VertexOutput
     float3 modelNormal : NORMAL;
     float2 texCoord : TEXCOORD;
     float3 color : COLOR; // Normal lines 쉐이더에서 사용
+    float3 tangent : TANGENT;
 };
 
 #endif // __COMMON_HLSLI__

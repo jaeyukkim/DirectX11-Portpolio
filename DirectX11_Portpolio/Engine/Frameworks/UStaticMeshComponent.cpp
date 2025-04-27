@@ -54,6 +54,20 @@ void UStaticMeshComponent::InitRenderer()
 	bInitRenderComplete = true;
 }
 
+/**
+* @param InMaterialName : 찾을 머터리얼 키 네임
+*/
+Material* UStaticMeshComponent::GetMaterial(string InMaterialName)
+{
+	auto it = MaterialTable.find(InMaterialName);
+	if (it != MaterialTable.end())
+	{
+		return it->second.get();
+	}
+
+	return nullptr;
+}
+
 
 void UStaticMeshComponent::TickComponent(float deltaTime)
 {

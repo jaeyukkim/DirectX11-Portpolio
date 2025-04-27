@@ -18,10 +18,13 @@ void ULightComponent::TickComponent(float deltaTime)
 
 
     FTransform* transform = GetWorldTransform();
-    LightInfo.direction = Vector3(transform->GetRotation());
+    //LightInfo.direction = Vector3(transform->GetRotation());
     LightInfo.position = transform->GetPosition();
 
-
+    
+    Vector3 defaultDirection = Vector3(0.0f, -1.0f, 0.0f);
+    Vector3 rotatedDirection = XMVector3Rotate(defaultDirection, transform->Rotation);
+    LightInfo.direction = XMVector3Normalize(rotatedDirection);
     FSceneView::Get()->UpdateLightMap(LightInfo);
 }
 

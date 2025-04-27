@@ -23,7 +23,7 @@ void FSceneView::Create()
     Instance->ViewConstantBuffer = make_shared<ConstantBuffer>(&Instance->Context, sizeof(Instance->Context));
     Instance->LightCountCBuffer = make_shared<ConstantBuffer>(&Instance->LightCntCbuffer, sizeof(Instance->LightCntCbuffer));
     Instance->LightConstantBuffer = make_shared<StructuredBuffer>(nullptr, sizeof(LightInformation), MAX_LIGHT_COUNT);
-
+    Instance->CachedLights.resize(MAX_LIGHT_COUNT, LightInformation{});
 }
 
 
@@ -80,24 +80,25 @@ void FSceneView::UpdateLightMap(LightInformation& InLightInfo)
 {
     CheckFalse(LightMap.size());
 
-    vector<LightInformation> lights(MAX_LIGHT_COUNT);
-    lights.assign(MAX_LIGHT_COUNT, LightInformation{});
-    
-    LightCntCbuffer.CurrentLightCnt = 0;
-    for (auto& [id, info] : LightMap)
+    // LightMap에서 해당 ID만 업데이트
+    auto it = LightMap.find(InLightInfo.LightID);
+    if (it != LightMap.end())
     {
-        if (info.LightID == InLightInfo.LightID)
+        it->second = InLightInfo;
+
+        // CachedLights에서도 해당 ID만 업데이트
+        if (InLightInfo.LightID >= 0 && InLightInfo.LightID < CachedLights.size())
         {
-            info = InLightInfo;   //라이트 업데이트
-            lights[info.LightID] = info;  //업데이트 할 라이트에 추가
-            LightCntCbuffer.CurrentLightCnt++;
+            CachedLights[InLightInfo.LightID] = InLightInfo;
         }
     }
 
-    // StructuredBuffer에 라이트 배열 업로드
-    LightConstantBuffer->UpdateData(lights.data());
-    LightConstantBuffer->PSSetStructuredBuffer(EConstBufferSlot::LightMap); // t5에 바인딩
+    // GPU에 업로드 (전체 전송)
+    LightConstantBuffer->UpdateData(CachedLights.data());
+    LightConstantBuffer->PSSetStructuredBuffer(EConstBufferSlot::LightMap);
 
+    // 라이트 개수 업데이트 (LightMap 크기 기준)
+    LightCntCbuffer.CurrentLightCnt = static_cast<UINT32>(LightMap.size());
     LightCountCBuffer->UpdateConstBuffer();
     LightCountCBuffer->PSSetConstantBuffer(EConstBufferSlot::LightCnt, 1);
 }

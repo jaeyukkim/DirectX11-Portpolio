@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClCompile Include="AKachujin.cpp" />
     <ClCompile Include="ALightActor.cpp" />
+    <ClCompile Include="Enviroment\AFloor.cpp" />
     <ClCompile Include="ULevel.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="Pch.cpp">
@@ -146,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="AKachujin.h" />
     <ClInclude Include="ALightActor.h" />
+    <ClInclude Include="Enviroment\AFloor.h" />
     <ClInclude Include="ULevel.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="Pch.h" />

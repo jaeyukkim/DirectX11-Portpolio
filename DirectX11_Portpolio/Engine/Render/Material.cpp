@@ -105,3 +105,8 @@ void Material::SetNormalMap(wstring InFilePath)
 	// Shader Resource View 설정
 	SRVs[MATERIAL_TEXTURE_NORMAL] = Textures[MATERIAL_TEXTURE_NORMAL]->GetSRV();
 }
+
+void Material::SetUVTiling(Vector2 InUV_Tiling)
+{
+	ColorData.UV_Tiling = InUV_Tiling;
+}

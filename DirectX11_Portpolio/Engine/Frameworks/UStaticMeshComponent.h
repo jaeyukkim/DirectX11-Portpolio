@@ -3,7 +3,7 @@
 #include "Render/RenderData.h"
 
 class StaticMesh;
-
+class Material;
 
 class UStaticMeshComponent : public UPrimitiveComponent
 {
@@ -15,9 +15,9 @@ public:
     virtual void TickComponent(float deltaTime) override;
     virtual void RenderComponent() override;
 
-
+public:
     void InitRenderer();
-
+    Material* GetMaterial(string InMaterialName);
 
 private:
 

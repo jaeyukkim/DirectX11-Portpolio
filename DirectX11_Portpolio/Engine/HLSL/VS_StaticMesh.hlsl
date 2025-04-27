@@ -6,7 +6,7 @@ struct StaticMeshInput
     float2 texCoord : TEXCOORD; // 텍스쳐 uv 좌표
     float4 ObjectColor : COLOR;
     float3 ObjectNormal : NORMAL; // 오브젝트의 정점의 normal    
-    float3 tanzent : TANGENT;
+    float3 tangent : TANGENT;
 };
 
 VertexOutput VS_Main(StaticMeshInput input)
@@ -22,6 +22,7 @@ VertexOutput VS_Main(StaticMeshInput input)
     output.modelNormal = normalize(mul(input.ObjectNormal, (float3x3)World));
     output.texCoord = input.texCoord;
     output.color = input.ObjectColor;
+    output.tangent = mul(input.tangent, (float3x3) World);
 
     return output;
 }

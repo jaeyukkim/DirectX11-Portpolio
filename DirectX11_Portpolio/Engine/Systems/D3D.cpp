@@ -163,7 +163,7 @@ void D3D::CreateViewport()
 	Viewport->Width = D3dDesc.Width;
 	Viewport->Height = D3dDesc.Height;
 	Viewport->MinDepth = 0;
-	Viewport->MaxDepth = 0;
+	Viewport->MaxDepth = 1;
 
 	DeviceContext->RSSetViewports(1, Viewport.get());
 }

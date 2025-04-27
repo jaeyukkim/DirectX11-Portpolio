@@ -2,9 +2,9 @@
    "MI_lantern_01_Inst" : {
       "Ambient" : "0.000000,0.000000,0.000000,1.000000",
       "Diffuse" : "0.215861,0.215861,0.215861,1.000000",
-      "DiffuseMap" : "",
+      "DiffuseMap" : "../Contents/_Objects/Lantern/T_lantern_BaseColor.PNG",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
-      "NormalMap" : "",
+      "NormalMap" : "../Contents/_Objects/Lantern/T_lantern_Normal.PNG",
       "PixelShaderPath" : "../Engine/HLSL/PS_StaticMesh.hlsl",
       "Specular" : "0.200000,0.200000,0.200000,20.000000",
       "SpecularMap" : "",

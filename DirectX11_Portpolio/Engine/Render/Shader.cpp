@@ -13,6 +13,7 @@ void Shader::InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElement
     CreateInputLayout(InInputElements);
     CompilePixelShader();
     CreateSamplerState(InSamplerDesc);
+    CreateRasterizeState();
     this->Bind();
 }
 
@@ -42,6 +43,23 @@ void Shader::CompilePixelShader()
     hr = D3D::Get()->GetDevice()->CreatePixelShader(PsBlob->GetBufferPointer(),
         PsBlob->GetBufferSize(), nullptr, PixelShader.GetAddressOf());
     AssertHR(hr, "PixelShader Create 실패");
+}
+
+//
+
+void Shader::CreateRasterizeState()
+{
+    D3D11_RASTERIZER_DESC rastDesc;
+    ZeroMemory(&rastDesc, sizeof(D3D11_RASTERIZER_DESC)); // Need this
+    rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
+    // rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+    rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
+    rastDesc.FrontCounterClockwise = false;
+    rastDesc.DepthClipEnable = true; // <- zNear, zFar 확인에 필요
+    
+
+    HRESULT hr = D3D::Get()->GetDevice()->CreateRasterizerState(&rastDesc, RSState.GetAddressOf());
+    AssertHR(hr, "Rasterize Create 실패");
 }
 
 
@@ -86,6 +104,7 @@ void Shader::Bind() const
     D3D::Get()->GetDeviceContext()->VSSetShader(VertexShader.Get(), nullptr, 0);
     D3D::Get()->GetDeviceContext()->PSSetShader(PixelShader.Get(), nullptr, 0);
     D3D::Get()->GetDeviceContext()->PSSetSamplers(0, 1, SamplerState.GetAddressOf());
+    D3D::Get()->GetDeviceContext()->RSSetState(RSState.Get());
 }
 
 void Shader::VSSetConstantBuffers(UINT StartSlot, const vector<ID3D11Buffer*>& InBuffers) const
@@ -122,7 +141,7 @@ void Shader::CreateDefaultDepthStencilState()
     depthStencilDesc.DepthWriteMask =
         D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
     depthStencilDesc.DepthFunc =
-        D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+        D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
     
 
     if (FAILED(D3D::Get()->GetDevice()->CreateDepthStencilState(

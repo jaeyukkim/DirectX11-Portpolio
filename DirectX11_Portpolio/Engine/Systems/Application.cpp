@@ -175,6 +175,8 @@ LRESULT Application::WndProc(HWND InHandle, UINT InMessage, WPARAM InwParam, LPA
 	return DefWindowProc(InHandle, InMessage, InwParam, InlParam);
 }
 
+
+
 void Application::MainRender()
 {
 	Timer::Get()->Tick();

@@ -5,7 +5,6 @@
 UCameraComponent::UCameraComponent()
 {
 	FTransform* T = GetWorldTransform();
-	T->SetRotation(90.0f, 0.0f, 180.0f);
 	SetViewMatrix();
 }
 

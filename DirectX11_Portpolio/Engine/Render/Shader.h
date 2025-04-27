@@ -29,12 +29,14 @@ public:
 private:
     void CompileVertexShader();
     void CompilePixelShader();
+    void CreateRasterizeState();
     void CreateInputLayout(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements);
     void CreateSamplerState(const D3D11_SAMPLER_DESC& InSamplerDesc);
 
 private:
     ComPtr<ID3D11VertexShader> VertexShader;
     ComPtr<ID3D11PixelShader> PixelShader;
+    ComPtr<ID3D11RasterizerState> RSState;
     ComPtr<ID3D11SamplerState> SamplerState;
     static ComPtr<ID3D11DepthStencilState> DefaultDepthStencilState;
     ComPtr<ID3D11DepthStencilState> CustomDepthStencilState;

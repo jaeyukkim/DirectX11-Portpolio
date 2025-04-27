@@ -12,8 +12,9 @@ struct FViewContext
     float padding;
 };
 
-enum class ELightType : int
+enum class ELightType : UINT32
 {
+    None,
     CubeMap,
     Directional,
     Spot,
@@ -26,14 +27,15 @@ struct LightInformation
 {
     ELightType LightType; //4
     int LightID; //4
-    Vector3 strength = Vector3(1.0f);              // 12
+    Vector3 strength = Vector3(0.5f, 0.5f, 0.5f);              // 12
     float fallOffStart = 0.0f;                     // 4
-    Vector3 direction = Vector3(0.0f, 0.0f, 1.0f); // 12
+    Vector3 direction = Vector3(0.0f, -1.0f, 0.0f); // 12
     float fallOffEnd = 10.0f;                      // 4
     Vector3 position = Vector3(0.0f, 0.0f, -2.0f); // 12
-    float spotPower = 100.0f;                      // 4
-    Color color;  //4
-    float padding[3] = { 0.0f };
+    float spotPower = 0.5f;                      // 4
+    float innerCone = static_cast<float>(cos(XMConvertToRadians(20.0f)));
+    float outerCone = static_cast<float>(cos(XMConvertToRadians(30.0f)));
+
 };
 
 
@@ -76,6 +78,7 @@ private:
     
     shared_ptr<ConstantBuffer> LightCountCBuffer;
     unordered_map<uint8_t, LightInformation> LightMap;
+    vector<LightInformation> CachedLights;
     shared_ptr<StructuredBuffer> LightConstantBuffer;
 
 private:

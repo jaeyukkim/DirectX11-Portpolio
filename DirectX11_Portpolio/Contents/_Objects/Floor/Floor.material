@@ -1,0 +1,13 @@
+{
+   "WorldGridMaterial" : {
+      "Ambient" : "0.000000,0.000000,0.000000,1.000000",
+      "Diffuse" : "0.215861,0.215861,0.215861,1.000000",
+      "DiffuseMap" : "../Contents/_Objects/Floor/T_stone_tiles_01_BaseColor.PNG",
+      "Emissive" : "0.000000,0.000000,0.000000,1.000000",
+      "NormalMap" : "../Contents/_Objects/Floor/T_stone_tiles_01_Normal.PNG",
+      "PixelShaderPath" : "../Engine/HLSL/PS_StaticMesh.hlsl",
+      "Specular" : "0.200000,0.200000,0.200000,20.000000",
+      "SpecularMap" : "",
+      "VertexShaderPath" : "../Engine/HLSL/VS_StaticMesh.hlsl"
+   }
+}

@@ -40,13 +40,20 @@ public:
     ConstantBuffer* GetConstantBuffer() const { return ColorConstantBuffer.get(); }
     const D3D11_SAMPLER_DESC& GetSamplerDesc() const { return SampDesc;  }
 
+
+public:
+    void SetUVTiling(Vector2 InUV_Tiling);
+
 private:
     struct Colors
     {
-        Color Ambient = Color(0, 0, 0, 1);
-        Color Diffuse = Color(1, 1, 1, 1);
-        Color Specular = Color(0, 0, 0, 1);
-        Color Emissive = Color(0, 0, 0, 1);
+        Color Ambient = Color(0.f, 0.f, 0.f, 1.f);
+        Color Diffuse = Color(1.f, 1.f, 1.f, 1.f);
+        Color Specular = Color(0.f, 0.f, 0.f, 1.f);
+        Color Emissive = Color(0.f, 0.f, 0.f, 1.f);
+        Vector2 UV_Tiling = Vector2(1.0f, 1.0f);
+        Vector2 UV_Offset = Vector2(0.0f, 0.0f);
+        Vector4 padding[3];
     } ColorData;
 
 private:

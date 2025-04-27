@@ -32,7 +32,7 @@ public:
 public:
 	bool bDirty = false;
 	int AttachDepth = 0;
-
+	Vector3 CachedEulerRotation;
 	
 
 private:
@@ -44,5 +44,6 @@ private:
 	shared_ptr<FTransform> WorldTransform;
 	shared_ptr<FTransform> RelativeTransform;
 	shared_ptr<ConstantBuffer> WorldConstantBuffer;
+	
 	
 };

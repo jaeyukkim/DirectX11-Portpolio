@@ -193,6 +193,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Frameworks\USkeletalMeshComponent.cpp" />
     <ClCompile Include="Light\ULightComponent.cpp" />
     <ClCompile Include="Manager\TickTaskManager.cpp" />
+    <ClCompile Include="MathLibrary\FTransform.cpp" />
     <ClCompile Include="Render\FSceneView.cpp" />
     <ClCompile Include="Render\Material.cpp" />
     <ClCompile Include="Frameworks\Skeletal.cpp" />
