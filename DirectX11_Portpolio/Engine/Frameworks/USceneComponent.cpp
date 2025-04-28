@@ -33,7 +33,7 @@ void USceneComponent::TickComponent(float deltaTime)
 }
 
 
-void USceneComponent::RenderComponent()
+void USceneComponent::RenderComponent(bool bUsePreRender)
 {
 	WorldConstantBuffer->UpdateConstBuffer();
 	WorldConstantBuffer->VSSetConstantBuffer(EConstBufferSlot::World, 1);

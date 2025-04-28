@@ -34,7 +34,7 @@ void SkeletalMesh::BindRenderStage()
 }
 
 
-void SkeletalMesh::Render()
+void SkeletalMesh::Render(bool bUsePreRender)
 {
 	Super::Render();
 	

@@ -12,7 +12,7 @@ public:
 
 	
 	virtual void TickComponent(float deltaTime) override;
-	virtual void RenderComponent();
+	virtual void RenderComponent(bool bUsePreRender = false);
 
 public:
 	void SetUpAttachment(USceneComponent* InParent, const string& InSocketName = "");

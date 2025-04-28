@@ -14,14 +14,14 @@
 /**
  * @param InFileName StaticMesh의 바이너리 파일 이름
  */
-UStaticMeshComponent::UStaticMeshComponent(wstring InFileName)
+UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, bool bOverwirte)
 {
 
 	wstring objectName = InFileName;
 	InFileName = L"../Contents/_Objects/" + objectName + L".model";
 
 
-	if (!filesystem::exists(InFileName))
+	if (bOverwirte)
 	{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadFile(objectName + L"/" + objectName + L".fbx");
@@ -68,6 +68,19 @@ Material* UStaticMeshComponent::GetMaterial(string InMaterialName)
 	return nullptr;
 }
 
+void UStaticMeshComponent::ReverseIndices()
+{
+	for (auto& mesh : m_Mesh)
+	{
+		for (UINT i = 0; i < mesh->IndexCount; i += 3)
+		{
+			std::swap(mesh->Indices[i + 1], mesh->Indices[i + 2]);
+		}
+		mesh->CreateBuffer();
+	}
+
+}
+
 
 void UStaticMeshComponent::TickComponent(float deltaTime)
 {
@@ -87,15 +100,20 @@ void UStaticMeshComponent::TickComponent(float deltaTime)
 /**
  * InitRenderer 완료되었으면 호출 가능
  */
-void UStaticMeshComponent::RenderComponent()
+void UStaticMeshComponent::RenderComponent(bool bUsePreRender)
 {
-	Super::RenderComponent();
+	Super::RenderComponent(bUsePreRender);
 
 	/*for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
 	{
 		meshPtr->Render();
 	}*/
-	m_Mesh[0]->Render();
+	m_Mesh[0]->Render(bUsePreRender);
+}
+
+void UStaticMeshComponent::DrawComponentIndex()
+{
+	m_Mesh[0]->DrawIndexed();
 }
 
 

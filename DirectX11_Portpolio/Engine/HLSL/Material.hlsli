@@ -7,7 +7,9 @@
 #define MATERIAL_TEXTURE_NORMAL 2
 #define MAX_MATERIAL_TEXTURE_COUNT 3
 
-Texture2D MaterialMaps[MAX_MATERIAL_TEXTURE_COUNT]  : register(t0);
+TextureCube textureCube : register(t0);
+Texture2D MaterialMaps[MAX_MATERIAL_TEXTURE_COUNT]  : register(t6);
+
 SamplerState g_sampler : register(s0);
 
 struct MaterialDesc

@@ -21,7 +21,7 @@ public:
     virtual ~SkeletalMesh();
 
     virtual void Tick() override;
-    virtual void Render() override;
+    virtual void Render(bool bUsePreRender = false) override;
 
 private:
     virtual void SetWorld(const FTransform* InTransform) override;

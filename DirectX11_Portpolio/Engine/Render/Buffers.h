@@ -9,7 +9,12 @@ enum class EConstBufferSlot : UINT8
 	Bone = 3,
 	MaterialTex = 4,
 	LightMap = 5,
-	LightCnt = 6
+	LightCnt = 6,
+};
+enum class EShaderResourceSlot : UINT8
+{
+	CubeMapTexture = 0,
+	MaterialTexture = 6
 };
 
 

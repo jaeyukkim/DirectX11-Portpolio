@@ -8,17 +8,19 @@ class Material;
 class UStaticMeshComponent : public UPrimitiveComponent
 {
 public:
-    UStaticMeshComponent(wstring InFileName);
+    UStaticMeshComponent(wstring InFileName, bool bOverwirte = false);
     virtual ~UStaticMeshComponent() = default;
 
 public:
     virtual void TickComponent(float deltaTime) override;
-    virtual void RenderComponent() override;
-
+    virtual void RenderComponent(bool bUsePreRender = false) override;
+    virtual void DrawComponentIndex();
 public:
     void InitRenderer();
-    Material* GetMaterial(string InMaterialName);
+    void ReverseIndices();
 
+    Material* GetMaterial(string InMaterialName);
+    
 private:
 
     void ReadFile(wstring InFileName);

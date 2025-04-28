@@ -12,17 +12,7 @@ cbuffer CB_ModelBones : register(b3)
 };
 
 
-struct VertexShaderInput
-{
-    float3 posModel : POSITION; //모델 좌표계의 위치 position
-    float2 texCoord : TEXCOORD; // <- 다음 예제에서 사용
-    float4 modelColor : COLOR;
-    float3 modelNormal : NORMAL; // 모델 좌표계의 normal    
-    float3 tangent : TANGENT;
-    float4 blendIndicies : BLENDINDICES;
-    float4 blendWeight : BLENDWEIGHTS;
 
-};
 
 VertexOutput VS_Main(VertexShaderInput input)
 {

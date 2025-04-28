@@ -69,13 +69,13 @@ void USkeletalMeshComponent::TickComponent(float deltaTime)
 }
 
 
-void USkeletalMeshComponent::RenderComponent()
+void USkeletalMeshComponent::RenderComponent(bool bUsePreRender)
 {
-	Super::RenderComponent();
+	Super::RenderComponent(bUsePreRender);
 
 	for (const shared_ptr<SkeletalMesh>& meshPtr : SkeletalMeshes)
 	{
-		meshPtr->Render();
+		meshPtr->Render(bUsePreRender);
 	}
 }
 

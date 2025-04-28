@@ -16,12 +16,13 @@ public:
 
 public:
     virtual void Tick();
-    virtual void Render();
+    virtual void Render(bool bUsePreRender = false);
+    virtual void DrawIndexed();
 
 protected:
     virtual void SetWorld(const FTransform* InTransform);
-    virtual void CreateBuffer();
     virtual void BindRenderStage();
+    virtual void CreateBuffer();
 
 private:
     static void ReadFile(BinaryReader* InReader,

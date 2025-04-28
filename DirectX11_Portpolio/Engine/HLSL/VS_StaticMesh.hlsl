@@ -1,13 +1,6 @@
 #include "Common.hlsli"
 
-struct StaticMeshInput
-{
-    float4 posObject : POSITION; // 오브젝트의 정점 position
-    float2 texCoord : TEXCOORD; // 텍스쳐 uv 좌표
-    float4 ObjectColor : COLOR;
-    float3 ObjectNormal : NORMAL; // 오브젝트의 정점의 normal    
-    float3 tangent : TANGENT;
-};
+
 
 VertexOutput VS_Main(StaticMeshInput input)
 {

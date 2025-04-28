@@ -39,7 +39,7 @@ public:
     Shader* GetRenderer() const { return Renderer.get(); }
     ConstantBuffer* GetConstantBuffer() const { return ColorConstantBuffer.get(); }
     const D3D11_SAMPLER_DESC& GetSamplerDesc() const { return SampDesc;  }
-
+    ID3D11ShaderResourceView* GetSRV(int materialType);
 
 public:
     void SetUVTiling(Vector2 InUV_Tiling);

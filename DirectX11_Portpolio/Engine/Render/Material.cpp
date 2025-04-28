@@ -24,7 +24,8 @@ void Material::Render()
 	
 	GetConstantBuffer()->UpdateConstBuffer();
 	GetConstantBuffer()->PSSetConstantBuffer(EConstBufferSlot::MaterialDesc, 1);
-	D3D::Get()->GetDeviceContext()->PSSetShaderResources(0, MAX_MATERIAL_TEXTURE_COUNT, SRVs->GetAddressOf());
+	D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::MaterialTexture),
+		MAX_MATERIAL_TEXTURE_COUNT, SRVs->GetAddressOf());
 	
 }
 
@@ -104,6 +105,12 @@ void Material::SetNormalMap(wstring InFilePath)
 
 	// Shader Resource View 설정
 	SRVs[MATERIAL_TEXTURE_NORMAL] = Textures[MATERIAL_TEXTURE_NORMAL]->GetSRV();
+}
+
+ID3D11ShaderResourceView* Material::GetSRV(int materialType)
+{
+	if(SRVs[materialType] != nullptr)
+		return SRVs[materialType].Get();
 }
 
 void Material::SetUVTiling(Vector2 InUV_Tiling)

@@ -28,9 +28,9 @@ void ULightComponent::TickComponent(float deltaTime)
     FSceneView::Get()->UpdateLightMap(LightInfo);
 }
 
-void ULightComponent::RenderComponent()
+void ULightComponent::RenderComponent(bool bUsePreRender)
 {
-	Super::RenderComponent();
+	Super::RenderComponent(bUsePreRender);
 }
 
  

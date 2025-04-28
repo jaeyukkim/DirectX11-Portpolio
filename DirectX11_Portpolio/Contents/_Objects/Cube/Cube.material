@@ -5,10 +5,10 @@
       "DiffuseMap" : "",
       "Emissive" : "0.800000,0.800000,0.800000,1.000000",
       "NormalMap" : "",
-      "PixelShaderPath" : "../Engine/HLSL/PS_StaticMesh.hlsl",
+      "PixelShaderPath" : "../Engine/HLSL/PS_CubeMap.hlsl",
       "Specular" : "0.800000,0.800000,0.800000,1.000000",
       "SpecularMap" : "",
-      "VertexShaderPath" : "../Engine/HLSL/VS_StaticMesh.hlsl"
+      "VertexShaderPath" : "../Engine/HLSL/VS_CubeMap.hlsl"
    },
    "Fbx Default Material" : {
       "Ambient" : "0.200000,0.200000,0.200000,1.000000",
@@ -16,9 +16,9 @@
       "DiffuseMap" : "",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "NormalMap" : "",
-      "PixelShaderPath" : "../Engine/HLSL/PS_StaticMesh.hlsl",
+      "PixelShaderPath" : "../Engine/HLSL/PS_CubeMap.hlsl",
       "Specular" : "0.720000,0.720000,0.720000,1.000000",
       "SpecularMap" : "",
-      "VertexShaderPath" : "../Engine/HLSL/VS_StaticMesh.hlsl"
+      "VertexShaderPath" : "../Engine/HLSL/VS_CubeMap.hlsl"
    }
 }
