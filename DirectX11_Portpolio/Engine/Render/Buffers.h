@@ -8,8 +8,9 @@ enum class EConstBufferSlot : UINT8
 	ViewContext = 2,
 	Bone = 3,
 	MaterialTex = 4,
-	LightMap = 5,
-	LightCnt = 6,
+	LightCnt = 5,
+	ImageFilterData = 6,
+	LightMap = 12,
 };
 enum class EShaderResourceSlot : UINT8
 {

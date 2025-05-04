@@ -12,14 +12,14 @@
 /**
  * @param InFileName SkeletalMesh의 바이너리 파일 이름
  */
-USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName)
+USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, bool bOverwrite)
 {
 	
 	wstring objectName = InFileName;
 	InFileName = L"../Contents/_Models/" + objectName + L".model";
 
 	
-	if (!filesystem::exists(InFileName))
+	if (bOverwrite)
 	{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadFile(objectName + L"/" + objectName + L".fbx");
@@ -36,22 +36,14 @@ USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName)
  */
 void USkeletalMeshComponent::InitRenderer() const
 {
-	vector<D3D11_INPUT_ELEMENT_DESC> inputElements =
-	{
-		{ "POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 0,   D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
-		{ "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,        0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 8 bytes
-		{ "COLOR",        0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 20,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 16 bytes
-		{ "NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 36,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
-		{ "TANGENT",      0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 48,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
-		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 60,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 16 bytes
-		{ "BLENDWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 76,  D3D11_INPUT_PER_VERTEX_DATA, 0 }   // 16 bytes
-	};
+	
 
 
 	
 	for (const shared_ptr<SkeletalMesh>& meshPtr : SkeletalMeshes)
 	{
-		meshPtr->MaterialData->GetRenderer()->InitRenderer(inputElements, meshPtr->MaterialData->GetSamplerDesc());
+		meshPtr->MaterialData->GetRenderer()->InitRenderer(InputElementCollection::SkeletalMeshInputElement, 
+																								meshPtr->MaterialData->GetSamplerDesc());
 	}
 }
 
@@ -170,10 +162,10 @@ void USkeletalMeshComponent::ReadMaterial(wstring InFilePath)
 		// 8.2 현재 머티리얼의 데이터 가져오기
 		Json::Value value = root[name];
 
-		// 8.3 셰이더(Shader) 이름이 존재하는 경우, 셰이더 설정
-		if (value["VertexShaderPath"].asString().size() > 0)
+		// 8.3 셰이더(Shader) 이름이 존재하는 경우 설정
+		if (value["VertexShaderPath"].asString().size() >= 0)
 			material->GetRenderer()->SetVertexShaderPath(String::ToWString(value["VertexShaderPath"].asString()));
-		if (value["PixelShaderPath"].asString().size() > 0)
+		if (value["PixelShaderPath"].asString().size() >= 0)
 			material->GetRenderer()->SetPixelShaderPath(String::ToWString(value["PixelShaderPath"].asString()));
 
 		
@@ -182,6 +174,7 @@ void USkeletalMeshComponent::ReadMaterial(wstring InFilePath)
 		material->SetDiffuse(JsonStringToColor(value["Diffuse"].asString()));
 		material->SetSpecular(JsonStringToColor(value["Specular"].asString()));
 		material->SetEmissive(JsonStringToColor(value["Emissive"].asString()));
+		material->SetShininess(stof(value["Shininess"].asString()));
 
 		// 8.5 텍스처(DiffuseMap) 설정
 		if (value["DiffuseMap"].asString().size() > 0)

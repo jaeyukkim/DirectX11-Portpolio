@@ -6,7 +6,9 @@
 float4 PS_Main(VertexOutput input) : SV_TARGET
 {
 
-    return textureCube.Sample(g_sampler, input.posProj.xyz);
+   float3 viewDir = normalize(input.posWorld - EyePos);
+   float3 ambient = textureCube[MATERIAL_TEXTURE_Ambient].Sample(g_sampler, viewDir);
 
-    //return float4(0.0f, 0.5f, 0.5f, 1.0f);
+
+   return float4(ambient, 1.0f);
 }

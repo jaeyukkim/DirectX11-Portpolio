@@ -7,6 +7,12 @@
 ComPtr<ID3D11DepthStencilState> Shader::DefaultDepthStencilState = nullptr;
 
 
+Shader::Shader(wstring VSPath, wstring PSPath)
+{
+    SetVertexShaderPath(VSPath);
+    SetPixelShaderPath(PSPath);
+}
+
 void Shader::InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements, const D3D11_SAMPLER_DESC& InSamplerDesc)
 {
     CompileVertexShader();
@@ -84,7 +90,7 @@ void Shader::Assert_IF_FailedCompile(HRESULT hr)
 void Shader::CreateInputLayout(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements)
 {
    
-    HRESULT hr = D3D::Get()->GetDevice()->CreateInputLayout(&InInputElements[0], UINT(InInputElements.size()),
+    HRESULT hr = D3D::Get()->GetDevice()->CreateInputLayout(InInputElements.data(), UINT(InInputElements.size()),
         VsBlob->GetBufferPointer(), VsBlob->GetBufferSize(), &InputLayouts);
 
     FAILED(hr);
@@ -99,7 +105,6 @@ void Shader::CreateSamplerState(const D3D11_SAMPLER_DESC& InSamplerDesc)
 
 void Shader::Bind() const
 {
-    
     D3D::Get()->GetDeviceContext()->IASetInputLayout(InputLayouts.Get());
     D3D::Get()->GetDeviceContext()->VSSetShader(VertexShader.Get(), nullptr, 0);
     D3D::Get()->GetDeviceContext()->PSSetShader(PixelShader.Get(), nullptr, 0);

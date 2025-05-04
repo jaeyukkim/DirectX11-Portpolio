@@ -1,11 +1,13 @@
 {
    "kachujin_MAT" : {
-      "Ambient" : "0.000000,0.000000,0.000000,1.000000",
+      "Ambient" : "0.000000,0.000000,0.000000,0.000000",
+      "AmbientMap" : "",
       "Diffuse" : "0.800000,0.800000,0.800000,1.000000",
       "DiffuseMap" : "../Contents/_Models/Kachujin/Kachujin_diffuse.png",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "NormalMap" : "../Contents/_Models/Kachujin/Kachujin_normal.png",
       "PixelShaderPath" : "../Engine/HLSL/PS_SkeletalMesh.hlsl",
+      "Shininess" : "20.00000",
       "Specular" : "0.500000,0.500000,0.500000,20.000000",
       "SpecularMap" : "../Contents/_Models/Kachujin/Kachujin_specular.png",
       "VertexShaderPath" : "../Engine/HLSL/VS_SkeletalMesh.hlsl"

@@ -25,12 +25,12 @@ struct Light
 };
 
 
-cbuffer CBLightCnt : register(b6)
+cbuffer CBLightCnt : register(b5)
 {
     int LightCnt;
 }
 
-StructuredBuffer<Light> lights : register(t5);
+StructuredBuffer<Light> lights : register(t12);
 
 
 float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal,

@@ -9,6 +9,7 @@ VertexOutput VS_Main(StaticMeshInput input)
 
 
     float4 posWorld = mul(input.posObject, World);
+    output.posWorld = posWorld.xyz;
     output.posProj = mul(posWorld, ViewProjection);
 
     return output;

@@ -1,0 +1,70 @@
+#include "HeaderCollection.h"
+#include "VertexData.h"
+#include "ImageFilter.h"
+
+ImageFilter::ImageFilter(wstring VSPath, wstring PSPath)
+{
+    Initialize(VSPath, PSPath);
+}
+
+void ImageFilter::Initialize(wstring VSPath, wstring PSPath)
+{
+    renderer = make_shared<Shader>(VSPath, PSPath);
+    renderer->InitRenderer(InputElementCollection::basicInputElement, SamplerDescCollection::GetDefaultSamplerDesc());
+ 
+    ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
+    m_viewport.TopLeftX = 0;
+    m_viewport.TopLeftY = 0;
+    m_viewport.Width = D3D::GetDesc().Width;
+    m_viewport.Height = D3D::GetDesc().Height;
+    m_viewport.MinDepth = 0.0f;
+    m_viewport.MaxDepth = 1.0f;
+
+    FilterData.dx = 1.0f / m_viewport.Width;
+    FilterData.dy = 1.0f / m_viewport.Height;
+
+    CBuffer = make_shared<ConstantBuffer>(&FilterData, sizeof(FilterData));
+   
+}
+
+void ImageFilter::UpdateConstantBuffers() 
+{
+    CBuffer->UpdateConstBuffer();
+}
+
+void ImageFilter::DrawIndexed(UINT IndexCount) const
+{
+
+    Assert(SRV.size() > 0, "SRV가 없습니다");
+    Assert(RTV.size() > 0, "RTV가 없습니다");
+
+    D3D::Get()->GetDeviceContext()->RSSetViewports(1, &m_viewport);
+    D3D::Get()->GetDeviceContext()->OMSetRenderTargets(UINT(RTV.size()), RTV.data(), NULL);
+
+    renderer->Bind();
+
+    D3D::Get()->GetDeviceContext()->PSSetShaderResources(0, UINT(SRV.size()), SRV.data());
+    CBuffer->PSSetConstantBuffer(EConstBufferSlot::ImageFilterData, 1);
+    renderer->DrawIndexed(IndexCount);
+}
+
+void ImageFilter::SetShaderResources(const vector<ComPtr<ID3D11ShaderResourceView>>& resources) 
+{
+    SRV.clear();
+
+    for (const auto& res : resources) 
+    {
+        SRV.push_back(res.Get());
+    }
+}
+
+void ImageFilter::SetRenderTargets(const vector<ComPtr<ID3D11RenderTargetView>>& targets) 
+{
+
+    RTV.clear();
+
+    for (const auto& tar : targets) 
+    {
+        RTV.push_back(tar.Get());
+    }
+}

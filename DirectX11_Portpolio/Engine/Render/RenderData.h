@@ -13,7 +13,9 @@ struct MaterialData
     Color Diffuse;
     Color Specular;
     Color Emissive;
+    float Shininess;
 
+    string AmbientFile;
     string DiffuseFile;
     string SpecularFile;
     string NormalFile;

@@ -1,23 +1,14 @@
 {
-   "DefaultMaterial" : {
-      "Ambient" : "0.000000,0.000000,0.000000,0.000000",
-      "Diffuse" : "0.800000,0.800000,0.800000,1.000000",
-      "DiffuseMap" : "",
-      "Emissive" : "0.800000,0.800000,0.800000,1.000000",
-      "NormalMap" : "",
-      "PixelShaderPath" : "../Engine/HLSL/PS_CubeMap.hlsl",
-      "Specular" : "0.800000,0.800000,0.800000,1.000000",
-      "SpecularMap" : "",
-      "VertexShaderPath" : "../Engine/HLSL/VS_CubeMap.hlsl"
-   },
-   "Fbx Default Material" : {
-      "Ambient" : "0.200000,0.200000,0.200000,1.000000",
-      "Diffuse" : "0.720000,0.720000,0.720000,1.000000",
+   "WorldGridMaterial" : {
+      "Ambient" : "0.000000,0.000000,0.000000,1.000000",
+      "AmbientMap" : "",
+      "Diffuse" : "0.215861,0.215861,0.215861,1.000000",
       "DiffuseMap" : "",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
+      "Shininess" : "0.2",
       "NormalMap" : "",
       "PixelShaderPath" : "../Engine/HLSL/PS_CubeMap.hlsl",
-      "Specular" : "0.720000,0.720000,0.720000,1.000000",
+      "Specular" : "0.200000,0.200000,0.200000,20.000000",
       "SpecularMap" : "",
       "VertexShaderPath" : "../Engine/HLSL/VS_CubeMap.hlsl"
    }

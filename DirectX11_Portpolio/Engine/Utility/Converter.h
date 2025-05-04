@@ -23,7 +23,7 @@ public:
 
 
     string ColorToJson(const Color& InColor);
-
+    string FloatToJson(const float val);
 
 private:
     void ReadMaterials(EMeshType InMeshType);

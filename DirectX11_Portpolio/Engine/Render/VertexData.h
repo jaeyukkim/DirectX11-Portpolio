@@ -89,3 +89,44 @@ struct VertexObject
     Vector3 Normal;
     Vector3 Tangent;
 };
+
+class InputElementCollection
+{
+public:
+
+    inline static vector<D3D11_INPUT_ELEMENT_DESC> basicInputElement =
+    {
+        { "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,   D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,       0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",     0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 36,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TANGENT",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 48,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+    inline static vector<D3D11_INPUT_ELEMENT_DESC> SkeletalMeshInputElement =
+    {
+        { "POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 0,   D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
+        { "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,        0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 8 bytes
+        { "COLOR",        0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 20,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 16 bytes
+        { "NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 36,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
+        { "TANGENT",      0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 48,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
+        { "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 60,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 16 bytes
+        { "BLENDWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 76,  D3D11_INPUT_PER_VERTEX_DATA, 0 }   // 16 bytes
+    };
+};
+
+
+class SamplerDescCollection
+{
+public:
+    static D3D11_SAMPLER_DESC GetDefaultSamplerDesc()
+    {
+        D3D11_SAMPLER_DESC desc = {};
+        desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        desc.AddressU = desc.AddressV = desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+        desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+        desc.MinLOD = 0;
+        desc.MaxLOD = D3D11_FLOAT32_MAX;
+        return desc;
+    }
+};

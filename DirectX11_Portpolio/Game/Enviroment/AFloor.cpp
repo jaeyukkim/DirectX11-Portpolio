@@ -9,11 +9,10 @@ AFloor::AFloor()
 	floor = CreateComponent<UStaticMeshComponent>(this, L"Floor");
 	SetRootComponent(floor.get());
 	
-	Material* grid = floor->GetMaterial("WorldGridMaterial");
-	CheckNull(grid);
-	
-	grid->SetUVTiling(Vector2(10.0f, 10.0f));
-
+	for (Material* grid : floor->GetAllMaterials())
+	{
+		grid->SetUVTiling(Vector2(10.0f, 10.0f));
+	}
 	
 }
 

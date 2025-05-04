@@ -105,7 +105,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
@@ -155,9 +155,12 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Light\ULightComponent.h" />
     <ClInclude Include="Manager\TickTaskManager.h" />
     <ClInclude Include="Render\FSceneView.h" />
+    <ClInclude Include="Render\Geometry.h" />
+    <ClInclude Include="Render\ImageFilter.h" />
     <ClInclude Include="Render\Material.h" />
     <ClInclude Include="Frameworks\Skeletal.h" />
     <ClInclude Include="Frameworks\SkeletalMesh.h" />
+    <ClInclude Include="Render\PostProcess.h" />
     <ClInclude Include="Render\Texture.h" />
     <ClInclude Include="HeaderCollection.h" />
     <ClInclude Include="MathLibrary\FTransform.h" />
@@ -195,9 +198,12 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Manager\TickTaskManager.cpp" />
     <ClCompile Include="MathLibrary\FTransform.cpp" />
     <ClCompile Include="Render\FSceneView.cpp" />
+    <ClCompile Include="Render\Geometry.cpp" />
+    <ClCompile Include="Render\ImageFilter.cpp" />
     <ClCompile Include="Render\Material.cpp" />
     <ClCompile Include="Frameworks\Skeletal.cpp" />
     <ClCompile Include="Frameworks\SkeletalMesh.cpp" />
+    <ClCompile Include="Render\PostProcess.cpp" />
     <ClCompile Include="Render\Texture.cpp" />
     <ClCompile Include="HeaderCollection.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -218,7 +224,39 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Utility\String.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="HLSL\PS_BloomDown.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="HLSL\PS_BloomUp.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Main</EntryPointName>
+    </FxCompile>
+    <FxCompile Include="HLSL\PS_Combine.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="HLSL\PS_CubeMap.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="HLSL\PS_Sampling.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -244,6 +282,14 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="HLSL\VS_CubeMap.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="HLSL\VS_Sampling.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>

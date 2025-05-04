@@ -8,7 +8,7 @@ class Material;
 class UStaticMeshComponent : public UPrimitiveComponent
 {
 public:
-    UStaticMeshComponent(wstring InFileName, bool bOverwirte = false);
+    UStaticMeshComponent(wstring InFileName, bool bOverwrite = false);
     virtual ~UStaticMeshComponent() = default;
 
 public:
@@ -19,7 +19,7 @@ public:
     void InitRenderer();
     void ReverseIndices();
 
-    Material* GetMaterial(string InMaterialName);
+    vector<Material*> GetAllMaterials();
     
 private:
 

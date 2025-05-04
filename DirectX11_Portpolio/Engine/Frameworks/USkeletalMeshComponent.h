@@ -8,7 +8,7 @@
 class USkeletalMeshComponent : public UPrimitiveComponent
 {
 public:
-    USkeletalMeshComponent(wstring InFileName);
+    USkeletalMeshComponent(wstring InFileName, bool bOverwrite = false);
     virtual ~USkeletalMeshComponent() = default;
 
 public:

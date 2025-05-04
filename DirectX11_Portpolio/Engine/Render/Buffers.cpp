@@ -67,8 +67,6 @@ void VertexBuffer::UpdateVertexBuffer()
 void VertexBuffer::IASetVertexBuffer()
 {
 	UINT offset = 0;
-	
-
 	D3D::Get()->GetDeviceContext()->IASetVertexBuffers(Slot, 1, Buffer.GetAddressOf(), &Stride, &offset);
 }
 

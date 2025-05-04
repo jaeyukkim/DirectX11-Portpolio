@@ -64,3 +64,5 @@ void Skeletal::ReadFile(BinaryReader* InReader, vector<shared_ptr<Skeletal>>& Ou
         bone->Parent->Children.push_back(bone);
     }
 }
+
+

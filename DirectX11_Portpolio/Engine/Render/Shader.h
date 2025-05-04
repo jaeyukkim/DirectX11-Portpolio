@@ -5,6 +5,7 @@ class Shader
 public:
     Shader() = default;
     ~Shader() = default;
+    Shader(wstring VSPath, wstring PSPath);
     
     void InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements,
         const D3D11_SAMPLER_DESC& InSamplerDesc);

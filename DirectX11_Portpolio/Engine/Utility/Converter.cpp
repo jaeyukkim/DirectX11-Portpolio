@@ -85,8 +85,14 @@ void Converter::ReadMaterials(EMeshType InMeshType)
 		material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
 		data->Emissive = Color(color.r, color.g, color.b, color.a);
 
+		float value;
+		material->Get(AI_MATKEY_SHININESS, value);
+		data->Shininess = value;
 
 		aiString textureFile;
+
+		material->GetTexture(aiTextureType_AMBIENT, 0, &textureFile);
+		data->AmbientFile = textureFile.C_Str();
 		
 		material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFile);
 		data->DiffuseFile = textureFile.C_Str();
@@ -129,6 +135,8 @@ void Converter::WriteMaterial(wstring InSaveFileName, bool InOverwrite)
 		value["Diffuse"] = ColorToJson(data->Diffuse);
 		value["Specular"] = ColorToJson(data->Specular);
 		value["Emissive"] = ColorToJson(data->Emissive);
+		value["Shininess"] = FloatToJson(data->Shininess);
+		value["AmbientMap"] = SaveTexture(folderName, data->AmbientFile);
 		value["DiffuseMap"] = SaveTexture(folderName, data->DiffuseFile);
 		value["SpecularMap"] = SaveTexture(folderName, data->SpecularFile);
 		value["NormalMap"] = SaveTexture(folderName, data->NormalFile);
@@ -152,6 +160,11 @@ void Converter::WriteMaterial(wstring InSaveFileName, bool InOverwrite)
 string Converter::ColorToJson(const Color& InColor)
 {
 	return String::Format("%f,%f,%f,%f", InColor.x, InColor.y, InColor.z, InColor.w);
+}
+
+string Converter::FloatToJson(const float val)
+{
+	return String::Format("%f", val);
 }
 
 string Converter::SaveTexture(string InSaveFolder, string InFileName)

@@ -14,14 +14,14 @@
 /**
  * @param InFileName StaticMesh의 바이너리 파일 이름
  */
-UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, bool bOverwirte)
+UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, bool bOverwrite)
 {
 
 	wstring objectName = InFileName;
 	InFileName = L"../Contents/_Objects/" + objectName + L".model";
 
 
-	if (bOverwirte)
+	if (bOverwrite)
 	{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadFile(objectName + L"/" + objectName + L".fbx");
@@ -37,35 +37,29 @@ UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, bool bOverwirte)
  */
 void UStaticMeshComponent::InitRenderer()
 {
-	vector<D3D11_INPUT_ELEMENT_DESC> inputElements =
-	{
-		{ "POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 0,   D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
-		{ "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,        0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 8 bytes
-		{ "COLOR",        0, DXGI_FORMAT_R32G32B32A32_FLOAT,  0, 20,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 16 bytes
-		{ "NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 36,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
-		{ "TANGENT",      0, DXGI_FORMAT_R32G32B32_FLOAT,     0, 48,  D3D11_INPUT_PER_VERTEX_DATA, 0 },   // 12 bytes
-	};
-
+	
 	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
 	{
-		meshPtr->MaterialData->GetRenderer()->InitRenderer(inputElements, meshPtr->MaterialData->GetSamplerDesc());
+		meshPtr->MaterialData->GetRenderer()->InitRenderer(InputElementCollection::basicInputElement, meshPtr->MaterialData->GetSamplerDesc());
 	}
 
 	bInitRenderComplete = true;
 }
 
 /**
-* @param InMaterialName : 찾을 머터리얼 키 네임
+*  모든 메터리얼 반환
 */
-Material* UStaticMeshComponent::GetMaterial(string InMaterialName)
+vector<Material*> UStaticMeshComponent::GetAllMaterials()
 {
-	auto it = MaterialTable.find(InMaterialName);
-	if (it != MaterialTable.end())
+	vector<Material*> result;
+
+	for (auto& [name, matPtr] : MaterialTable)
 	{
-		return it->second.get();
+		if (matPtr)
+			result.push_back(matPtr.get());
 	}
 
-	return nullptr;
+	return result;
 }
 
 void UStaticMeshComponent::ReverseIndices()
@@ -86,15 +80,14 @@ void UStaticMeshComponent::TickComponent(float deltaTime)
 {
 	Super::TickComponent(deltaTime);
 
-	/*
+	
 	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
 	{
-		meshPtr->SetWorld(GetTransform());
+		meshPtr->SetWorld(GetWorldTransform());
 		meshPtr->Tick();
 	}
-	*/
-	m_Mesh[0]->SetWorld(GetWorldTransform());
-	m_Mesh[0]->Tick();
+	
+	
 }
 
 /**
@@ -104,16 +97,20 @@ void UStaticMeshComponent::RenderComponent(bool bUsePreRender)
 {
 	Super::RenderComponent(bUsePreRender);
 
-	/*for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
+	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
 	{
-		meshPtr->Render();
-	}*/
-	m_Mesh[0]->Render(bUsePreRender);
+		meshPtr->Render(bUsePreRender);
+	}
+	
 }
 
 void UStaticMeshComponent::DrawComponentIndex()
 {
-	m_Mesh[0]->DrawIndexed();
+	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
+	{
+		meshPtr->DrawIndexed();
+	}
+	
 }
 
 
@@ -225,6 +222,11 @@ void UStaticMeshComponent::ReadMaterial(wstring InFilePath)
 		material->SetDiffuse(JsonStringToColor(value["Diffuse"].asString()));
 		material->SetSpecular(JsonStringToColor(value["Specular"].asString()));
 		material->SetEmissive(JsonStringToColor(value["Emissive"].asString()));
+		material->SetShininess(stof(value["Shininess"].asString()));
+
+		// 8.5 텍스처(DiffuseMap) 설정
+		if (value["AmbientMap"].asString().size() > 0)
+			material->SetAmbientMap(String::ToWString(value["AmbientMap"].asString()));
 
 		// 8.5 텍스처(DiffuseMap) 설정
 		if (value["DiffuseMap"].asString().size() > 0)

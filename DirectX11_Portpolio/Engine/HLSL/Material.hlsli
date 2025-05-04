@@ -1,13 +1,14 @@
 #ifndef __MATERIAL_HLSLI__
 #define __MATERIAL_HLSLI__
 
+#define MATERIAL_TEXTURE_Ambient 0
+#define MATERIAL_TEXTURE_Diffuse 1
+#define MATERIAL_TEXTURE_Specular 2
+#define MATERIAL_TEXTURE_NORMAL 3
+#define MAX_MATERIAL_TEXTURE_COUNT 4
+#define MAX_CUBEMAP_TEXTURE_COUNT 3
 
-#define MATERIAL_TEXTURE_Diffuse 0
-#define MATERIAL_TEXTURE_Specular 1
-#define MATERIAL_TEXTURE_NORMAL 2
-#define MAX_MATERIAL_TEXTURE_COUNT 3
-
-TextureCube textureCube : register(t0);
+TextureCube textureCube[MAX_CUBEMAP_TEXTURE_COUNT] : register(t0);
 Texture2D MaterialMaps[MAX_MATERIAL_TEXTURE_COUNT]  : register(t6);
 
 SamplerState g_sampler : register(s0);
@@ -18,6 +19,7 @@ struct MaterialDesc
     float4 Diffuse;
     float4 Specular;
     float4 Emissive;
+    float Shininess;
     float2 UV_Tiling;
     float2 UV_Offset;
 };
