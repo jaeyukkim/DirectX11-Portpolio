@@ -1,5 +1,7 @@
 #pragma once
 
+class PostProcess;
+
 struct D3DDesc
 {
 	wstring AppName;
@@ -34,6 +36,7 @@ private:
 	void CreateRTV();
 	void CreateViewport();
 	void CreateDSV();
+	void CreatePostProcess();
 
 private:
 	Color clearColor;
@@ -41,14 +44,16 @@ private:
 public:
 	ID3D11Device* GetDevice() { return Device.Get(); }
 	ID3D11DeviceContext* GetDeviceContext() { return DeviceContext.Get(); }
-
+	void RunPostProcess();
+	void SetFloatRTV();
 	void SetRenderTarget();
-	void ClearDepthStencilView();
-	void ClearRenderTargetView();
+	void ClearDSV();
+	void ClearRTV();
+	void ClearFloatRTV();
 	void Present();
 
 	void ResizeScreen(float InWidth, float InHeight);
-
+	
 private:
 	D3D();
 	~D3D();
@@ -70,4 +75,20 @@ private:
 
 	ComPtr<ID3D11Texture2D> DSV_Texture;
 	ComPtr<ID3D11DepthStencilView> DepthStencilView;
+
+private:
+	ComPtr<ID3D11Texture2D> FloatBuffer;
+	ComPtr<ID3D11ShaderResourceView> FloatSRV;
+	ComPtr<ID3D11RenderTargetView> FloatRTV;
+
+	ComPtr<ID3D11Texture2D> ResolvedBuffer;
+	ComPtr<ID3D11ShaderResourceView> ResolvedSRV;
+	ComPtr<ID3D11RenderTargetView> ResolvedRTV;
+	
+	unique_ptr<PostProcess> postProcess;
+
+private:
+	UINT NumQualityLevels = 0;
+	bool bUseMSAA = true;
+	
 };

@@ -13,7 +13,7 @@ Shader::Shader(wstring VSPath, wstring PSPath)
     SetPixelShaderPath(PSPath);
 }
 
-void Shader::InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements, const D3D11_SAMPLER_DESC& InSamplerDesc)
+void Shader::InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements, const D3D11_SAMPLER_DESC InSamplerDesc)
 {
     CompileVertexShader();
     CreateInputLayout(InInputElements);

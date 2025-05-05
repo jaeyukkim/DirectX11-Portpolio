@@ -1,18 +1,22 @@
 #pragma once
 
-class ImageFilter;
+#include "ImageFilter.h"
+
 class Geometry;
 class IndexBuffer;
 class VertexBuffer;
-
+struct StaticMeshData;
 
 class PostProcess 
 {
 public:
+    PostProcess(const vector<ComPtr<ID3D11ShaderResourceView>>& resources,
+        const vector<ComPtr<ID3D11RenderTargetView>>& targets);
+
     void Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& resources,
             const vector<ComPtr<ID3D11RenderTargetView>>& targets);
     void Render();
-    void CreateBuffer(ComPtr<ID3D11ShaderResourceView>& srv, ComPtr<ID3D11RenderTargetView>& rtv);
+    void CreateBuffer(ComPtr<ID3D11ShaderResourceView>& srv, ComPtr<ID3D11RenderTargetView>& rtv, int width, int height);
 
 public:
     ImageFilter CombineFilter;
@@ -30,9 +34,10 @@ private:
     vector<ComPtr<ID3D11RenderTargetView>> bloomRTVs;
 
 private:
-    const wstring VSPath = L"VS_Sampling.hlsl";
-    const wstring BloomDownPSPath = L"PS_BloomDown.hlsl";
-    const wstring BloomUpPSPath = L"PS_BloomUp.hlsl";
-    const wstring CombinePSPath = L"PS_Combine.hlsl";
+    
+    const wstring VSPath = L"../Engine/HLSL/VS_Sampling.hlsl";
+    const wstring BloomDownPSPath = L"../Engine/HLSL/PS_BloomDown.hlsl";
+    const wstring BloomUpPSPath = L"../Engine/HLSL/PS_BloomUp.hlsl";
+    const wstring CombinePSPath = L"../Engine/HLSL/PS_Combine.hlsl";
     const int BloomLevels = 4;
 };

@@ -2,12 +2,13 @@
 
 class ConstantBuffer;
 
-class ImageFilter {
+class ImageFilter 
+{
 public:
     ImageFilter() {};
-    ImageFilter(wstring VSPath, wstring PSPath);
+    ImageFilter(wstring VSPath, wstring PSPath, int width, int height);
 
-    void Initialize(wstring VSPath, wstring PSPath);
+    void Initialize(wstring VSPath, wstring PSPath,int width, int height);
     void UpdateConstantBuffers();
     void DrawIndexed(UINT IndexCount) const;
     void SetShaderResources(const vector<ComPtr<ID3D11ShaderResourceView>>& resources);

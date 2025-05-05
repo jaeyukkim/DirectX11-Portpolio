@@ -13,7 +13,7 @@ ALightActor::ALightActor()
 	DirectionalLightComp = CreateComponent<ULightComponent>(this, ELightType::Directional);
 
 	LightComp->CachedEulerRotation = GetActorTransform()->GetRotation();
-	DirectionalLightComp->GetLightInfo()->strength = Vector3(1.5f, 1.5f, 1.5f);
+	//DirectionalLightComp->GetLightInfo()->strength = Vector3(1.5f, 1.5f, 1.5f);
 
 
 }

@@ -1,4 +1,5 @@
 #include "HeaderCollection.h"
+#include "Render/PostProcess.h"
 #include "D3D.h"
 
 D3D* D3D::Instance = nullptr;
@@ -21,6 +22,7 @@ void D3D::Create()
 	Instance->CreateRTV();
 	Instance->CreateDSV();
 	Instance->CreateViewport();
+	Instance->CreatePostProcess();
 	Shader::CreateDefaultDepthStencilState();
 }
 
@@ -40,24 +42,41 @@ void D3D::SetDesc(const D3DDesc& InDesc)
 	D3dDesc = InDesc;
 }
 
+void D3D::RunPostProcess()
+{
+	DeviceContext->ResolveSubresource(ResolvedBuffer.Get(), 0,
+		FloatBuffer.Get(), 0, DXGI_FORMAT_R16G16B16A16_FLOAT);
+	postProcess->Render();
+}
+
+void D3D::SetFloatRTV()
+{
+	DeviceContext->OMSetRenderTargets(1, FloatRTV.GetAddressOf(), DepthStencilView.Get());
+}
+
 void D3D::SetRenderTarget()
 {
 	DeviceContext->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), DepthStencilView.Get());
 }
 
-void D3D::ClearDepthStencilView()
+void D3D::ClearDSV()
 {
-	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
-void D3D::ClearRenderTargetView()
+void D3D::ClearRTV()
 {
 	DeviceContext->ClearRenderTargetView(RenderTargetView.Get(), clearColor);
 }
 
+void D3D::ClearFloatRTV()
+{
+	DeviceContext->ClearRenderTargetView(FloatRTV.Get(), clearColor);
+}
+
 void D3D::Present()
 {
-	SwapChain->Present(0, 0);
+	SwapChain->Present(1, 0);
 }
 
 void D3D::ResizeScreen(float InWidth, float InHeight)
@@ -75,6 +94,7 @@ void D3D::ResizeScreen(float InWidth, float InHeight)
 	CreateRTV();
 	CreateViewport();
 	CreateDSV();
+	CreatePostProcess();
 
 	WinSizeChanged.Broadcast();
 }
@@ -102,19 +122,19 @@ void D3D::CreateDevice()
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 		desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		desc.RefreshRate.Numerator = 0;
+		desc.RefreshRate.Numerator = 200;
 		desc.RefreshRate.Denominator = 1;
-
+		
 
 		DXGI_SWAP_CHAIN_DESC swapChainDesc;
 		ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
 
 		swapChainDesc.BufferDesc = desc;
-		swapChainDesc.BufferCount = 1;
+		swapChainDesc.BufferCount = 2;
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapChainDesc.Windowed = true;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-
+		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 		swapChainDesc.SampleDesc.Count = 1;
 		swapChainDesc.SampleDesc.Quality = 0;
 
@@ -153,6 +173,40 @@ void D3D::CreateRTV()
 
 	assert(RenderTargetView != nullptr);
 
+	FAILED(Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R16G16B16A16_FLOAT, 4, &NumQualityLevels));
+
+	D3D11_TEXTURE2D_DESC desc;
+	backBuffer->GetDesc(&desc);
+	desc.MipLevels = desc.ArraySize = 1;
+	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	desc.Usage = D3D11_USAGE_DEFAULT; // 스테이징 텍스쳐로부터 복사 가능
+	desc.MiscFlags = 0;
+	desc.CPUAccessFlags = 0;
+
+	if (bUseMSAA && NumQualityLevels) 
+	{
+		desc.SampleDesc.Count = 4;
+		desc.SampleDesc.Quality = NumQualityLevels - 1;
+	}
+	else 
+	{
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+	}
+
+	// FLOAT MSAA 적용 된 RTV, SRV
+	FAILED(Device->CreateTexture2D(&desc, NULL, FloatBuffer.GetAddressOf()));
+	FAILED(Device->CreateShaderResourceView(FloatBuffer.Get(), NULL, FloatSRV.GetAddressOf()));
+	FAILED(Device->CreateRenderTargetView(FloatBuffer.Get(), NULL, FloatRTV.GetAddressOf()));
+
+
+	// FLOAT MSAA를 Relsolve해서 저장할 SRV/RTV
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	FAILED(Device->CreateTexture2D(&desc, NULL, ResolvedBuffer.GetAddressOf()));
+	FAILED(Device->CreateShaderResourceView(ResolvedBuffer.Get(), NULL, ResolvedSRV.GetAddressOf()));
+	FAILED(Device->CreateRenderTargetView(ResolvedBuffer.Get(), NULL, ResolvedRTV.GetAddressOf()));
 }
 
 void D3D::CreateViewport()
@@ -170,8 +224,7 @@ void D3D::CreateViewport()
 
 void D3D::CreateDSV()
 {
-	DXGI_FORMAT format = DXGI_FORMAT_D32_FLOAT;
-
+	DXGI_FORMAT format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 
 	//Create Texture - DSV
@@ -183,24 +236,46 @@ void D3D::CreateDSV()
 		desc.MipLevels = 1;
 		desc.ArraySize = 1;
 		desc.Format = format;
-		desc.SampleDesc.Count = 1;
-		desc.SampleDesc.Quality = 0;
 		desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = 0;
+
+		if (NumQualityLevels > 0)
+		{
+			desc.SampleDesc.Count = 4; 
+			desc.SampleDesc.Quality = NumQualityLevels - 1;
+		}
+		else 
+		{
+			desc.SampleDesc.Count = 1; 
+			desc.SampleDesc.Quality = 0;
+		}
 
 		Check(Device->CreateTexture2D(&desc, nullptr, DSV_Texture.GetAddressOf()));
 	}
 
+	
 	//Create DSV
 	{
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
 		ZeroMemory(&desc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
 		desc.Format = format;
-		desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		if (NumQualityLevels > 0)
+			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS; //  MSAA용
+		else
+			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 
 		Check(Device->CreateDepthStencilView(DSV_Texture.Get(), &desc, DepthStencilView.GetAddressOf()));
 	}
 
 	Shader::CreateDefaultDepthStencilState();
 	
+}
+
+void D3D::CreatePostProcess()
+{
+	postProcess = make_unique<PostProcess>(
+		vector<ComPtr<ID3D11ShaderResourceView>>{ ResolvedSRV },
+		vector<ComPtr<ID3D11RenderTargetView>>{ RenderTargetView });
 }

@@ -4,6 +4,7 @@
 #include "IExecutable.h"
 #include "Application.h"
 #include "Render/FSceneView.h"
+#include "Render/PostProcess.h"
 
 IExecutable* Application::Main = nullptr;
 
@@ -190,12 +191,14 @@ void Application::MainRender()
 	//Rendering
 	{
 		
-		D3D::Get()->SetRenderTarget();
-		D3D::Get()->ClearRenderTargetView();
-		D3D::Get()->ClearDepthStencilView();
+		D3D::Get()->ClearFloatRTV();
+		D3D::Get()->ClearRTV();
+		D3D::Get()->ClearDSV();
+		D3D::Get()->SetFloatRTV();
 		Shader::SetDefaultDepthStencilState();
 		FSceneView::Get()->PreRender();
 		Main->Render();
+		D3D::Get()->RunPostProcess();
 		Gui::Get()->Render();
 		D3D::Get()->Present();
 	}

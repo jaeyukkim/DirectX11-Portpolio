@@ -8,7 +8,7 @@ public:
     Shader(wstring VSPath, wstring PSPath);
     
     void InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements,
-        const D3D11_SAMPLER_DESC& InSamplerDesc);
+        const D3D11_SAMPLER_DESC InSamplerDesc);
     void Bind() const;
     void DrawIndexed(const int nIndex);
     

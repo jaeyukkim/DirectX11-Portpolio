@@ -2,21 +2,21 @@
 #include "VertexData.h"
 #include "ImageFilter.h"
 
-ImageFilter::ImageFilter(wstring VSPath, wstring PSPath)
+ImageFilter::ImageFilter(wstring VSPath, wstring PSPath, int width, int height)
 {
-    Initialize(VSPath, PSPath);
+    Initialize(VSPath, PSPath, width, height);
 }
 
-void ImageFilter::Initialize(wstring VSPath, wstring PSPath)
+void ImageFilter::Initialize(wstring VSPath, wstring PSPath, int width, int height)
 {
     renderer = make_shared<Shader>(VSPath, PSPath);
-    renderer->InitRenderer(InputElementCollection::basicInputElement, SamplerDescCollection::GetDefaultSamplerDesc());
+    renderer->InitRenderer(InputElementCollection::basicInputElement, SamplerDescCollection::GetBlurSamplerDesc());
  
     ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
     m_viewport.TopLeftX = 0;
     m_viewport.TopLeftY = 0;
-    m_viewport.Width = D3D::GetDesc().Width;
-    m_viewport.Height = D3D::GetDesc().Height;
+    m_viewport.Width = (float)width;
+    m_viewport.Height = (float)height;
     m_viewport.MinDepth = 0.0f;
     m_viewport.MaxDepth = 1.0f;
 
@@ -37,6 +37,7 @@ void ImageFilter::DrawIndexed(UINT IndexCount) const
 
     Assert(SRV.size() > 0, "SRV가 없습니다");
     Assert(RTV.size() > 0, "RTV가 없습니다");
+
 
     D3D::Get()->GetDeviceContext()->RSSetViewports(1, &m_viewport);
     D3D::Get()->GetDeviceContext()->OMSetRenderTargets(UINT(RTV.size()), RTV.data(), NULL);

@@ -1,33 +1,40 @@
 #include "HeaderCollection.h"
-#include "ImageFilter.h"
 #include "Geometry.h"
 #include "RenderData.h"
 #include "PostProcess.h"
 
 
+PostProcess::PostProcess(const vector<ComPtr<ID3D11ShaderResourceView>>& resources, const vector<ComPtr<ID3D11RenderTargetView>>& targets)
+{
+    Initialize(resources, targets);
+}
+
 void PostProcess::Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& resources,
                                             const vector<ComPtr<ID3D11RenderTargetView>>& targets) 
 {
+    
     MeshData = make_shared<StaticMeshData>(Geometry::MakeSquare());
     VBuffer = make_shared<VertexBuffer>(MeshData->Vertices.data(), MeshData->Vertices.size(), sizeof(VertexObject));
     IdxCount = MeshData->Indices.size();
     IBuffer = make_shared<IndexBuffer>(MeshData->Indices.data(), IdxCount);
     
 
+    int width = D3D::GetDesc().Width;
+    int height = D3D::GetDesc().Height;
     bloomSRVs.resize(BloomLevels);
     bloomRTVs.resize(BloomLevels);
 
     for (int i = 0; i < BloomLevels; i++) 
     {
         int div = int(pow(2, i));
-        CreateBuffer(bloomSRVs[i], bloomRTVs[i]);
+        CreateBuffer(bloomSRVs[i], bloomRTVs[i], width /div, height /div);
     }
 
     BloomDownFilters.resize(BloomLevels - 1);
     for (int i = 0; i < BloomLevels - 1; i++) 
     {
         int div = int(pow(2, i + 1));
-        BloomDownFilters[i].Initialize(VSPath, BloomDownPSPath);
+        BloomDownFilters[i].Initialize(VSPath, BloomDownPSPath, width / div, height / div);
         if (i == 0) 
         {
             BloomDownFilters[i].SetShaderResources({ resources[0] });
@@ -45,13 +52,13 @@ void PostProcess::Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& res
     {
         int level = BloomLevels - 2 - i;
         int div = int(pow(2, level));
-        BloomUpFilters[i].Initialize(VSPath, BloomUpPSPath);
+        BloomUpFilters[i].Initialize(VSPath, BloomUpPSPath,width / div, height / div);
         BloomUpFilters[i].SetShaderResources({ bloomSRVs[level + 1] });
         BloomUpFilters[i].SetRenderTargets({ bloomRTVs[level] });
     }
 
     // Combine + ToneMapping
-    CombineFilter.Initialize(VSPath, CombinePSPath);
+    CombineFilter.Initialize(VSPath, CombinePSPath, width, height);
     CombineFilter.SetShaderResources({ resources[0], bloomSRVs[0] });
     CombineFilter.SetRenderTargets(targets);
     CombineFilter.FilterData.strength = 0.0f; // Bloom strength
@@ -63,7 +70,25 @@ void PostProcess::Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& res
 
 void PostProcess::Render() 
 {
+    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+    if (ImGui::TreeNode("Post Processing")) 
+    {
 
+        int flag = 0;
+        flag += ImGui::SliderFloat("Bloom Strength", &CombineFilter.FilterData.strength, 0.0f, 1.0f);
+        flag += ImGui::SliderFloat("Exposure", &CombineFilter.FilterData.option1, 0.0f, 10.0f);
+        flag += ImGui::SliderFloat("Gamma",  &CombineFilter.FilterData.option2, 0.1f, 5.0f);
+
+        // 편의상 사용자 입력이 인식되면 바로 GPU 버퍼를 업데이트
+        if (flag) 
+        {
+            CombineFilter.UpdateConstantBuffers();
+        }
+
+        ImGui::TreePop();
+    }
+
+   
     VBuffer->IASetVertexBuffer();
     IBuffer->IASetIndexBuffer();
 
@@ -82,14 +107,14 @@ void PostProcess::Render()
 
 
 void PostProcess::CreateBuffer(ComPtr<ID3D11ShaderResourceView>& srv,
-                                                   ComPtr<ID3D11RenderTargetView>& rtv) 
+                                                   ComPtr<ID3D11RenderTargetView>& rtv, int width, int height)
 {
     ComPtr<ID3D11Texture2D> texture;
 
     D3D11_TEXTURE2D_DESC txtDesc;
     ZeroMemory(&txtDesc, sizeof(txtDesc));
-    txtDesc.Width = D3D::GetDesc().Width;
-    txtDesc.Height = D3D::GetDesc().Height;;
+    txtDesc.Width = width;
+    txtDesc.Height = height;
     txtDesc.MipLevels = txtDesc.ArraySize = 1;
     txtDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; //  이미지 처리용도
     txtDesc.SampleDesc.Count = 1;
