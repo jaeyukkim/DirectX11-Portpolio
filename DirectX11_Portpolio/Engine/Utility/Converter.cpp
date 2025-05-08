@@ -24,12 +24,11 @@ Converter::~Converter()
 
 void Converter::ReadFile(const wstring InFileName)
 {
-	ReadFilePath = L"../Contents/_Assets/" + InFileName;
 	
 
 	Scene = Loader->ReadFile
 	(
-		String::ToString(ReadFilePath).c_str(),
+		String::ToString(InFileName).c_str(),
 		aiProcess_ConvertToLeftHanded
 		| aiProcess_Triangulate
 		| aiProcess_GenUVCoords

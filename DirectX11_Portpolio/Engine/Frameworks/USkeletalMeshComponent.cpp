@@ -21,8 +21,27 @@ USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, bool bOverwri
 	
 	if (bOverwrite)
 	{
+		wstring fbxPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
+		wstring gltfPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
+
+		wstring finalPath;
+		if (filesystem::exists(fbxPath))
+		{
+			finalPath = fbxPath;
+		}
+		else if (filesystem::exists(gltfPath))
+		{
+			finalPath = gltfPath;
+		}
+		else
+		{
+			wcout << L"모델 파일이 존재하지 않습니다: " << endl;
+			return;
+		}
+
+
 		shared_ptr<Converter> converter = make_shared<Converter>();
-		converter->ReadFile(objectName + L"/" + objectName + L".fbx");
+		converter->ReadFile(finalPath);
 		converter->ExportMaterial(objectName, true,  EMeshType::SkeletalMeshType);
 		converter->ExportMesh(objectName, EMeshType::SkeletalMeshType);
 	}
