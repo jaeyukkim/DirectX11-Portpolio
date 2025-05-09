@@ -95,7 +95,7 @@ void FSceneView::UpdateLightMap(LightInformation& InLightInfo)
 
     // GPU에 업로드 (전체 전송)
     LightConstantBuffer->UpdateData(CachedLights.data());
-    LightConstantBuffer->PSSetStructuredBuffer(EConstBufferSlot::LightMap);
+    LightConstantBuffer->PSSetStructuredBuffer(EShaderResourceSlot::LightMap);
 
     // 라이트 개수 업데이트 (LightMap 크기 기준)
     LightCntCbuffer.CurrentLightCnt = static_cast<UINT32>(LightMap.size());

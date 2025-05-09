@@ -126,8 +126,7 @@ D3D11_TEXTURE2D_DESC Texture::ReadPixel(ID3D11Texture2D* InSource, DXGI_FORMAT I
 	ComPtr<ID3D11Texture2D> texture;
 	Check(D3D::Get()->GetDevice()->CreateTexture2D(&desc, nullptr, &texture));
 	D3D::Get()->GetDeviceContext()->CopyResource(texture.Get(), InSource);
-
-	//UINT* colors = new UINT[desc.Width * desc.Height];
+	
 	unique_ptr<UINT[]> colors(new UINT[desc.Width * desc.Height]);
 	
 	D3D11_MAPPED_SUBRESOURCE subResource;

@@ -167,12 +167,12 @@ void StructuredBuffer::UpdateBuffer()
 	D3D::Get()->GetDeviceContext()->Unmap(buffer.Get(), 0);
 }
 
-void StructuredBuffer::PSSetStructuredBuffer(const EConstBufferSlot bufferSlot)
+void StructuredBuffer::PSSetStructuredBuffer(const EShaderResourceSlot bufferSlot)
 {
 	D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(bufferSlot), 1, srv.GetAddressOf());
 }
 
-void StructuredBuffer::VSSetStructuredBuffer(const EConstBufferSlot bufferSlot)
+void StructuredBuffer::VSSetStructuredBuffer(const EShaderResourceSlot bufferSlot)
 {
 	D3D::Get()->GetDeviceContext()->VSSetShaderResources(static_cast<UINT>(bufferSlot), 1, srv.GetAddressOf());
 }

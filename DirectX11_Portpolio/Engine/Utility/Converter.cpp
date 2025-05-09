@@ -70,38 +70,44 @@ void Converter::ReadMaterials(EMeshType InMeshType)
 		data->PixelShaderPath = GetPixelShaderFileName(InMeshType);
 
 		aiColor4D color;
+		float value;
 
-		material->Get(AI_MATKEY_COLOR_AMBIENT, color);
-		data->Ambient = Color(color.r, color.g, color.b, color.a);
+		material->Get(AI_MATKEY_BASE_COLOR, color);
+		data->Albedo = Color(color.r, color.g, color.b, color.a);
 
-		material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-		data->Diffuse = Color(color.r, color.g, color.b, color.a);
+		material->Get(AI_MATKEY_ROUGHNESS_FACTOR, value);
+		data->Roughness = value;
 
-		material->Get(AI_MATKEY_COLOR_SPECULAR, color);
-		material->Get(AI_MATKEY_SHININESS, color.a);
-		data->Specular = Color(color.r, color.g, color.b, color.a);
+		material->Get(AI_MATKEY_METALLIC_FACTOR, value);
+		data->Metallic = value;
 
 		material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
 		data->Emissive = Color(color.r, color.g, color.b, color.a);
 
-		float value;
-		material->Get(AI_MATKEY_SHININESS, value);
-		data->Shininess = value;
+
 
 		aiString textureFile;
 
-		material->GetTexture(aiTextureType_AMBIENT, 0, &textureFile);
-		data->AmbientFile = textureFile.C_Str();
+		material->GetTexture(aiTextureType_BASE_COLOR, 0, &textureFile);
+		data->AlbedoFile = textureFile.C_Str();
 		
-		material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFile);
-		data->DiffuseFile = textureFile.C_Str();
+		material->GetTexture(aiTextureType_METALNESS, 0, &textureFile);
+		data->MetallicFile = textureFile.C_Str();
 
-		material->GetTexture(aiTextureType_SPECULAR, 0, &textureFile);
-		data->SpecularFile = textureFile.C_Str();
+		material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFile);
+		data->DiffuseRoughnessFile = textureFile.C_Str();
 
 		material->GetTexture(aiTextureType_NORMALS, 0, &textureFile);
 		data->NormalFile = textureFile.C_Str();
 
+		material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &textureFile);
+		data->AmbientOcclusionFile = textureFile.C_Str();
+
+		material->GetTexture(aiTextureType_EMISSIVE, 0, &textureFile);
+		data->EmissiveFile = textureFile.C_Str();
+
+		material->GetTexture(aiTextureType_HEIGHT, 0, &textureFile);
+		data->HeightFile = textureFile.C_Str();
 		
 		Materials.push_back(data);
 	}
@@ -130,15 +136,17 @@ void Converter::WriteMaterial(wstring InSaveFileName, bool InOverwrite)
 
 		value["VertexShaderPath"] = data->VertexShaderPath;
 		value["PixelShaderPath"] = data->PixelShaderPath;
-		value["Ambient"] = ColorToJson(data->Ambient);
-		value["Diffuse"] = ColorToJson(data->Diffuse);
-		value["Specular"] = ColorToJson(data->Specular);
+		value["Albedo"] = ColorToJson(data->Albedo);
+		value["Roughness"] = FloatToJson(data->Roughness);
+		value["Metallic"] = FloatToJson(data->Metallic);
 		value["Emissive"] = ColorToJson(data->Emissive);
-		value["Shininess"] = FloatToJson(data->Shininess);
-		value["AmbientMap"] = SaveTexture(folderName, data->AmbientFile);
-		value["DiffuseMap"] = SaveTexture(folderName, data->DiffuseFile);
-		value["SpecularMap"] = SaveTexture(folderName, data->SpecularFile);
+		value["AlbedoMap"] = SaveTexture(folderName, data->AlbedoFile);
+		value["MetallicMap"] = SaveTexture(folderName, data->MetallicFile);
+		value["DiffuseRoughnessMap"] = SaveTexture(folderName, data->DiffuseRoughnessFile);
 		value["NormalMap"] = SaveTexture(folderName, data->NormalFile);
+		value["AmbientOcclusionMap"] = SaveTexture(folderName, data->AmbientOcclusionFile);
+		value["EmissiveMap"] = SaveTexture(folderName, data->EmissiveFile);
+		value["HeightMap"] = SaveTexture(folderName, data->HeightFile);
 		root[data->Name.c_str()] = value;
 
 		Delete(data);
@@ -264,9 +272,7 @@ void Converter::ReadBoneData(aiNode* InNode, int InIndex, int InParent)
 	bone->Parent = InParent;
 	bone->Name = InNode->mName.C_Str();
 
-	bool check = sizeof(Matrix) == sizeof(aiMatrix4x4);
-	Assert(check, "Matrix와 aiMatrix4x4 사이즈 다름");
-	memcpy(&bone->Transform, &InNode->mTransformation, sizeof(Matrix));
+	memcpy(&bone->Transform, InNode->mTransformation[0], sizeof(Matrix));
 	bone->Transform = bone->Transform.Transpose();
 
 	
@@ -279,11 +285,10 @@ void Converter::ReadBoneData(aiNode* InNode, int InIndex, int InParent)
 
 	bone->Transform = bone->Transform * parent;
 
-	Bones.push_back(bone);
-
-
 	for (UINT i = 0; i < InNode->mNumMeshes; i++)
 		bone->MeshNumbers.push_back(InNode->mMeshes[i]);
+
+	Bones.push_back(bone);
 
 	for (UINT i = 0; i < InNode->mNumChildren; i++)
 		ReadBoneData(InNode->mChildren[i], (int)Bones.size(), InIndex);
@@ -355,8 +360,6 @@ void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
 
 		w->ToInt(data->Parent);
 		w->ToMatrix(data->Transform);
-
-		
 		w->ToUInt((UINT)data->MeshNumbers.size());
 
 		if(data->MeshNumbers.size() > 0)
@@ -370,6 +373,7 @@ void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
 	{
 		w->ToString(data->Name);
 		w->ToString(data->MaterialName);
+		w->ToUInt(data->BoneIndex);
 
 		w->ToUInt((UINT)data->Vertices.size());
 		w->ToByte(&data->Vertices[0], (UINT)(sizeof(VertexModel) * data->Vertices.size()));

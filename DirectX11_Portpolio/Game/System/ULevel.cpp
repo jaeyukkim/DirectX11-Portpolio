@@ -10,10 +10,10 @@ void ULevel::Initialize()
     FTickTaskManager::Create(this);
 
 
-    SpawnActor<ALightActor>(this);
+//    SpawnActor<ALightActor>(this);
     SpawnActor<AKachujin>(this);
-    SpawnActor<AFloor>(this);
-    SpawnActor<ACubeMap>(this);
+//    SpawnActor<AFloor>(this);
+//    SpawnActor<ACubeMap>(this);
 }
 
 void ULevel::Destroy()
@@ -32,7 +32,6 @@ void ULevel::Render()
     {
         actor->Render();
     }
-   
 }
 
 void ULevel::AddActorToLevel(const shared_ptr<Actor>& InActor)

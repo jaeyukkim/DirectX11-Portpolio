@@ -9,16 +9,18 @@ struct MaterialData
     string VertexShaderPath;
     string PixelShaderPath;
 
-    Color Ambient;
-    Color Diffuse;
-    Color Specular;
+    Color Albedo;
+    float Roughness;
+    float Metallic;
     Color Emissive;
-    float Shininess;
 
-    string AmbientFile;
-    string DiffuseFile;
-    string SpecularFile;
+    string AlbedoFile;
+    string MetallicFile;
+    string DiffuseRoughnessFile;
     string NormalFile;
+    string AmbientOcclusionFile;
+    string EmissiveFile;
+    string HeightFile;
 };
 
 struct BoneData
@@ -35,8 +37,8 @@ struct BoneData
 struct SkeletalMeshData
 {
     string Name;
-
     string MaterialName;
+    int BoneIndex;
 
     vector<VertexModel> Vertices;
     vector<UINT> Indices;

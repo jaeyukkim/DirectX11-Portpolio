@@ -10,12 +10,13 @@ enum class EConstBufferSlot : UINT8
 	MaterialTex = 4,
 	LightCnt = 5,
 	ImageFilterData = 6,
-	LightMap = 12,
 };
+
 enum class EShaderResourceSlot : UINT8
 {
 	CubeMapTexture = 0,
-	MaterialTexture = 6
+	MaterialTexture = 4,
+	LightMap = 11,
 };
 
 
@@ -97,8 +98,8 @@ public:
 	~StructuredBuffer() = default;
 
 	void UpdateBuffer();
-	void PSSetStructuredBuffer(const EConstBufferSlot bufferSlot);
-	void VSSetStructuredBuffer(const EConstBufferSlot bufferSlot);
+	void PSSetStructuredBuffer(const EShaderResourceSlot bufferSlot);
+	void VSSetStructuredBuffer(const EShaderResourceSlot bufferSlot);
 	void UpdateData(void* InData);
 
 private:

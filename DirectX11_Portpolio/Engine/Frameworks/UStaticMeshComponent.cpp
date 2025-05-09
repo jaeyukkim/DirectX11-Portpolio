@@ -79,14 +79,12 @@ void UStaticMeshComponent::ReverseIndices()
 void UStaticMeshComponent::TickComponent(float deltaTime)
 {
 	Super::TickComponent(deltaTime);
-
 	
 	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
 	{
 		meshPtr->SetWorld(GetWorldTransform());
 		meshPtr->Tick();
 	}
-	
 	
 }
 
@@ -110,7 +108,6 @@ void UStaticMeshComponent::DrawComponentIndex()
 	{
 		meshPtr->DrawIndexed();
 	}
-	
 }
 
 
@@ -179,96 +176,66 @@ void UStaticMeshComponent::ReadFile(wstring InFileName)
  */	
 void UStaticMeshComponent::ReadMaterial(wstring InFilePath)
 {
-
-	// 1. 머티리얼 파일(.material)의 경로를 설정
+	
 	InFilePath = L"../Contents/_Objects/" + InFilePath + L".material";
 
-	// 2. 해당 파일이 위치한 폴더 경로 가져오기
 	wstring textureFolder = Path::GetDirectoryName(InFilePath);
-
-	// 3. JSON 파일을 읽기 위한 입력 스트림 생성
 	ifstream stream;
-
-	// 4. 파일을 열기
 	stream.open(InFilePath);
-
-	// 5. JSON 데이터를 저장할 객체 생성
 	Json::Value root;
-
-	// 6. JSON 파일에서 데이터를 읽어 `root` 객체에 저장
 	stream >> root;
-
-	// 7. JSON에서 모든 머티리얼(Key 값) 목록 가져오기
 	Json::Value::Members members = root.getMemberNames();
-
-	// 8. 각 머티리얼 정보를 순회하면서 읽어들임
+	
 	for (string name : members)
 	{
-		// 8.1 새로운 머티리얼 객체 생성
 		shared_ptr<Material> material = make_shared<Material>();
-
-		// 8.2 현재 머티리얼의 데이터 가져오기
 		Json::Value value = root[name];
-
-		// 8.3 셰이더(Shader) 이름이 존재하는 경우, 셰이더 설정
+		
 		if (value["VertexShaderPath"].asString().size() > 0)
 			material->GetRenderer()->SetVertexShaderPath(String::ToWString(value["VertexShaderPath"].asString()));
 		if (value["PixelShaderPath"].asString().size() > 0)
 			material->GetRenderer()->SetPixelShaderPath(String::ToWString(value["PixelShaderPath"].asString()));
-
-
-		// 8.4 머티리얼 색상 정보 설정 (Ambient, Diffuse, Specular, Emissive)
-		material->SetAmbient(JsonStringToColor(value["Ambient"].asString()));
-		material->SetDiffuse(JsonStringToColor(value["Diffuse"].asString()));
-		material->SetSpecular(JsonStringToColor(value["Specular"].asString()));
+		
+		material->SetAlbedo(JsonStringToColor(value["Ambient"].asString()));
+		material->SetRoughness(stof(value["Roughness"].asString()));
+		material->SetMetallic(stof(value["Metallic"].asString()));
 		material->SetEmissive(JsonStringToColor(value["Emissive"].asString()));
-		material->SetShininess(stof(value["Shininess"].asString()));
-
-		// 8.5 텍스처(DiffuseMap) 설정
-		if (value["AmbientMap"].asString().size() > 0)
-			material->SetAmbientMap(String::ToWString(value["AmbientMap"].asString()));
-
-		// 8.5 텍스처(DiffuseMap) 설정
-		if (value["DiffuseMap"].asString().size() > 0)
-			material->SetDiffuseMap(String::ToWString(value["DiffuseMap"].asString()));
-
-		// 8.6 텍스처(SpecularMap) 설정
-		if (value["SpecularMap"].asString().size() > 0)
-			material->SetSpecularMap(String::ToWString(value["SpecularMap"].asString()));
-
-		// 8.7 텍스처(NormalMap) 설정
+		
+		if (value["AlbedoMap"].asString().size() > 0)
+			material->SetTextureMap(String::ToWString(value["AlbedoMap"].asString()), MaterialMapType::ALBEDO);
+		
+		if (value["MetallicMap"].asString().size() > 0)
+			material->SetTextureMap(String::ToWString(value["MetallicMap"].asString()), MaterialMapType::METALLIC);
+		
+		if (value["DiffuseRoughnessMap"].asString().size() > 0)
+			material->SetTextureMap(String::ToWString(value["DiffuseRoughnessMap"].asString()), MaterialMapType::DIFFUSE_ROUGHNESS);
+		
 		if (value["NormalMap"].asString().size() > 0)
-			material->SetNormalMap(String::ToWString(value["NormalMap"].asString()));
+			material->SetTextureMap(String::ToWString(value["NormalMap"].asString()), MaterialMapType::NORMAL);
+		
+		if (value["AmbientOcclusionMap"].asString().size() > 0)
+			material->SetTextureMap(String::ToWString(value["AmbientOcclusionMap"].asString()), MaterialMapType::AMBIENTOCCLUSION);
+		
+		if (value["EmissiveMap"].asString().size() > 0)
+			material->SetTextureMap(String::ToWString(value["EmissiveMap"].asString()), MaterialMapType::EMISSIVE);
 
-		// 8.8 읽은 머티리얼을 MaterialTable에 저장 (name을 Key로 사용)
+		if (value["HeightMap"].asString().size() > 0)
+			material->SetTextureMap(String::ToWString(value["HeightMap"].asString()), MaterialMapType::HEIGHT);
+		
 		MaterialTable[name] = material;
 	}
-
-	// 9. 파일 스트림을 닫음
+	
 	stream.close();
 }
 
 
 void UStaticMeshComponent::ReadMesh(wstring InFilePath)
 {
-	// 1. 파일 경로를 설정 (모델 데이터가 저장된 경로)
 	InFilePath = L"../Contents/_Objects/" + InFilePath + L".mesh";
-
-
-	// 2. 이진 파일을 읽기 위한 BinaryReader 객체 생성
 	unique_ptr<BinaryReader> reader = make_unique<BinaryReader>();
-
-	// 3. 지정된 .mesh 파일을 열기
 	reader->Open(InFilePath);
-
-
-	// 5. 메시(Mesh) 데이터를 읽어서 `Meshes` 벡터 및 머티리얼(MaterialTable)에 저장
 	StaticMesh::ReadFile(reader.get(), MaterialTable, m_Mesh);
-
-	// 6. 파일 닫기 및 메모리 정리
 	reader->Close();
-
-
 }
 
 

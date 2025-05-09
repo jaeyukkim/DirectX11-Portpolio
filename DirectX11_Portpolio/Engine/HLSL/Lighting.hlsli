@@ -30,9 +30,9 @@ cbuffer CBLightCnt : register(b5)
     int LightCnt;
 }
 
-StructuredBuffer<Light> lights : register(t12);
+StructuredBuffer<Light> lights : register(t11);
 
-
+/*
 float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal,
     float3 toEye, MaterialDesc mat)
 {
@@ -114,6 +114,70 @@ float3 ComputeSpotLight(Light L, MaterialDesc mat, float3 pos, float3 normal, fl
     lightStrength *= spotFactor;
 
     return BlinnPhong(lightStrength, lightVec, normal, toEye, mat);
+}
+*/
+
+float3 SchlickFresnel(float3 F0, float NdotH)
+{
+    return F0 + (1.0 - F0) * pow(2.0, (-5.55473 * NdotH - 6.98316) * NdotH);
+}
+
+
+float3 DiffuseIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
+    float metallic)
+{
+    float3 F0 = lerp(Fdielectric, albedo, metallic);
+    float3 F = SchlickFresnel(F0, max(0.0, dot(normalWorld, pixelToEye)));
+    float3 kd = lerp(1.0 - F, 0.0, metallic);
+    float3 irradiance = textureCube[CUBEMAP_IRRADIENCE].Sample(g_sampler, normalWorld).rgb;
+
+    return kd * albedo * irradiance;
+}
+
+float3 SpecularIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
+    float metallic, float roughness)
+{
+    float2 specularBRDF = brdfTex.Sample(g_sampler, float2(dot(normalWorld, pixelToEye), 1.0 - roughness)).rg;
+    float3 specularIrradiance = textureCube[CUBEMAP_SPECULAR].SampleLevel(g_sampler, reflect(-pixelToEye, normalWorld),
+        3 + roughness * 5.0f).rgb;
+    const float3 Fdielectric = 0.04; // 비금속(Dielectric) 재질의 F0
+    float3 F0 = lerp(Fdielectric, albedo, metallic);
+
+    return (F0 * specularBRDF.x + specularBRDF.y) * specularIrradiance;
+}
+
+float3 AmbientLightingByIBL(float3 albedo, float3 normalW, float3 pixelToEye, float ao,
+    float metallic, float roughness)
+{
+    float3 diffuseIBL = DiffuseIBL(albedo, normalW, pixelToEye, metallic);
+    float3 specularIBL = SpecularIBL(albedo, normalW, pixelToEye, metallic, roughness);
+
+    return (diffuseIBL + specularIBL) * ao;
+}
+
+// GGX/Towbridge-Reitz normal distribution function.
+// Uses Disney's reparametrization of alpha = roughness^2.
+float NdfGGX(float NdotH, float roughness)
+{
+    float alpha = roughness * roughness;
+    float alphaSq = alpha * alpha;
+    float denom = (NdotH * NdotH) * (alphaSq - 1.0) + 1.0;
+
+    return alphaSq / (3.141592 * denom * denom);
+}
+
+// Single term for separable Schlick-GGX below.
+float SchlickG1(float NdotV, float k)
+{
+    return NdotV / (NdotV * (1.0 - k) + k);
+}
+
+// Schlick-GGX approximation of geometric attenuation function using Smith's method.
+float SchlickGGX(float NdotI, float NdotO, float roughness)
+{
+    float r = roughness + 1.0;
+    float k = (r * r) / 8.0;
+    return SchlickG1(NdotI, k) * SchlickG1(NdotO, k);
 }
 
 #endif // __LIGHTING_HLSLI__

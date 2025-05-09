@@ -28,7 +28,7 @@ void StaticMesh::BindRenderStage()
 void StaticMesh::Render(bool bUsePreRender)
 {
 	MaterialData->GetRenderer()->Bind();	// VS, PS 등 스테이지 바인딩
-	BindRenderStage();   //파생 클래스 바인딩 먼저 진행( 본 정보 세팅 등)
+	BindRenderStage();   //파생 클래스 바인딩 먼저 진행(본 정보 세팅 등)
 
 	VBuffer->IASetVertexBuffer();
 	IBuffer->IASetIndexBuffer();

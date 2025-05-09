@@ -1,27 +1,46 @@
 #ifndef __MATERIAL_HLSLI__
 #define __MATERIAL_HLSLI__
 
-#define MATERIAL_TEXTURE_Ambient 0
-#define MATERIAL_TEXTURE_Diffuse 1
-#define MATERIAL_TEXTURE_Specular 2
-#define MATERIAL_TEXTURE_NORMAL 3
-#define MAX_MATERIAL_TEXTURE_COUNT 4
-#define MAX_CUBEMAP_TEXTURE_COUNT 3
+#define TEXTURE_ALBEDO 0
+#define TEXTURE_METALLIC 1
+#define TEXTURE_DIFFUSE_ROUGHNESS 2
+#define TEXTURE_NORMAL 3
+#define TEXTURE_AMBIENTOCCLUSION 4
+#define TEXTURE_EMISSIVE 5
+#define TEXTURE_HEIGHT 6
+#define MAX_MATERIAL_TEXTURE_COUNT 7
+
+#define CUBEMAP_ENVTEX 0
+#define CUBEMAP_SPECULAR 1
+#define CUBEMAP_IRRADIENCE 2
+#define CUBEMAP_BRDF 3
+#define MAX_CUBEMAP_TEXTURE_COUNT 3 // BRDF는 2D 텍스쳐임
+
 
 TextureCube textureCube[MAX_CUBEMAP_TEXTURE_COUNT] : register(t0);
-Texture2D MaterialMaps[MAX_MATERIAL_TEXTURE_COUNT]  : register(t6);
+Texture2D brdfTex  : register(t3);
+Texture2D MaterialMaps[MAX_MATERIAL_TEXTURE_COUNT]  : register(t4);
 
 SamplerState g_sampler : register(s0);
 
+static const float3 Fdielectric = 0.04;  // 비금속(Dielectric) 재질의 F0
+
+
 struct MaterialDesc
 {
-    float4 Ambient;
-    float4 Diffuse;
-    float4 Specular;
+    float4 Albedo;
+    float Roughness;
+    float Metallic;
     float4 Emissive;
-    float Shininess;
     float2 UV_Tiling;
     float2 UV_Offset;
+    int useAlbedoMap;
+    int useNormalMap;
+    int useAOMap; 
+    int invertNormalMapY;
+    int useMetallicMap;
+    int useRoughnessMap;
+    int useEmissiveMap;
 };
 
 cbuffer CB_Material : register(b0)
@@ -29,24 +48,29 @@ cbuffer CB_Material : register(b0)
     MaterialDesc Material;
 };
 
-
 float3 ApplyNormalMapping(float2 uv, float3 normal, float3 tangent, SamplerState samp)
 {
-    float4 map = MaterialMaps[MATERIAL_TEXTURE_NORMAL].Sample(samp, uv);
+    float3 normalWorld = normal;
 
-    [flatten]
-    if (any(map.rgb) == false)
-        return normal;   // 노말맵 없으면 원본 노멀 반환
+    if (Material.useNormalMap)
+    {
+        float3 NewNormal = MaterialMaps[TEXTURE_NORMAL].SampleLevel(samp, uv, 0.0).rgb;
+        NewNormal = 2.0 * NewNormal - 1.0;
 
-    float3 coord = map.rgb * 2.0f - 1.0f;
+        // OpenGL 노멀맵일 경우에는 y 방향을 뒤집어줍니다.
+        NewNormal.y = Material.invertNormalMapY ? -NewNormal.y : NewNormal.y;
 
-    float3 N = normalize(normal);
-    float3 T = normalize(tangent - dot(tangent, N) * N);
-    float3 B = cross(N, T);
 
-    float3x3 TBN = float3x3(T, B, N);
-    return normalize(mul(coord, TBN));   // 변환된 노멀 반환
+        float3 N = normalize(normal);
+        float3 T = normalize(tangent - dot(tangent, N) * N);
+        float3 B = cross(N, T);
+
+        float3x3 TBN = float3x3(T, B, N);
+        normalWorld =  normalize(mul(NewNormal, TBN));   // 변환된 노멀 반환
+    }
+
+    return normalWorld;
 }
 
 
-#endif // __MATERIAL_HLSLI__
+#endif  //__MATERIAL_HLSLI__

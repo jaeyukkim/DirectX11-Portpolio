@@ -19,7 +19,6 @@ public:
     
     
 private:
-    
     void ReadFile(wstring InFileName);
     void ReadMaterial(wstring InFilePath);
     void ReadMesh(wstring InFilePath);

@@ -45,7 +45,6 @@ private:
     struct BoneDesc
     {
         Matrix Transforms[MAX_MODEL_TRANSFORM];
-
         UINT BoneIndex;
         float Padding[3];
     } BoneData;

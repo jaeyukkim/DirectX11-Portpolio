@@ -4,7 +4,7 @@
 
 AKachujin::AKachujin()
 {
-    Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Kachujin", true);
+    Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Knight", true);
     SetRootComponent(Mesh.get());
 
     Camera = CreateComponent<UCameraComponent>(this);
