@@ -21,7 +21,7 @@ USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, bool bOverwri
 	{
 		wstring fbxPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
 		wstring gltfPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
-
+		bool bIsGLTF = false;
 		wstring finalPath;
 		if (filesystem::exists(fbxPath))
 		{
@@ -30,6 +30,7 @@ USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, bool bOverwri
 		else if (filesystem::exists(gltfPath))
 		{
 			finalPath = gltfPath;
+			bIsGLTF = true;
 		}
 		else
 		{
@@ -38,7 +39,7 @@ USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, bool bOverwri
 		}
 
 		shared_ptr<Converter> converter = make_shared<Converter>();
-		converter->ReadFile(finalPath);
+		converter->ReadFile(finalPath, bIsGLTF);
 		converter->ExportMaterial(objectName, true,  EMeshType::SkeletalMeshType);
 		converter->ExportMesh(objectName, EMeshType::SkeletalMeshType);
 	}
@@ -56,6 +57,7 @@ void USkeletalMeshComponent::InitRenderer() const
 	{
 		meshPtr->MaterialData->GetRenderer()->InitRenderer(InputElementCollection::SkeletalMeshInputElement, 
 																								meshPtr->MaterialData->GetSamplerDesc());
+		meshPtr->MaterialData->GetRenderer()->CreateSamplerState(ESamplerSlot::ClampSampler);
 	}
 }
 
@@ -83,6 +85,18 @@ void USkeletalMeshComponent::RenderComponent(bool bUsePreRender)
 	}
 }
 
+vector<Material*> USkeletalMeshComponent::GetAllMaterials()
+{
+	vector<Material*> result;
+
+	for (auto& [name, matPtr] : MaterialTable)
+	{
+		if (matPtr)
+			result.push_back(matPtr.get());
+	}
+
+	return result;
+}
 
 void USkeletalMeshComponent::ReadFile(wstring InFileName)
 {
@@ -160,8 +174,8 @@ void USkeletalMeshComponent::ReadMaterial(wstring InFilePath)
 		if (value["MetallicMap"].asString().size() > 0)
 			material->SetTextureMap(String::ToWString(value["MetallicMap"].asString()), MaterialMapType::METALLIC);
 		
-		if (value["DiffuseRoughnessMap"].asString().size() > 0)
-			material->SetTextureMap(String::ToWString(value["DiffuseRoughnessMap"].asString()), MaterialMapType::DIFFUSE_ROUGHNESS);
+		if (value["RoughnessMap"].asString().size() > 0)
+			material->SetTextureMap(String::ToWString(value["RoughnessMap"].asString()), MaterialMapType::ROUGHNESS);
 		
 		if (value["NormalMap"].asString().size() > 0)
 			material->SetTextureMap(String::ToWString(value["NormalMap"].asString()), MaterialMapType::NORMAL);

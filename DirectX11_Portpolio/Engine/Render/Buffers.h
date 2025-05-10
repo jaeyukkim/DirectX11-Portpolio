@@ -19,6 +19,12 @@ enum class EShaderResourceSlot : UINT8
 	LightMap = 11,
 };
 
+enum class ESamplerSlot : UINT8
+{
+	DefaultSampler = 0,
+	ClampSampler = 1
+};
+
 
 class VertexBuffer
 {

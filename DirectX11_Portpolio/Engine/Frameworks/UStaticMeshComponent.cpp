@@ -24,7 +24,7 @@ UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, bool bOverwrite)
 	if (bOverwrite)
 	{
 		shared_ptr<Converter> converter = make_shared<Converter>();
-		converter->ReadFile(objectName + L"/" + objectName + L".fbx");
+		converter->ReadFile(objectName + L"/" + objectName + L".fbx", false);
 		converter->ExportMaterial(objectName, true, EMeshType::StaticMeshType);
 		converter->ExportMesh(objectName, EMeshType::StaticMeshType);
 	}
@@ -41,6 +41,7 @@ void UStaticMeshComponent::InitRenderer()
 	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
 	{
 		meshPtr->MaterialData->GetRenderer()->InitRenderer(InputElementCollection::basicInputElement, meshPtr->MaterialData->GetSamplerDesc());
+		meshPtr->MaterialData->GetRenderer()->CreateSamplerState(ESamplerSlot::ClampSampler);
 	}
 
 	bInitRenderComplete = true;
@@ -196,7 +197,7 @@ void UStaticMeshComponent::ReadMaterial(wstring InFilePath)
 		if (value["PixelShaderPath"].asString().size() > 0)
 			material->GetRenderer()->SetPixelShaderPath(String::ToWString(value["PixelShaderPath"].asString()));
 		
-		material->SetAlbedo(JsonStringToColor(value["Ambient"].asString()));
+		material->SetAlbedo(JsonStringToColor(value["Albedo"].asString()));
 		material->SetRoughness(stof(value["Roughness"].asString()));
 		material->SetMetallic(stof(value["Metallic"].asString()));
 		material->SetEmissive(JsonStringToColor(value["Emissive"].asString()));
@@ -207,8 +208,8 @@ void UStaticMeshComponent::ReadMaterial(wstring InFilePath)
 		if (value["MetallicMap"].asString().size() > 0)
 			material->SetTextureMap(String::ToWString(value["MetallicMap"].asString()), MaterialMapType::METALLIC);
 		
-		if (value["DiffuseRoughnessMap"].asString().size() > 0)
-			material->SetTextureMap(String::ToWString(value["DiffuseRoughnessMap"].asString()), MaterialMapType::DIFFUSE_ROUGHNESS);
+		if (value["RoughnessMap"].asString().size() > 0)
+			material->SetTextureMap(String::ToWString(value["RoughnessMap"].asString()), MaterialMapType::ROUGHNESS);
 		
 		if (value["NormalMap"].asString().size() > 0)
 			material->SetTextureMap(String::ToWString(value["NormalMap"].asString()), MaterialMapType::NORMAL);

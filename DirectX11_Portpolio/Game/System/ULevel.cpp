@@ -13,7 +13,7 @@ void ULevel::Initialize()
 //    SpawnActor<ALightActor>(this);
     SpawnActor<AKachujin>(this);
 //    SpawnActor<AFloor>(this);
-//    SpawnActor<ACubeMap>(this);
+    SpawnActor<ACubeMap>(this);
 }
 
 void ULevel::Destroy()

@@ -10,7 +10,7 @@ ImageFilter::ImageFilter(wstring VSPath, wstring PSPath, int width, int height)
 void ImageFilter::Initialize(wstring VSPath, wstring PSPath, int width, int height)
 {
     renderer = make_shared<Shader>(VSPath, PSPath);
-    renderer->InitRenderer(InputElementCollection::basicInputElement, SamplerDescCollection::GetBlurSamplerDesc());
+    renderer->InitRenderer(InputElementCollection::basicInputElement, ESamplerSlot::ClampSampler);
  
     ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
     m_viewport.TopLeftX = 0;

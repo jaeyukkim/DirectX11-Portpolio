@@ -18,9 +18,9 @@ private:
     void LoadTexture();
 
 public:
-    D3D11_TEXTURE2D_DESC ReadPixel(vector<Color>& OutPixel);
-    D3D11_TEXTURE2D_DESC ReadPixel(DXGI_FORMAT InFormat, vector<Color>& OutPixel);
-    D3D11_TEXTURE2D_DESC ReadPixel(ID3D11Texture2D* InSource, DXGI_FORMAT InFormat, vector<Color>& OutPixel);
+    //D3D11_TEXTURE2D_DESC ReadPixel(vector<Color>& OutPixel);
+    //D3D11_TEXTURE2D_DESC ReadPixel(DXGI_FORMAT InFormat, vector<Color>& OutPixel);
+    //D3D11_TEXTURE2D_DESC ReadPixel(ID3D11Texture2D* InSource, DXGI_FORMAT InFormat, vector<Color>& OutPixel);
 
 private:
     ComPtr<ID3D11ShaderResourceView> SRV = nullptr;

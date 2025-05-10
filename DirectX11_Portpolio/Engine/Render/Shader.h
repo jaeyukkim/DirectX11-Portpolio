@@ -8,8 +8,8 @@ public:
     Shader(wstring VSPath, wstring PSPath);
     
     void InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements,
-        const D3D11_SAMPLER_DESC InSamplerDesc);
-    void Bind() const;
+         ESamplerSlot SampSlot);
+    void Bind();
     void DrawIndexed(const int nIndex);
     
 
@@ -22,23 +22,28 @@ public:
     void PSSetConstantBuffers(UINT StartSlot, const vector<ID3D11Buffer*>& InBuffers) const;
     void SetVertexShaderPath(const wstring& InVertexShaderPath);
     void SetPixelShaderPath(const wstring& InPixelShaderPath);
+
+public:
     static void CreateDefaultDepthStencilState();
     static void SetDefaultDepthStencilState();
     void CreateDepthStencilState(const D3D11_DEPTH_STENCIL_DESC& InDepthStencilDesc);
     void SetCustomDepthStencilState();
+    void PSSetSampler();
+    void CreateSamplerState(const ESamplerSlot SampSlot);
 
 private:
     void CompileVertexShader();
     void CompilePixelShader();
     void CreateRasterizeState();
     void CreateInputLayout(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements);
-    void CreateSamplerState(const D3D11_SAMPLER_DESC& InSamplerDesc);
+    
 
 private:
     ComPtr<ID3D11VertexShader> VertexShader;
     ComPtr<ID3D11PixelShader> PixelShader;
     ComPtr<ID3D11RasterizerState> RSState;
-    ComPtr<ID3D11SamplerState> SamplerState;
+    ComPtr<ID3D11SamplerState> SamplerState = nullptr;
+    ComPtr<ID3D11SamplerState> ClampSamplerState = nullptr;
     static ComPtr<ID3D11DepthStencilState> DefaultDepthStencilState;
     ComPtr<ID3D11DepthStencilState> CustomDepthStencilState;
     ComPtr<ID3D11InputLayout> InputLayouts;

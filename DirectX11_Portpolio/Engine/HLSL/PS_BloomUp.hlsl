@@ -1,5 +1,5 @@
 Texture2D BloomDownTex : register(t0);
-SamplerState g_sampler : register(s0);
+SamplerState ClampSampler : register(s1);
 
 cbuffer SamplingPixelConstantData : register(b6)
 {
@@ -18,5 +18,5 @@ struct SamplingPixelShaderInput
 
 float4 PS_Main(SamplingPixelShaderInput input) : SV_TARGET
 {
-    return BloomDownTex.Sample(g_sampler, input.texcoord);
+    return BloomDownTex.Sample(ClampSampler, input.texcoord);
 }

@@ -137,7 +137,7 @@ float3 DiffuseIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
 float3 SpecularIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
     float metallic, float roughness)
 {
-    float2 specularBRDF = brdfTex.Sample(g_sampler, float2(dot(normalWorld, pixelToEye), 1.0 - roughness)).rg;
+    float2 specularBRDF = brdfTex.Sample(ClampSampler, float2(dot(normalWorld, pixelToEye), 1.0 - roughness)).rg;
     float3 specularIrradiance = textureCube[CUBEMAP_SPECULAR].SampleLevel(g_sampler, reflect(-pixelToEye, normalWorld),
         3 + roughness * 5.0f).rgb;
     const float3 Fdielectric = 0.04; // 비금속(Dielectric) 재질의 F0
@@ -152,7 +152,7 @@ float3 AmbientLightingByIBL(float3 albedo, float3 normalW, float3 pixelToEye, fl
     float3 diffuseIBL = DiffuseIBL(albedo, normalW, pixelToEye, metallic);
     float3 specularIBL = SpecularIBL(albedo, normalW, pixelToEye, metallic, roughness);
 
-    return (diffuseIBL + specularIBL) * ao;
+    return (diffuseIBL + specularIBL) * (ao+3);
 }
 
 // GGX/Towbridge-Reitz normal distribution function.

@@ -16,7 +16,7 @@ public:
     Converter();
     ~Converter();
 
-    void ReadFile(const wstring InFileName);
+    void ReadFile(const wstring InFileName, bool InbIsGLTF);
 
 public:
     void ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType);
@@ -48,6 +48,9 @@ private:
     string GetVertexShaderFileName(EMeshType InMeshType);
 
 private:
+    void ConvertToDXCoord(Vector3* normal, Vector3* tangent);
+
+private:
     wstring ReadFilePath;
 
     shared_ptr<Assimp::Importer> Loader;
@@ -57,4 +60,7 @@ private:
     vector<struct BoneData*> Bones;
     vector<struct SkeletalMeshData*> SkeletalMeshes;
     vector<struct StaticMeshData*> StaticMeshes;
+
+private:
+    bool bIsGLTF = false;
 };

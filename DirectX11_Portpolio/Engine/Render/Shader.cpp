@@ -13,12 +13,12 @@ Shader::Shader(wstring VSPath, wstring PSPath)
     SetPixelShaderPath(PSPath);
 }
 
-void Shader::InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements, const D3D11_SAMPLER_DESC InSamplerDesc)
+void Shader::InitRenderer(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputElements, ESamplerSlot SampSlot)
 {
     CompileVertexShader();
     CreateInputLayout(InInputElements);
     CompilePixelShader();
-    CreateSamplerState(InSamplerDesc);
+    CreateSamplerState(SampSlot);
     CreateRasterizeState();
     this->Bind();
 }
@@ -97,18 +97,30 @@ void Shader::CreateInputLayout(const vector<D3D11_INPUT_ELEMENT_DESC>& InInputEl
     
 }
 
-void Shader::CreateSamplerState(const D3D11_SAMPLER_DESC& InSamplerDesc)
+void Shader::CreateSamplerState(const ESamplerSlot sampSlot)
 {
-    D3D::Get()->GetDevice()->CreateSamplerState(&InSamplerDesc, SamplerState.GetAddressOf());
+    switch (sampSlot)
+    {
+    case ESamplerSlot::DefaultSampler:
+        D3D::Get()->GetDevice()->CreateSamplerState(&SamplerDescCollection::GetDefaultSamplerDesc(),
+            SamplerState.GetAddressOf());
+        break;
+
+    case ESamplerSlot::ClampSampler:
+        D3D::Get()->GetDevice()->CreateSamplerState(&SamplerDescCollection::GetClampSamplerDesc(),
+            ClampSamplerState.GetAddressOf());
+        break;
+    }
+    
 }
 
 
-void Shader::Bind() const
+void Shader::Bind()
 {
     D3D::Get()->GetDeviceContext()->IASetInputLayout(InputLayouts.Get());
     D3D::Get()->GetDeviceContext()->VSSetShader(VertexShader.Get(), nullptr, 0);
     D3D::Get()->GetDeviceContext()->PSSetShader(PixelShader.Get(), nullptr, 0);
-    D3D::Get()->GetDeviceContext()->PSSetSamplers(0, 1, SamplerState.GetAddressOf());
+    PSSetSampler();
     D3D::Get()->GetDeviceContext()->RSSetState(RSState.Get());
 }
 
@@ -173,6 +185,14 @@ void Shader::CreateDepthStencilState(const D3D11_DEPTH_STENCIL_DESC& InDepthSten
 void Shader::SetCustomDepthStencilState()
 {
     D3D::Get()->GetDeviceContext()->OMSetDepthStencilState(CustomDepthStencilState.Get(), 0);
+}
+
+void Shader::PSSetSampler()
+{
+    if(SamplerState != nullptr)
+        D3D::Get()->GetDeviceContext()->PSSetSamplers(static_cast<int>(ESamplerSlot::DefaultSampler), 1, SamplerState.GetAddressOf());
+    if(ClampSamplerState != nullptr)
+        D3D::Get()->GetDeviceContext()->PSSetSamplers(static_cast<int>(ESamplerSlot::ClampSampler), 1, ClampSamplerState.GetAddressOf());
 }
 
 void Shader::DrawIndexed(const int nIndex)

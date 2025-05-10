@@ -1,6 +1,7 @@
 #include "HeaderCollection.h"
 #include "Texture.h"
 
+
 using namespace DirectX;
 
 Texture::Texture(wstring InFileName, TexMetadata& InLoadInfo, bool bDefaultPath)
@@ -80,11 +81,11 @@ void Texture::LoadTexture()
 		Check(hr);
 	}
 
-	
+
 	hr = CreateShaderResourceView(D3D::Get()->GetDevice(), image.GetImages(), image.GetImageCount(), Metadata, SRV.GetAddressOf());
 	Check(hr);
 }
-
+/*
 D3D11_TEXTURE2D_DESC Texture::ReadPixel(vector<Color>& OutPixel)
 {
 	return ReadPixel(DXGI_FORMAT_UNKNOWN, OutPixel);
@@ -149,3 +150,4 @@ D3D11_TEXTURE2D_DESC Texture::ReadPixel(ID3D11Texture2D* InSource, DXGI_FORMAT I
 
 	return desc;
 }
+*/

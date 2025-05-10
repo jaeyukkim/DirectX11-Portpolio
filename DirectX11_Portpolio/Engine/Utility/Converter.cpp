@@ -22,9 +22,9 @@ Converter::~Converter()
 
 }
 
-void Converter::ReadFile(const wstring InFileName)
+void Converter::ReadFile(const wstring InFileName, bool InbIsGLTF)
 {
-	
+	bIsGLTF = InbIsGLTF;
 
 	Scene = Loader->ReadFile
 	(
@@ -35,6 +35,7 @@ void Converter::ReadFile(const wstring InFileName)
 		| aiProcess_GenNormals
 		| aiProcess_CalcTangentSpace
 		| aiProcess_GenBoundingBoxes
+
 	);
 
 	Assert(Scene != nullptr, "모델 정상 로드 않됨");
@@ -93,11 +94,11 @@ void Converter::ReadMaterials(EMeshType InMeshType)
 		
 		material->GetTexture(aiTextureType_METALNESS, 0, &textureFile);
 		data->MetallicFile = textureFile.C_Str();
-
+		
 		material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFile);
 		data->DiffuseRoughnessFile = textureFile.C_Str();
 
-		material->GetTexture(aiTextureType_NORMALS, 0, &textureFile);
+		material->GetTexture(aiTextureType_NORMAL_CAMERA, 0, &textureFile);
 		data->NormalFile = textureFile.C_Str();
 
 		material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &textureFile);
@@ -142,7 +143,7 @@ void Converter::WriteMaterial(wstring InSaveFileName, bool InOverwrite)
 		value["Emissive"] = ColorToJson(data->Emissive);
 		value["AlbedoMap"] = SaveTexture(folderName, data->AlbedoFile);
 		value["MetallicMap"] = SaveTexture(folderName, data->MetallicFile);
-		value["DiffuseRoughnessMap"] = SaveTexture(folderName, data->DiffuseRoughnessFile);
+		value["RoughnessMap"] = SaveTexture(folderName, data->DiffuseRoughnessFile);
 		value["NormalMap"] = SaveTexture(folderName, data->NormalFile);
 		value["AmbientOcclusionMap"] = SaveTexture(folderName, data->AmbientOcclusionFile);
 		value["EmissiveMap"] = SaveTexture(folderName, data->EmissiveFile);
@@ -330,6 +331,9 @@ void Converter::ReadSkeletalMeshData()
 			if (mesh->HasTangentsAndBitangents())
 				memcpy_s(&vertex.Tangent, sizeof(Vector3), &mesh->mTangents[v], sizeof(Vector3));
 
+			if (bIsGLTF)
+				ConvertToDXCoord(&vertex.Normal, &vertex.Tangent);
+
 			data->Vertices.push_back(vertex);
 		}
 
@@ -344,6 +348,22 @@ void Converter::ReadSkeletalMeshData()
 		SkeletalMeshes.push_back(data);
 	}
 }
+
+void Converter::ConvertToDXCoord(Vector3* normal, Vector3* tangent)
+{
+	// Normal 변환
+	float temp= -normal->y;
+	normal->y = normal->z;
+	normal->z = temp;
+	normal->Normalize();
+	
+	// Tangent 변환
+	float tempT = -tangent->y;
+	tangent->y = tangent->z;
+	tangent->z = tempT;
+	tangent->Normalize();
+}
+
 
 void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
 {
@@ -496,3 +516,4 @@ string Converter::GetVertexShaderFileName(EMeshType InMeshType)
 	}
 	return path;
 }
+

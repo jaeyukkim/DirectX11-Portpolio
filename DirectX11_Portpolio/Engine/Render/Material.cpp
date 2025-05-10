@@ -8,6 +8,7 @@ Material::Material()
 
 	ColorConstantBuffer = make_shared<ConstantBuffer>(&MaterialDesc, sizeof(MaterialDescription));
 	Renderer = make_shared<Shader>();
+
 }
 
 
@@ -30,7 +31,6 @@ void Material::Render()
 
 void Material::Initialize()
 {
-	SampDesc = SamplerDescCollection::GetDefaultSamplerDesc();
 	for (int i = 0; i < static_cast<int>(MaterialMapType::MAX_TEXTURE_COUNT); i++)
 	{
 		Textures[i] = nullptr;		//// 텍스처 포인터 초기화
@@ -38,7 +38,7 @@ void Material::Initialize()
 	}
 }
 
-void Material::SetSamplerDesc(const D3D11_SAMPLER_DESC& InsampDesc)
+void Material::SetSamplerDesc(ESamplerSlot InsampDesc)
 {
 	SampDesc = InsampDesc;
 }
@@ -52,12 +52,14 @@ void Material::SetTextureMap(wstring InFilePath, MaterialMapType InMaterialMapTy
 	CheckingMaterialMap(InMaterialMapType);
 	
 }
-void Material::CheckingMaterialMap(MaterialMapType InMaterialMapType)
+bool Material::CheckingMaterialMap(MaterialMapType InMaterialMapType)
 {
+	bool bUseSRGB = false;
 	switch (InMaterialMapType)
 	{
 	case MaterialMapType::ALBEDO:
 		MaterialDesc.bUseAlbedoMap = true;
+		bUseSRGB = true;
 		break;
 	case MaterialMapType::NORMAL:
 		MaterialDesc.bUseNormalMap = true;
@@ -68,13 +70,16 @@ void Material::CheckingMaterialMap(MaterialMapType InMaterialMapType)
 	case MaterialMapType::METALLIC:
 		MaterialDesc.bUseMetallicMap = true;
 		break;
-	case MaterialMapType::DIFFUSE_ROUGHNESS:
-		MaterialDesc.bUseDeffuseRoughnessMap = true;
+	case MaterialMapType::ROUGHNESS:
+		MaterialDesc.bUseRoughnessMap = true;
 		break;
 	case MaterialMapType::EMISSIVE:
 		MaterialDesc.bUseEmissiveMap = true;
+		bUseSRGB = true;
 		break;
 	}
+
+	return bUseSRGB;
 }
 
 ID3D11ShaderResourceView* Material::GetSRV(MaterialMapType InMaterialMapType)

@@ -16,7 +16,7 @@ public:
     virtual void RenderComponent(bool bUsePreRender = false) override;
 
     void InitRenderer() const;
-    
+    vector<Material*> GetAllMaterials();
     
 private:
     void ReadFile(wstring InFileName);
