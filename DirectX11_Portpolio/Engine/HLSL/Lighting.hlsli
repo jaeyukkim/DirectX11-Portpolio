@@ -129,7 +129,7 @@ float3 DiffuseIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
     float3 F0 = lerp(Fdielectric, albedo, metallic);
     float3 F = SchlickFresnel(F0, max(0.0, dot(normalWorld, pixelToEye)));
     float3 kd = lerp(1.0 - F, 0.0, metallic);
-    float3 irradiance = textureCube[CUBEMAP_IRRADIENCE].Sample(g_sampler, normalWorld).rgb;
+    float3 irradiance = textureCube[CUBEMAP_IRRADIENCE].SampleLevel(g_sampler, normalWorld, 0).rgb;
 
     return kd * albedo * irradiance;
 }
@@ -137,10 +137,9 @@ float3 DiffuseIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
 float3 SpecularIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
     float metallic, float roughness)
 {
-    float2 specularBRDF = brdfTex.Sample(ClampSampler, float2(dot(normalWorld, pixelToEye), 1.0 - roughness)).rg;
+    float2 specularBRDF = brdfTex.SampleLevel(ClampSampler, float2(dot(normalWorld, pixelToEye), 1.0 - roughness), 0.0f).rg;
     float3 specularIrradiance = textureCube[CUBEMAP_SPECULAR].SampleLevel(g_sampler, reflect(-pixelToEye, normalWorld),
-        3 + roughness * 5.0f).rgb;
-    const float3 Fdielectric = 0.04; // 비금속(Dielectric) 재질의 F0
+        2 + roughness * 5.0f).rgb;
     float3 F0 = lerp(Fdielectric, albedo, metallic);
 
     return (F0 * specularBRDF.x + specularBRDF.y) * specularIrradiance;
@@ -152,7 +151,7 @@ float3 AmbientLightingByIBL(float3 albedo, float3 normalW, float3 pixelToEye, fl
     float3 diffuseIBL = DiffuseIBL(albedo, normalW, pixelToEye, metallic);
     float3 specularIBL = SpecularIBL(albedo, normalW, pixelToEye, metallic, roughness);
 
-    return (diffuseIBL + specularIBL) * (ao+3);
+    return (diffuseIBL + specularIBL) * ao;
 }
 
 // GGX/Towbridge-Reitz normal distribution function.

@@ -21,7 +21,7 @@ AKachujin::~AKachujin()
 void AKachujin::Tick(float deltaTime)
 {
     Super::Tick(deltaTime);
-
+    
     if (ImGui::TreeNode("Material")) 
     {
 
@@ -50,12 +50,13 @@ void AKachujin::Tick(float deltaTime)
                 desc->bUseAOMap = bUseAOMap;
                 desc->bUseMetallicMap = bUseMetallicMap;
                 desc->bUseRoughnessMap = bUseRoughnessMap;
+                desc->bInvertNormalMapY = true;
             }
         }
 
         ImGui::TreePop();
     }
-
+    
     
 }
 

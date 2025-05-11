@@ -8,7 +8,6 @@ cbuffer CB_ModelBones : register(b3)
     matrix BoneTransforms[MAX_MODEL_TRANSFORM];
 
     uint BoneIndex;
-
 };
 
 
@@ -17,6 +16,8 @@ cbuffer CB_ModelBones : register(b3)
 VertexOutput VS_Main(VertexShaderInput input)
 {
     VertexOutput output;
+
+    float newWorld = mul(BoneTransforms[BoneIndex], World);
 
     float4 pos = float4(input.posModel, 1.0f);
     float4 posWorld = mul(pos, World);

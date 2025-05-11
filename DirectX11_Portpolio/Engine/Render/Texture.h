@@ -4,7 +4,8 @@
 class Texture
 {
 public:
-    Texture(wstring InFileName, TexMetadata& InLoadInfo, bool bDefaultPath = true);
+    Texture(wstring InFileName, TexMetadata& InLoadInfo,  
+        bool bUseSRGB, bool bIsCubeMap, bool bDefaultPath = true);
     ~Texture();
 
 public:
@@ -15,7 +16,17 @@ public:
 
 private:
     void LoadMetadata(TexMetadata& InLoadInfo);
-    void LoadTexture();
+    void LoadTexture(bool InbIsCubeMap, bool bUseSRGB);
+    void ReadImage(vector<uint8_t>& image, int& width, int& height);
+
+private:
+    void CreateDDSTexture(bool InbIsCubeMap);
+    void CreateTexture(bool bUseSRGB);
+
+    ComPtr<ID3D11Texture2D> CreateStagingTexture(
+        const int width, const int height, vector<uint8_t>& image,
+        const DXGI_FORMAT pixelFormat = DXGI_FORMAT_R8G8B8A8_UNORM,
+        const int mipLevels = 1, const int arraySize = 1);
 
 public:
     //D3D11_TEXTURE2D_DESC ReadPixel(vector<Color>& OutPixel);
@@ -24,6 +35,9 @@ public:
 
 private:
     ComPtr<ID3D11ShaderResourceView> SRV = nullptr;
+    ComPtr<ID3D11Texture2D> texture = nullptr;
+    
+
     TexMetadata Metadata;
 
 private:

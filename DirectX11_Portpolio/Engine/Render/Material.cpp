@@ -47,10 +47,10 @@ void Material::SetTextureMap(wstring InFilePath, MaterialMapType InMaterialMapTy
 {
 	int matType = static_cast<int>(InMaterialMapType);
 	TexMetadata mataData;
-	Textures[matType] = make_shared<Texture>(InFilePath, mataData, false);
+	Textures[matType] = make_shared<Texture>(InFilePath, mataData, 
+		CheckingMaterialMap(InMaterialMapType), bCubeMap, false);
+
 	SRVs[matType] = Textures[matType]->GetSRV();
-	CheckingMaterialMap(InMaterialMapType);
-	
 }
 bool Material::CheckingMaterialMap(MaterialMapType InMaterialMapType)
 {
@@ -78,7 +78,7 @@ bool Material::CheckingMaterialMap(MaterialMapType InMaterialMapType)
 		bUseSRGB = true;
 		break;
 	}
-
+	
 	return bUseSRGB;
 }
 

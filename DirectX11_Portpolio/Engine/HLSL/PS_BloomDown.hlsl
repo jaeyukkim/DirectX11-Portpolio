@@ -18,5 +18,31 @@ struct SamplingPixelShaderInput
 
 float4 PS_Main(SamplingPixelShaderInput input) : SV_TARGET
 {
-    return BloomDownTex.Sample(ClampSampler, input.texcoord);
+    float x = input.texcoord.x;
+    float y = input.texcoord.y;
+
+    float3 a = BloomDownTex.Sample(ClampSampler, float2(x - 2 * dx, y + 2 * dy)).rgb;
+    float3 b = BloomDownTex.Sample(ClampSampler, float2(x, y + 2 * dy)).rgb;
+    float3 c = BloomDownTex.Sample(ClampSampler, float2(x + 2 * dx, y + 2 * dy)).rgb;
+
+    float3 d = BloomDownTex.Sample(ClampSampler, float2(x - 2 * dx, y)).rgb;
+    float3 e = BloomDownTex.Sample(ClampSampler, float2(x, y)).rgb;
+    float3 f = BloomDownTex.Sample(ClampSampler, float2(x + 2 * dx, y)).rgb;
+
+    float3 g = BloomDownTex.Sample(ClampSampler, float2(x - 2 * dx, y - 2 * dy)).rgb;
+    float3 h = BloomDownTex.Sample(ClampSampler, float2(x, y - 2 * dy)).rgb;
+    float3 i = BloomDownTex.Sample(ClampSampler, float2(x + 2 * dx, y - 2 * dy)).rgb;
+
+    float3 j = BloomDownTex.Sample(ClampSampler, float2(x - dx, y + dy)).rgb;
+    float3 k = BloomDownTex.Sample(ClampSampler, float2(x + dx, y + dy)).rgb;
+    float3 l = BloomDownTex.Sample(ClampSampler, float2(x - dx, y - dy)).rgb;
+    float3 m = BloomDownTex.Sample(ClampSampler, float2(x + dx, y - dy)).rgb;
+
+    float3 color = e * 0.125;
+    color += (a + c + g + i) * 0.03125;
+    color += (b + d + f + h) * 0.0625;
+    color += (j + k + l + m) * 0.125;
+
+    return float4(color, 1.0);
+    //return BloomDownTex.Sample(ClampSampler, input.texcoord);
 }
