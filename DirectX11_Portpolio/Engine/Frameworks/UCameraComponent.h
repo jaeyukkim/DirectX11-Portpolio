@@ -25,7 +25,7 @@ private:
 	
 
 private:
-	float MoveSpeed = 2.f;
+	float MoveSpeed = 10.f;
 	float RotationSpeed = 25.f;
 	float aspect = 16.0f / 9.0f;
 	

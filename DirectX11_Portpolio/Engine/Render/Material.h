@@ -47,6 +47,7 @@ public:
     ConstantBuffer* GetConstantBuffer() const { return ColorConstantBuffer.get(); }
     ESamplerSlot GetSamplerDesc() const { return SampDesc; }
     ID3D11ShaderResourceView* GetSRV(MaterialMapType InMaterialMapType);
+    ID3D11ShaderResourceView* GetSkyMapSRV(CubeMapType InCubeMapType);
 
 public:
     void SetUVTiling(Vector2 InUV_Tiling);

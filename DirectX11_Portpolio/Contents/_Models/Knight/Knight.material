@@ -17,7 +17,7 @@
    "blinn1SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
       "AlbedoMap" : "../Contents/_Models/Knight/textures/blinn1SG_baseColor.jpeg",
-      "AmbientOcclusionMap" : "",
+      "AmbientOcclusionMap" : "../Contents/_Models/Knight/textures/blinn1SG_metallicRoughness.png",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "EmissiveMap" : "",
       "HeightMap" : "",
@@ -32,7 +32,7 @@
    "blinn2SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
       "AlbedoMap" : "../Contents/_Models/Knight/textures/blinn2SG_baseColor.png",
-      "AmbientOcclusionMap" : "",
+      "AmbientOcclusionMap" : "../Contents/_Models/Knight/textures/blinn2SG_metallicRoughness.png",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "EmissiveMap" : "",
       "HeightMap" : "",
@@ -47,7 +47,7 @@
    "blinn3SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
       "AlbedoMap" : "../Contents/_Models/Knight/textures/blinn3SG_baseColor.jpeg",
-      "AmbientOcclusionMap" : "",
+      "AmbientOcclusionMap" : "../Contents/_Models/Knight/textures/blinn3SG_metallicRoughness.png",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "EmissiveMap" : "",
       "HeightMap" : "",
@@ -62,7 +62,7 @@
    "blinn4SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
       "AlbedoMap" : "../Contents/_Models/Knight/textures/blinn4SG_baseColor.jpeg",
-      "AmbientOcclusionMap" : "",
+      "AmbientOcclusionMap" : "../Contents/_Models/Knight/textures/blinn4SG_metallicRoughness.png",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "EmissiveMap" : "",
       "HeightMap" : "",
@@ -77,7 +77,7 @@
    "blinn5SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
       "AlbedoMap" : "../Contents/_Models/Knight/textures/blinn5SG_baseColor.jpeg",
-      "AmbientOcclusionMap" : "",
+      "AmbientOcclusionMap" : "../Contents/_Models/Knight/textures/blinn5SG_metallicRoughness.png",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "EmissiveMap" : "",
       "HeightMap" : "",

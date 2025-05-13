@@ -1,0 +1,12 @@
+{
+  "File": {
+    "Material": "MapFloor/MapFloor",
+    "Mesh": "MapFloor/MapFloor"
+  },
+  "Transform": {
+    "Position": "0,0,0",
+    "Rotation": "90.0,0,0",
+    "Scale": "0.05,0.05,0.05"
+  }
+  
+}

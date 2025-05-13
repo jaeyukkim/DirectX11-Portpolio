@@ -13,9 +13,15 @@ VertexOutput VS_Main(StaticMeshInput input)
     output.posWorld = posWorld.xyz;
 
     output.modelNormal = normalize(mul(input.ObjectNormal, (float3x3)World));
+
     output.texCoord = input.texCoord;
     output.color = input.ObjectColor;
-    output.tangent = mul(input.tangent, (float3x3) World);
+
+    
+    float4 tangentWorld = float4(input.tangent, 0.0f);
+    tangentWorld = mul(tangentWorld, World);
+    output.tangent = tangentWorld.xyz;
+ 
 
     return output;
 }

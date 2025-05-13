@@ -151,7 +151,12 @@ void Texture::CreateTexture(bool bUseSRGB)
 		stagingTexture.Get(), 0, NULL);
 
 	// ResourceView 만들기
-	D3D::Get()->GetDevice()->CreateShaderResourceView(texture.Get(), 0, SRV.GetAddressOf());
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = pixelFormat;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = -1; // 최대까지 자동 설정
+	D3D::Get()->GetDevice()->CreateShaderResourceView(texture.Get(), &srvDesc, SRV.GetAddressOf());
 
 	// 해상도를 낮춰가며 밉맵 생성
 	D3D::Get()->GetDeviceContext()->GenerateMips(SRV.Get());
@@ -267,69 +272,3 @@ void Texture::ReadImage(vector<uint8_t>& image, int& width, int& height)
 	}
 }
 
-/*
-D3D11_TEXTURE2D_DESC Texture::ReadPixel(vector<Color>& OutPixel)
-{
-	return ReadPixel(DXGI_FORMAT_UNKNOWN, OutPixel);
-}
-
-D3D11_TEXTURE2D_DESC Texture::ReadPixel(DXGI_FORMAT InFormat, vector<Color>& OutPixel)
-{
-	ID3D11Texture2D* texture;
-	SRV->GetResource((ID3D11Resource**)&texture);
-
-	if (InFormat == DXGI_FORMAT_UNKNOWN)
-	{
-		D3D11_TEXTURE2D_DESC desc;
-		texture->GetDesc(&desc);
-
-		InFormat = desc.Format;
-	}
-
-	return ReadPixel(texture, InFormat, OutPixel);
-}
-
-D3D11_TEXTURE2D_DESC Texture::ReadPixel(ID3D11Texture2D* InSource, DXGI_FORMAT InFormat, vector<Color>& OutPixel)
-{
-	D3D11_TEXTURE2D_DESC sourceDesc;
-	InSource->GetDesc(&sourceDesc);
-
-
-	D3D11_TEXTURE2D_DESC desc;
-	ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
-	desc.Width = sourceDesc.Width;
-	desc.Height = sourceDesc.Height;
-	desc.MipLevels = 1;
-	desc.ArraySize = 1;
-	desc.Format = InFormat;
-	desc.SampleDesc = sourceDesc.SampleDesc;
-	desc.Usage = D3D11_USAGE_STAGING;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-
-	ComPtr<ID3D11Texture2D> texture;
-	Check(D3D::Get()->GetDevice()->CreateTexture2D(&desc, nullptr, &texture));
-	D3D::Get()->GetDeviceContext()->CopyResource(texture.Get(), InSource);
-	
-	unique_ptr<UINT[]> colors(new UINT[desc.Width * desc.Height]);
-	
-	D3D11_MAPPED_SUBRESOURCE subResource;
-	D3D::Get()->GetDeviceContext()->Map(texture.Get(), 0, D3D11_MAP_READ, 0, &subResource);
-	{
-		memcpy(colors.get(), subResource.pData, sizeof(UINT) * desc.Width * desc.Height);
-	}
-	D3D::Get()->GetDeviceContext()->Unmap(texture.Get(), 0);
-	
-
-	for (UINT y = 0; y < desc.Height; y++)
-	{
-		for (UINT x = 0; x < desc.Width; x++)
-		{
-			UINT index = desc.Width * y + x;
-
-			OutPixel.push_back(Color(colors[index]));
-		}
-	}
-
-	return desc;
-}
-*/

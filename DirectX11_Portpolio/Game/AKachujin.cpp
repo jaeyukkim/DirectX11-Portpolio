@@ -5,12 +5,12 @@
 
 AKachujin::AKachujin()
 {
-    Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Knight");
+    Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Samurai");
     SetRootComponent(Mesh.get());
 
     Camera = CreateComponent<UCameraComponent>(this);
     Camera->GetRelativeTransform()->SetRotation(30.0f, 0.0f, 0.0f);
-    Camera->GetRelativeTransform()->SetPosition(0.0f, 10.0f, -10.0f);
+    Camera->GetRelativeTransform()->SetPosition(0.0f, 3.0f, -3.0f);
    // Camera->SetUpAttachment(GetRootComponent());
 }
 
@@ -22,7 +22,7 @@ void AKachujin::Tick(float deltaTime)
 {
     Super::Tick(deltaTime);
     
-    if (ImGui::TreeNode("Material")) 
+    if (ImGui::TreeNode("ModelMaterial")) 
     {
 
         int flag = 0;

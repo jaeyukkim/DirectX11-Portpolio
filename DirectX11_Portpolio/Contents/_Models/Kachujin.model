@@ -4,7 +4,7 @@
     "Mesh": "Kachujin/Kachujin"
   },
   "Transform": {
-    "Position": "0,0,6",
+    "Position": "0,1,6",
     "Rotation": "0,180,0",
     "Scale": "0.01,0.01,0.01"
   },

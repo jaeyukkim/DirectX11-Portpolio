@@ -38,6 +38,10 @@ void FSceneView::PreRender()
 
     Instance->ViewConstantBuffer->UpdateConstBuffer();
     Instance->ViewConstantBuffer->VSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
+    Instance->ViewConstantBuffer->PSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
+
+    D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::CubeMapTexture),
+        static_cast<int>(CubeMapType::MAX_CUBEMAP_TEXTURE_COUNT), Instance->IBLSRV->GetAddressOf());
 
 }
 
@@ -104,3 +108,11 @@ void FSceneView::UpdateLightMap(LightInformation& InLightInfo)
 }
 
 
+void FSceneView::UpdateSkyLight(CubeMapType IBLType, ID3D11ShaderResourceView* InIBLSRV)
+{
+    Assert(InIBLSRV != nullptr, "UpdateSkyLight FAILED");
+
+    int IBLTypeToIdx = static_cast<int>(IBLType);
+    IBLSRV[IBLTypeToIdx] = InIBLSRV;
+   
+}

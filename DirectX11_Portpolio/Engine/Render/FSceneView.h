@@ -1,6 +1,8 @@
 #pragma once
-
+#include "Material.h"
 #define MAX_LIGHT_COUNT 30
+
+
 
 struct FViewContext
 {
@@ -62,6 +64,7 @@ public:
 public:
     void AddToLightMap(LightInformation* InLightInfo);
     void UpdateLightMap(LightInformation& InLightInfo);
+    void UpdateSkyLight(CubeMapType IBLType, ID3D11ShaderResourceView* InIBLSRV);
 
 private:
     FViewContext Context;
@@ -80,6 +83,10 @@ private:
     unordered_map<uint8_t, LightInformation> LightMap;
     vector<LightInformation> CachedLights;
     shared_ptr<StructuredBuffer> LightConstantBuffer;
+
+
+    static constexpr int MaxIBLMap = static_cast<int>(CubeMapType::MAX_CUBEMAP_TEXTURE_COUNT);
+    ComPtr<ID3D11ShaderResourceView> IBLSRV[MaxIBLMap] = { nullptr };
 
 private:
     static FSceneView* Instance; 

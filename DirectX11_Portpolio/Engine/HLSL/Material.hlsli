@@ -16,6 +16,9 @@
 #define CUBEMAP_BRDF 3
 #define MAX_CUBEMAP_TEXTURE_COUNT 3 // BRDF는 2D 텍스쳐임
 
+#define MaxLOD 10
+#define BasicLodScale 20
+#define NormalLod 1.5
 
 TextureCube textureCube[MAX_CUBEMAP_TEXTURE_COUNT] : register(t0);
 Texture2D brdfTex  : register(t3);
@@ -51,13 +54,19 @@ cbuffer CB_Material : register(b0)
     MaterialDesc Material;
 };
 
-float3 ApplyNormalMapping(float2 uv, float3 normal, float3 tangent, SamplerState samp)
+float ComputeLODBasedOnLog2(float distance, float lodScale)
+{
+    float lod = log2((distance + 1.0f) / lodScale);
+    return clamp(lod, 0, MaxLOD);
+}
+
+float3 ApplyNormalMapping(float2 uv, float3 normal, float3 tangent, SamplerState samp, float LOD)
 {
     float3 normalWorld = normal;
 
     if (Material.useNormalMap)
     {
-        float3 NewNormal = MaterialMaps[TEXTURE_NORMAL].SampleLevel(samp, uv, 0.0).rgb;
+        float3 NewNormal = MaterialMaps[TEXTURE_NORMAL].SampleLevel(samp, uv, LOD).rgb;
         NewNormal = 2.0 * NewNormal - 1.0;
 
         // OpenGL 노멀맵일 경우에는 y 방향을 뒤집어줍니다.

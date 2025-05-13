@@ -23,8 +23,27 @@ UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, bool bOverwrite)
 
 	if (bOverwrite)
 	{
+		wstring fbxPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
+		wstring gltfPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
+		bool bIsGLTF = false;
+		wstring finalPath;
+		if (filesystem::exists(fbxPath))
+		{
+			finalPath = fbxPath;
+		}
+		else if (filesystem::exists(gltfPath))
+		{
+			finalPath = gltfPath;
+			bIsGLTF = true;
+		}
+		else
+		{
+			wcout << L"모델 파일이 존재하지 않습니다: " << endl;
+			return;
+		}
+
 		shared_ptr<Converter> converter = make_shared<Converter>();
-		converter->ReadFile(objectName + L"/" + objectName + L".fbx", false);
+		converter->ReadFile(finalPath, bIsGLTF);
 		converter->ExportMaterial(objectName, true, EMeshType::StaticMeshType);
 		converter->ExportMesh(objectName, EMeshType::StaticMeshType);
 	}

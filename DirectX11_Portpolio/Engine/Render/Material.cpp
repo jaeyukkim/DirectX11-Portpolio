@@ -90,6 +90,14 @@ ID3D11ShaderResourceView* Material::GetSRV(MaterialMapType InMaterialMapType)
 	return nullptr;
 }
 
+ID3D11ShaderResourceView* Material::GetSkyMapSRV(CubeMapType InCubeMapType)
+{
+	int matType = static_cast<int>(InCubeMapType);
+	if (SRVs[matType] != nullptr)
+		return SRVs[matType].Get();
+	return nullptr;
+}
+
 void Material::SetUVTiling(Vector2 InUV_Tiling)
 {
 	MaterialDesc.UV_Tiling = InUV_Tiling;
