@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -142,6 +142,16 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Editor\Application\EditorApplication.h" />
+    <ClInclude Include="Editor\Application\Gui.h" />
+    <ClInclude Include="Editor\Application\guiEditor.h" />
+    <ClInclude Include="Editor\EditorWindow\EditorWindow.h" />
+    <ClInclude Include="Editor\Entity\Entity.h" />
+    <ClInclude Include="Editor\Widget\TransformWidget.h" />
+    <ClInclude Include="Editor\WindowView\ConsoleWindow.h" />
+    <ClInclude Include="Editor\WindowView\ContentWindow.h" />
+    <ClInclude Include="Editor\WindowView\DetailWindow.h" />
+    <ClInclude Include="Editor\WindowView\OutlinerWindow.h" />
     <ClInclude Include="Frameworks\Actor.h" />
     <ClInclude Include="Frameworks\ACharacter.h" />
     <ClInclude Include="Frameworks\StaticMesh.h" />
@@ -176,7 +186,6 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Systems\Mouse.h" />
     <ClInclude Include="Timer\Timer.h" />
     <ClInclude Include="Timer\TimerManager.h" />
-    <ClInclude Include="UI\Gui.h" />
     <ClInclude Include="Utility\BinaryFile.h" />
     <ClInclude Include="Utility\Converter.h" />
     <ClInclude Include="Utility\Delegate.h" />
@@ -184,6 +193,89 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Utility\String.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Editor\Application\EditorApplication.cpp" />
+    <ClCompile Include="Editor\Application\Gui.cpp">
+      <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <Optimization>Disabled</Optimization>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\Debug_Engine\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\Debug_Engine\</BrowseInformationFile>
+      <CompileAs>Default</CompileAs>
+      <ConformanceMode>false</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\Debug_Engine\</ModuleDependenciesFile>
+      <ModuleOutputFile>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\Debug_Engine\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ObjectFileName>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\Debug_Engine\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\x64\Debug\Engine.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>HeaderCollection.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\Debug_Engine\Engine.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\Debug_Engine\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <TrackerLogDirectory>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\Debug_Engine\Engine.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <XMLDocumentationFileName>D:\DX-Portpolio\DirectX11-Portpolio\DirectX11_Portpolio\Debug_Engine\</XMLDocumentationFileName>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>_DEBUG;_LIB;_UNICODE;UNICODE;</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>./;;C:\Users\77\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
+      <LibCompiled>true</LibCompiled>
+    </ClCompile>
+    <ClCompile Include="Editor\Application\guiEditor.cpp" />
+    <ClCompile Include="Editor\EditorWindow\EditorWindow.cpp" />
+    <ClCompile Include="Editor\Entity\Entity.cpp" />
+    <ClCompile Include="Editor\Widget\TransformWidget.cpp" />
+    <ClCompile Include="Editor\WindowView\ConsoleWindow.cpp" />
+    <ClCompile Include="Editor\WindowView\ContentWindow.cpp" />
+    <ClCompile Include="Editor\WindowView\DetailWindow.cpp" />
+    <ClCompile Include="Editor\WindowView\OutlinerWindow.cpp" />
     <ClCompile Include="Frameworks\Actor.cpp" />
     <ClCompile Include="Frameworks\ACharacter.cpp" />
     <ClCompile Include="Frameworks\StaticMesh.cpp" />
@@ -216,7 +308,6 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Systems\Mouse.cpp" />
     <ClCompile Include="Timer\Timer.cpp" />
     <ClCompile Include="Timer\TimerManager.cpp" />
-    <ClCompile Include="UI\Gui.cpp" />
     <ClCompile Include="Utility\BinaryFile.cpp" />
     <ClCompile Include="Utility\Converter.cpp" />
     <ClCompile Include="Utility\Delegate.cpp" />

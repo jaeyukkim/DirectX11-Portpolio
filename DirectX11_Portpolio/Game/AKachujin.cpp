@@ -22,6 +22,7 @@ void AKachujin::Tick(float deltaTime)
 {
     Super::Tick(deltaTime);
     
+    /*
     if (ImGui::TreeNode("ModelMaterial")) 
     {
 
@@ -57,7 +58,7 @@ void AKachujin::Tick(float deltaTime)
         ImGui::TreePop();
     }
     
-    
+    */
 }
 
 void AKachujin::Render()

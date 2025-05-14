@@ -8,8 +8,6 @@ D3DDesc D3D::D3dDesc = D3DDesc();
 
 D3D* D3D::Get()
 {
-	assert(Instance != nullptr);
-
 	return Instance;
 }
 
@@ -41,6 +39,7 @@ void D3D::SetDesc(const D3DDesc& InDesc)
 {
 	D3dDesc = InDesc;
 }
+
 
 void D3D::RunPostProcess()
 {
@@ -74,9 +73,20 @@ void D3D::ClearFloatRTV()
 	DeviceContext->ClearRenderTargetView(FloatRTV.Get(), clearColor);
 }
 
+
 void D3D::Present()
 {
 	SwapChain->Present(1, 0);
+}
+
+void D3D::EndDraw()
+{
+	ComPtr<ID3D11Texture2D> backBuffer;
+	HRESULT hr = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+		reinterpret_cast<void**>(backBuffer.GetAddressOf()));
+	assert(SUCCEEDED(hr) && "SwapChain 백버퍼 가져오기 실패");
+
+	DeviceContext->CopyResource(RenderTargetBuffer.Get(), backBuffer.Get());
 }
 
 void D3D::ResizeScreen(float InWidth, float InHeight)
@@ -184,12 +194,12 @@ void D3D::CreateRTV()
 	desc.MiscFlags = 0;
 	desc.CPUAccessFlags = 0;
 
-	if (bUseMSAA && NumQualityLevels) 
+	if (bUseMSAA && NumQualityLevels)
 	{
 		desc.SampleDesc.Count = 4;
 		desc.SampleDesc.Quality = NumQualityLevels - 1;
 	}
-	else 
+	else
 	{
 		desc.SampleDesc.Count = 1;
 		desc.SampleDesc.Quality = 0;
@@ -207,6 +217,13 @@ void D3D::CreateRTV()
 	FAILED(Device->CreateTexture2D(&desc, NULL, ResolvedBuffer.GetAddressOf()));
 	FAILED(Device->CreateShaderResourceView(ResolvedBuffer.Get(), NULL, ResolvedSRV.GetAddressOf()));
 	FAILED(Device->CreateRenderTargetView(ResolvedBuffer.Get(), NULL, ResolvedRTV.GetAddressOf()));
+
+
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	FAILED(Device->CreateTexture2D(&desc, NULL, RenderTargetBuffer.GetAddressOf()));
+	FAILED(Device->CreateShaderResourceView(RenderTargetBuffer.Get(), NULL, RenderTargetSRV.GetAddressOf()));
+
 }
 
 void D3D::CreateViewport()

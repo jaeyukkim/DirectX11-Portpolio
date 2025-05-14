@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "World.h"
-
 #include "ULevel.h"
 #include "Systems/Application.h"
 
@@ -30,29 +29,4 @@ void World::Render()
 ULevel* World::GetLevel()
 {
 	return PersistentLevel;
-}
-
-
-int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE InPrevInstance, 
-                   _In_ LPSTR InParam,_In_ int command)
-{
-	D3DDesc desc;
-	desc.AppName = L"KimJaeYuk";
-	desc.Instance = hInInstance;
-	desc.Handle = nullptr;
-
-	desc.Width = 1600;
-	desc.Height = 900;
-	
-
-	D3D::SetDesc(desc);
-
-	
-	WPARAM wParam;
-	{
-		shared_ptr<World> main = std::make_shared<World>();
-		wParam = Application::Run(main.get());
-	}
-	
-	return wParam;
 }

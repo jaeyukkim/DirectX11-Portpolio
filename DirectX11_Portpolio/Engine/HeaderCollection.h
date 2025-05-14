@@ -71,4 +71,5 @@ using namespace DirectX::SimpleMath;
 #include "Systems/Mouse.h"
 #include "Manager/TickTaskManager.h"
 
-#include "UI/Gui.h"
+#include "Editor/Application/Gui.h"
+#include "Editor/Application/EditorApplication.h"

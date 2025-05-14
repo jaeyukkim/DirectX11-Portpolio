@@ -14,15 +14,23 @@ public:
 	UObject();
 	virtual ~UObject();
 
+	int GetObjectID() { return ObjectID; }
+	const string GetObjectName() { return ObjectName; }
+	void SetObjectName(string name) { ObjectName = name; }
 protected:
 	template<typename Component, typename... Args>
 	shared_ptr<Component> CreateComponent(Actor* Owner, Args&&... args);
 	
 	template<typename ActorType, typename... Args>
 	void SpawnActor(UObject* InOuter, Args&&... args);
+
 	
-public:
-	atomic<UINT32> ObjectID;
+
+private:
+	UINT32 ObjectID;
+	string ObjectName;
+
+	friend class ULevel;
 };
 
 
@@ -68,6 +76,12 @@ void UObject::SpawnActor(UObject* InOuter, Args&&... args)
 	// 컴포넌트 생성
 	auto newActor = make_shared<ActorType>(forward<Args>(args)...);
 
+	
+	string className = typeid(ActorType).name();
+	const std::string prefix = "class ";
+	if (className.find(prefix) == 0)
+		className = className.substr(prefix.length());
+	newActor->SetObjectName(className);
 	// Owner 설정
 	newActor->Outer = InOuter;
 	World::GetLevel()->AddActorToLevel(newActor);

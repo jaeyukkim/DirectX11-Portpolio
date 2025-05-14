@@ -15,6 +15,7 @@ public:
     virtual void TickComponent(float deltaTime) override;
     virtual void RenderComponent(bool bUsePreRender = false) override;
     virtual void DrawComponentIndex();
+
 public:
     void InitRenderer();
     void ReverseIndices();

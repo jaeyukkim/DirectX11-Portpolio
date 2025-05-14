@@ -19,6 +19,7 @@ AFloor::AFloor()
 
 void AFloor::Tick(float deltaTime)
 {
+    /*
     if (ImGui::TreeNode("Material"))
     {
 
@@ -48,6 +49,7 @@ void AFloor::Tick(float deltaTime)
 
         ImGui::TreePop();
     }
+    */
 }
 
 void AFloor::Render()

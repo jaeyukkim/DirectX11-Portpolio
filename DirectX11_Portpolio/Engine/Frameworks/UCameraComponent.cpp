@@ -83,7 +83,7 @@ void UCameraComponent::SetViewMatrix()
 	}
 	// View 행렬 생성
 	aspect = D3D::Get()->GetDesc().Width / D3D::Get()->GetDesc().Height;
-	ViewContext.Projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(90.0f), aspect, 0.1f, 100000.0f);
+	ViewContext.Projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), aspect, 0.1f, 100000.0f);
 	ViewContext.View = XMMatrixLookAtLH(position, target, up);
 	ViewContext.ViewInverse = ViewContext.View.Invert();
 	ViewContext.ViewProjection = ViewContext.View * ViewContext.Projection;

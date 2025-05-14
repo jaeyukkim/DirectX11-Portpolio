@@ -70,6 +70,7 @@ void PostProcess::Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& res
 
 void PostProcess::Render() 
 {
+    /*
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     if (ImGui::TreeNode("Post Processing")) 
     {
@@ -87,7 +88,7 @@ void PostProcess::Render()
 
         ImGui::TreePop();
     }
-
+    */
    
     VBuffer->IASetVertexBuffer();
     IBuffer->IASetIndexBuffer();

@@ -44,6 +44,8 @@ private:
 public:
 	ID3D11Device* GetDevice() { return Device.Get(); }
 	ID3D11DeviceContext* GetDeviceContext() { return DeviceContext.Get(); }
+	ID3D11ShaderResourceView* GetRenderTargetSRV() { return RenderTargetSRV.Get(); }
+
 	void RunPostProcess();
 	void SetFloatRTV();
 	void SetRenderTarget();
@@ -51,6 +53,7 @@ public:
 	void ClearRTV();
 	void ClearFloatRTV();
 	void Present();
+	void EndDraw();
 
 	void ResizeScreen(float InWidth, float InHeight);
 	
@@ -70,7 +73,7 @@ private:
 	ComPtr<ID3D11Device> Device;
 	ComPtr<ID3D11DeviceContext> DeviceContext;
 
-	ComPtr<ID3D11RenderTargetView> RenderTargetView;
+	
 	shared_ptr<D3D11_VIEWPORT> Viewport;
 
 	ComPtr<ID3D11Texture2D> DSV_Texture;
@@ -85,6 +88,10 @@ private:
 	ComPtr<ID3D11ShaderResourceView> ResolvedSRV;
 	ComPtr<ID3D11RenderTargetView> ResolvedRTV;
 	
+	ComPtr<ID3D11Texture2D> RenderTargetBuffer;
+	ComPtr<ID3D11ShaderResourceView> RenderTargetSRV;
+	ComPtr<ID3D11RenderTargetView> RenderTargetView;
+
 	unique_ptr<PostProcess> postProcess;
 
 private:

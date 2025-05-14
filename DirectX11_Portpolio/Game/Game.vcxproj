@@ -138,6 +138,7 @@
     <ClCompile Include="ALightActor.cpp" />
     <ClCompile Include="Enviroment\AFloor.cpp" />
     <ClCompile Include="Enviroment\ACubeMap.cpp" />
+    <ClCompile Include="System\main.cpp" />
     <ClCompile Include="System\ULevel.cpp" />
     <ClCompile Include="System\World.cpp" />
     <ClCompile Include="Pch.cpp">

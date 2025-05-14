@@ -5,23 +5,22 @@
 class Application
 {
 public:
-	static WPARAM Run(class IExecutable* InMain);
+	static void InitApplication(class IExecutable* InMain);
+	static void Destroy();
+	static void Run();
+	static void Close();
+	static bool IsRunning();
 	
 
 private:
-	static void Create();
-	static void Destroy();
-
-	static LRESULT CALLBACK WndProc(HWND InHandle, UINT InMessage, WPARAM InwParam, LPARAM InlParam);
 
 	static void MainRender();
 
-	
-	
 private:
 	Application();
 	~Application();
 private:
 	static class IExecutable* Main;
+	static bool bIsRunning;
 };
 

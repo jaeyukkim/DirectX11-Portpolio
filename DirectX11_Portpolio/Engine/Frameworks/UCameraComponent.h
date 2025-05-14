@@ -28,7 +28,7 @@ private:
 	float MoveSpeed = 10.f;
 	float RotationSpeed = 25.f;
 	float aspect = 16.0f / 9.0f;
-	
+	float FOV = 75.0f;
 
 private:
 	FViewContext ViewContext;

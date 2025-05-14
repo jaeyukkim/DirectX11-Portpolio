@@ -12,10 +12,12 @@ public:
 
 
 public:
-    vector<shared_ptr<Actor>>& GetAllActor() {return Actors;}
+    vector<shared_ptr<Actor>> GetAllActor();
+    Actor* GetActor(int InObjectID);
     void AddActorToLevel(const shared_ptr<Actor>& InActor);
     void DestroyActor(Actor* InActor);
 private:
-    vector<shared_ptr<Actor>> Actors;
+    unordered_map<UINT32, shared_ptr<Actor>> Actors;
     static ULevel* level;
+    static atomic<UINT32> ObjectCount;
 };
