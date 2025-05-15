@@ -28,6 +28,7 @@ public:
 
 	static const D3DDesc& GetDesc();
 	static void SetDesc(const D3DDesc& InDesc);
+	
 
 	FWinSizeChangedSignature WinSizeChanged;
 
@@ -45,6 +46,8 @@ public:
 	ID3D11Device* GetDevice() { return Device.Get(); }
 	ID3D11DeviceContext* GetDeviceContext() { return DeviceContext.Get(); }
 	ID3D11ShaderResourceView* GetRenderTargetSRV() { return RenderTargetSRV.Get(); }
+	PostProcess* GetPostProcess() { return postProcess.get(); }
+
 
 	void RunPostProcess();
 	void SetFloatRTV();
@@ -92,7 +95,7 @@ private:
 	ComPtr<ID3D11ShaderResourceView> RenderTargetSRV;
 	ComPtr<ID3D11RenderTargetView> RenderTargetView;
 
-	unique_ptr<PostProcess> postProcess;
+	shared_ptr<PostProcess> postProcess;
 
 private:
 	UINT NumQualityLevels = 0;

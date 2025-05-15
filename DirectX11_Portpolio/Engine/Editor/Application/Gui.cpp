@@ -74,41 +74,14 @@ void Gui::Render()
 	ImGuiIO& io = ImGui::GetIO();
 	io.DisplaySize = ImVec2(D3D::Get()->GetDesc().Width, D3D::Get()->GetDesc().Height);
 		
-	/*
-	ImGui::Begin
-	(
-		"TextWindow", NULL,
-		ImGuiWindowFlags_NoTitleBar |
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoScrollWithMouse |
-		ImGuiWindowFlags_NoCollapse |
-		ImGuiWindowFlags_NoSavedSettings |
-		ImGuiWindowFlags_NoInputs |
-		ImGuiWindowFlags_NoFocusOnAppearing |
-		ImGuiWindowFlags_NoBringToFrontOnFocus |
-		ImGuiWindowFlags_NoNavFocus
-	);
-
-	for (GuiText content : Contents)
-	{
-		ImVec2 position = ImVec2(content.Position.x, content.Position.y);
-		ImColor color = ImColor(content.Color.x, content.Color.y, content.Color.z, content.Color.w);
-
-		ImGui::GetWindowDrawList()->AddText(position, color, content.Content.c_str());
-	}
-	Contents.clear();
-	
-	
-	ImGui::End();
-	*/
-
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-	ImGui::UpdatePlatformWindows();
-	ImGui::RenderPlatformWindowsDefault();
 
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+	}
 }
 
 

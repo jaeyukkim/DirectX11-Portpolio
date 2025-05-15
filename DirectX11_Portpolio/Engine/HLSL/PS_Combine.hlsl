@@ -64,6 +64,27 @@ float3 lumaBasedReinhardToneMapping(float3 color)
     return color;
 }
 
+float3 RRTAndODTFit(float3 v)
+{
+    float3 a = v * (v + 0.0245786f) - 0.000090537f;
+    float3 b = v * (0.983729f * v + 0.4329510f) + 0.238081f;
+    return a / b;
+}
+
+float3 ACESFitted(float3 color)
+{
+    // Pre-exposure (optional)
+    color *= 0.6f;
+
+    // Apply ACES curve
+    color = RRTAndODTFit(color);
+
+    // Gamma correction (convert to sRGB)
+    color = pow(color, 1.0 / 2.2); // or use sRGB conversion
+
+    return color;
+}
+
 float4 PS_Main(SamplingPixelShaderInput input) : SV_TARGET
 {
     float3 color0 = g_texture0.Sample(g_sampler, input.texcoord).rgb;
@@ -72,7 +93,7 @@ float4 PS_Main(SamplingPixelShaderInput input) : SV_TARGET
     float3 combined = (1.0 - strength) * color0 + strength * color1;
 
     // Tone Mapping  
-    combined = LinearToneMapping(combined);
+    combined = ACESFitted(combined);
 
     return float4(combined, 1.0f);
 }

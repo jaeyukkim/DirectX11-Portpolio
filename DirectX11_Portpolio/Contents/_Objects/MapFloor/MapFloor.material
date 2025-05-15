@@ -6,11 +6,11 @@
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "EmissiveMap" : "",
       "HeightMap" : "",
-      "Metallic" : "0.552786",
+      "Metallic" : "0.152786",
       "MetallicMap" : "../Contents/_Objects/MapFloor/textures/texture_Metallic.png",
       "NormalMap" : "../Contents/_Objects/MapFloor/textures/texture_Normal.png",
       "PixelShaderPath" : "../Engine/HLSL/PS_StaticMesh.hlsl",
-      "Roughness" : "0.552786",
+      "Roughness" : "0.852786",
       "RoughnessMap" : "../Contents/_Objects/MapFloor/textures/texture_Roughness.png",
       "VertexShaderPath" : "../Engine/HLSL/VS_StaticMesh.hlsl"
    }

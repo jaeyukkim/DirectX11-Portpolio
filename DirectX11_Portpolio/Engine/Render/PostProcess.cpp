@@ -70,25 +70,7 @@ void PostProcess::Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& res
 
 void PostProcess::Render() 
 {
-    /*
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNode("Post Processing")) 
-    {
-
-        int flag = 0;
-        flag += ImGui::SliderFloat("Bloom Strength", &CombineFilter.FilterData.strength, 0.0f, 1.0f);
-        flag += ImGui::SliderFloat("Exposure", &CombineFilter.FilterData.option1, 0.0f, 10.0f);
-        flag += ImGui::SliderFloat("Gamma",  &CombineFilter.FilterData.option2, 0.1f, 5.0f);
-
-        // 편의상 사용자 입력이 인식되면 바로 GPU 버퍼를 업데이트
-        if (flag) 
-        {
-            CombineFilter.UpdateConstantBuffers();
-        }
-
-        ImGui::TreePop();
-    }
-    */
+    
    
     VBuffer->IASetVertexBuffer();
     IBuffer->IASetIndexBuffer();

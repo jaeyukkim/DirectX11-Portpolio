@@ -12,7 +12,7 @@ void ULevel::Initialize()
     FTickTaskManager::Create(this);
 
 
-//    SpawnActor<ALightActor>(this);
+    SpawnActor<ALightActor>(this);
     SpawnActor<AKachujin>(this);
     SpawnActor<AFloor>(this);
     SpawnActor<ACubeMap>(this);

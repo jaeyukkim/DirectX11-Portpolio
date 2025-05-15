@@ -77,7 +77,7 @@ public:
 
 public:
 	void SetSelectedActor(weak_ptr<Actor> actor);
-	weak_ptr<Actor> GetSelectedActor();
+	Actor* GetSelectedActor();
 	FSeletedActorChangedDelegate SeletedActorChanged;
 
 private:
@@ -101,6 +101,11 @@ private:
 	bool mViewportFocused;
 	bool mViewportHovered;
 	int mGuizmoType;
+
+private:
+	const float TranslateSnapVal = 0.5f;
+	const float RotateSnapVal = 10.0f;
+
 
 	
 };

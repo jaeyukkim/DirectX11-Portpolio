@@ -21,8 +21,9 @@ ACubeMap::ACubeMap()
     }
 
     SetRootComponent(Sphere.get());
-   
-    
+   //FSceneView::Get()->UpdateIBLStrength(IBLStength);
+   FSceneView::Get()->UpdateIBLStrength(0.0f);
+
 }
 
 void ACubeMap::Tick(float deltaTime)

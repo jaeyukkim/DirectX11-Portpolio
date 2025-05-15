@@ -292,7 +292,7 @@ void D3D::CreateDSV()
 
 void D3D::CreatePostProcess()
 {
-	postProcess = make_unique<PostProcess>(
+	postProcess = make_shared<PostProcess>(
 		vector<ComPtr<ID3D11ShaderResourceView>>{ ResolvedSRV },
 		vector<ComPtr<ID3D11RenderTargetView>>{ RenderTargetView });
 }

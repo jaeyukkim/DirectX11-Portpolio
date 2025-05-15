@@ -9,6 +9,7 @@
 #include <Systems/Application.h>
 
 #include "EditorApplication.h"
+#include <Render/FSceneView.h>
 
 
 
@@ -33,14 +34,18 @@ void EditorApplication::SetSelectedActor(weak_ptr<Actor> actor)
 }
 
 
-weak_ptr<Actor> EditorApplication::GetSelectedActor()
+Actor* EditorApplication::GetSelectedActor()
 {
-	return mSelectedActor;
+	if (shared_ptr<Actor> actor = mSelectedActor.lock())
+	{
+		return actor.get();
+	}
+	return nullptr;
 }
 
 EditorApplication::EditorApplication()
 	:mFlag(ImGuiWindowFlags_None), mState(EditorApplication::eState::Active), mDockspaceFlags(ImGuiDockNodeFlags_None),
-	mFullScreen(true), mViewportFocused(false), mViewportHovered(false), mGuizmoType(-1)
+	mFullScreen(true), mViewportFocused(false), mViewportHovered(false), mGuizmoType(ImGuizmo::OPERATION::TRANSLATE)
 {
 
 }
@@ -283,9 +288,9 @@ void EditorApplication::OnImGuiRender()
 		}
 		ImGui::EndDragDropTarget();
 	}
-	/*
+	
 	// To do : guizmo
-	ya::GameObject* selectedObject = ya::renderer::selectedObject;
+	Actor* selectedObject = GetSelectedActor();
 	if (selectedObject && mGuizmoType != -1)
 	{
 		ImGuizmo::SetOrthographic(false);
@@ -298,24 +303,25 @@ void EditorApplication::OnImGuiRender()
 		// game view camera setting
 
 		// Scene Camera
-		const ya::math::Matrix& viewMatrix = ya::renderer::mainCamera->GetViewMatrix();
-		const ya::math::Matrix& projectionMatrix = ya::renderer::mainCamera->GetProjectionMatrix();
+		FViewContext* viewContext = FSceneView::Get()->GetSceneViewContext();
+		const Matrix* viewMatrix = &viewContext->View.Transpose();
+		const Matrix* projectionMatrix = &viewContext->Projection.Transpose();
 
 		// Object Transform
-		ya::Transform* transform = selectedObject->GetComponent<ya::Transform>();
-		ya::math::Matrix worldMatrix = transform->GetWorldMatrix();
+		FTransform* transform = selectedObject->GetActorTransform();
+		Matrix worldMatrix = transform->ToMatrix();
 
 		// snapping
-		bool snap = ya::Input::GetKey(ya::eKeyCode::Leftcontrol);
-		float snapValue = 0.5f;
+		bool snap = Keyboard::Get()->Press(VK_LCONTROL);
+		float snapValue = TranslateSnapVal;
 
 		// snap to 45 degrees for rotation
 		if (mGuizmoType == ImGuizmo::OPERATION::ROTATE)
-			snapValue = 45.0f;
+			snapValue = RotateSnapVal;
 
 		float snapValues[3] = { snapValue, snapValue, snapValue };
 
-		ImGuizmo::Manipulate(*viewMatrix.m, *projectionMatrix.m, static_cast<ImGuizmo::OPERATION>(mGuizmoType)
+		ImGuizmo::Manipulate(*viewMatrix->m, *projectionMatrix->m, static_cast<ImGuizmo::OPERATION>(mGuizmoType)
 			, ImGuizmo::WORLD, *worldMatrix.m, nullptr, snap ? snapValues : nullptr);
 
 		if (ImGuizmo::IsUsing())
@@ -327,7 +333,7 @@ void EditorApplication::OnImGuiRender()
 			ImGuizmo::DecomposeMatrixToComponents(*worldMatrix.m, translation, rotation, scale);
 
 			// delta rotation from the current rotation
-			ya::math::Vector3 deltaRotation = Vector3(rotation) - transform->GetRotation();
+			Vector3 deltaRotation = Vector3(rotation) - transform->GetRotation();
 			deltaRotation = transform->GetRotation() + deltaRotation;
 
 			// set the new transform
@@ -336,115 +342,10 @@ void EditorApplication::OnImGuiRender()
 			transform->SetPosition(Vector3(translation));
 		}
 	}
-	*/
+	
 	ImGui::End();	// Scene end
 
 	ImGui::PopStyleVar();
 	ImGui::End(); // dockspace end
 	
 }
-
-
-/*
-// Events
-void EditorApplication::SetKeyPressed(int keyCode, int scancode, int action, int mods)
-{
-	constexpr int RELEASE = 0;
-	constexpr int PRESS = 1;
-	constexpr int REPEAT = 2;
-
-	//To do : repeat check
-	//if (action == PRESS)
-		//action = REPEAT;
-	//static std::unordered_map<key, >
-
-	// unordered map key setting
-
-
-
-	switch (action)
-	{
-	case RELEASE:
-	{
-		ya::KeyReleasedEvent event(static_cast<ya::eKeyCode>(keyCode));
-
-		if (mEventCallback)
-			mEventCallback(event);
-	}
-	break;
-	case PRESS:
-	{
-		ya::KeyPressedEvent event(static_cast<ya::eKeyCode>(keyCode), false);
-
-		if (mEventCallback)
-			mEventCallback(event);
-	}
-	break;
-	case REPEAT:
-	{
-		ya::KeyPressedEvent event(static_cast<ya::eKeyCode>(keyCode), true);
-
-		if (mEventCallback)
-			mEventCallback(event);
-	}
-	break;
-	}
-}
-
-void EditorApplication::SetCursorPos(double x, double y)
-{
-	ya::MouseMovedEvent event(x, y);
-
-	if (mEventCallback)
-		mEventCallback(event);
-}
-
-
-
-bool EditorApplication::OnKeyPressed(ya::KeyPressedEvent& e)
-{
-	if (e.IsRepeat())
-		return false;
-
-	bool control = ya::Input::GetKey(ya::eKeyCode::Leftcontrol) || ya::Input::GetKey(ya::eKeyCode::RightControl);
-	bool shift = ya::Input::GetKey(ya::eKeyCode::LeftShift) || ya::Input::GetKey(ya::eKeyCode::RightShift);
-
-	switch (e.GetKeyCode())
-	{
-		// Gizmos
-	case ya::eKeyCode::Q:
-	{
-		if (!ImGuizmo::IsUsing())
-			SetGuizmoType(-1);
-		break;
-	}
-	case ya::eKeyCode::W:
-	{
-		if (!ImGuizmo::IsUsing())
-			SetGuizmoType(ImGuizmo::OPERATION::TRANSLATE);
-		break;
-	}
-	case ya::eKeyCode::E:
-	{
-		if (!ImGuizmo::IsUsing())
-			SetGuizmoType(ImGuizmo::OPERATION::ROTATE);
-		break;
-	}
-	case ya::eKeyCode::R:
-	{
-		if (control)
-		{
-			//ScriptEngine::ReloadAssembly();
-		}
-		else
-		{
-			if (!ImGuizmo::IsUsing())
-				SetGuizmoType(ImGuizmo::OPERATION::SCALE);
-		}
-		break;
-	}
-	}
-
-	return true;
-}
-*/

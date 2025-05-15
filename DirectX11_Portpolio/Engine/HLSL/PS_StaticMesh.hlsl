@@ -13,9 +13,6 @@ float4 PS_Main(VertexOutput input) : SV_TARGET
     float2 uv = input.texCoord * Material.UV_Tiling + Material.UV_Offset;
     float3 finalNormal = ApplyNormalMapping(input.texCoord, input.modelNormal, input.tangent, g_sampler, normalLod);
     
-    
-   
- 
 
     float3 albedo = Material.useAlbedoMap ? MaterialMaps[TEXTURE_ALBEDO].SampleLevel(g_sampler, uv, lod).rgb * Material.Albedo.rgb
         : Material.Albedo.rgb;
@@ -27,9 +24,42 @@ float4 PS_Main(VertexOutput input) : SV_TARGET
     float3 emission = Material.useEmissiveMap ? MaterialMaps[TEXTURE_EMISSIVE].SampleLevel(g_sampler, uv, lod).rgb
         : Material.Emissive;
 
-    float3 ambientLighting = AmbientLightingByIBL(albedo, finalNormal, toEye, ao, metallic, roughness);
+    float3 ambientLighting = AmbientLightingByIBL(albedo, finalNormal, toEye, ao, metallic, roughness) * IBLStrength;
 
-    PixelColor = float4(ambientLighting, 1.0);
+    float3 directLighting = float3(0, 0, 0);
+    for (int i = 0; i < LightCnt; ++i)
+    {
+
+        float3 lightVec = lights[i].position - input.posWorld;
+        float lightDist = length(lightVec);
+        lightVec /= lightDist;
+        float3 halfway = normalize(toEye + lightVec);
+
+        float NdotI = max(0.0, dot(finalNormal, lightVec));
+        float NdotH = max(0.0, dot(finalNormal, halfway));
+        float NdotO = max(0.0, dot(finalNormal, toEye));
+
+        float3 F0 = lerp(Fdielectric, albedo, metallic);
+        float3 F = SchlickFresnel(F0, max(0.0, dot(halfway, toEye)));
+        float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metallic);
+        float3 diffuseBRDF = kd * albedo;
+
+        float D = NdfGGX(NdotH, roughness);
+        float3 G = SchlickGGX(NdotI, NdotO, roughness);
+        float3 specularBRDF = (F * D * G) / max(1e-5, 4.0 * NdotI * NdotO);
+
+        float3 radiance = LightRadiance(lights[i], input.posWorld, finalNormal);
+        
+        directLighting += (lights[i].Type & LIGHT_Lim) ? float3(0.0f, 0.0f, 0.0f) : 
+            ComputeLimLight(lights[i], toEye, finalNormal);
+
+        directLighting += (diffuseBRDF + specularBRDF) * NdotI * radiance;
+    }
+
+    
+
+    PixelColor = float4(ambientLighting + directLighting + emission, 1.0);
+    PixelColor = clamp(PixelColor, 0.0, 1000.0);
     return PixelColor;
 
 }

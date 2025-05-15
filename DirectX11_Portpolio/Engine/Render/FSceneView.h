@@ -16,12 +16,11 @@ struct FViewContext
 
 enum class ELightType : UINT32
 {
-    None,
-    CubeMap,
-    Directional,
-    Spot,
-    Point,
-    Lim
+    None = (1 << 0),
+    Directional = (1 << 1),
+    Spot = (1 << 2),
+    Point = (1 << 3),
+    Lim = (1 << 4)
 };
 
 // 조명 정보
@@ -29,18 +28,23 @@ struct LightInformation
 {
     ELightType LightType; //4
     int LightID; //4
-    Vector3 strength = Vector3(0.5f, 0.5f, 0.5f);              // 12
+    Vector3 strength = Vector3(2.0f, 2.0f, 2.0f);              // 12
     float fallOffStart = 0.0f;                     // 4
     Vector3 direction = Vector3(0.0f, -1.0f, 0.0f); // 12
-    float fallOffEnd = 10.0f;                      // 4
+    float fallOffEnd = 30.0f;                      // 4
     Vector3 position = Vector3(0.0f, 0.0f, -2.0f); // 12
-    float spotPower = 0.5f;                      // 4
+    float spotPower = 10.0f;                      // 4
     float innerCone = static_cast<float>(cos(XMConvertToRadians(20.0f)));
     float outerCone = static_cast<float>(cos(XMConvertToRadians(30.0f)));
 
 };
 
-
+struct FLightInfo
+{
+    int CurrentLightCnt = 0;
+    float IBLStrength = 2.5f;
+    float padding[2];
+};
 
 struct FSceneView
 {
@@ -59,7 +63,9 @@ public:
 public:
     void UpdateSceneView(const FViewContext& InContext);
     D3D_PRIMITIVE_TOPOLOGY GetPrimitiveType() const { return Instance->IAPrimitive; }
-    FViewContext& GetSceneViewContext() { return Context; }
+    FViewContext* GetSceneViewContext() { return &Context; }
+    void UpdateIBLStrength(float InIBLStrength) {LightInfoCbuffer.IBLStrength = InIBLStrength;}
+    FLightInfo* GetLightInfo() { return &LightInfoCbuffer; }
 
 public:
     void AddToLightMap(LightInformation* InLightInfo);
@@ -71,11 +77,7 @@ private:
     shared_ptr<ConstantBuffer> ViewConstantBuffer;
 
 private:
-    struct CLightCnt
-    {
-        int CurrentLightCnt = 0;
-        float padding[3];
-    }LightCntCbuffer;
+    FLightInfo LightInfoCbuffer;
     
     static atomic<uint8_t> LightCounter;
     

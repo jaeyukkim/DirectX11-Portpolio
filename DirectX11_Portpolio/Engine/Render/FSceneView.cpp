@@ -21,7 +21,7 @@ void FSceneView::Create()
     CheckNull(Instance);
 
     Instance->ViewConstantBuffer = make_shared<ConstantBuffer>(&Instance->Context, sizeof(Instance->Context));
-    Instance->LightCountCBuffer = make_shared<ConstantBuffer>(&Instance->LightCntCbuffer, sizeof(Instance->LightCntCbuffer));
+    Instance->LightCountCBuffer = make_shared<ConstantBuffer>(&Instance->LightInfoCbuffer, sizeof(Instance->LightInfoCbuffer));
     Instance->LightConstantBuffer = make_shared<StructuredBuffer>(nullptr, sizeof(LightInformation), MAX_LIGHT_COUNT);
     Instance->CachedLights.resize(MAX_LIGHT_COUNT, LightInformation{});
 }
@@ -102,7 +102,7 @@ void FSceneView::UpdateLightMap(LightInformation& InLightInfo)
     LightConstantBuffer->PSSetStructuredBuffer(EShaderResourceSlot::LightMap);
 
     // 라이트 개수 업데이트 (LightMap 크기 기준)
-    LightCntCbuffer.CurrentLightCnt = static_cast<UINT32>(LightMap.size());
+    LightInfoCbuffer.CurrentLightCnt = static_cast<UINT32>(LightMap.size());
     LightCountCBuffer->UpdateConstBuffer();
     LightCountCBuffer->PSSetConstantBuffer(EConstBufferSlot::LightCnt, 1);
 }

@@ -1,15 +1,17 @@
 {
    "MI_lantern_01_Inst" : {
-      "Ambient" : "0.000000,0.000000,0.000000,1.000000",
-      "AmbientMap" : "",
-      "Diffuse" : "0.215861,0.215861,0.215861,1.000000",
-      "DiffuseMap" : "../Contents/_Objects/Lantern/T_lantern_BaseColor.PNG",
-      "Emissive" : "0.000000,0.000000,0.000000,1.000000",
-      "Shininess" : "0.2",
+      "Albedo" : "0.000000,0.000000,0.000000,0.000000",
+      "AlbedoMap" : "../Contents/_Objects/Lantern/T_lantern_BaseColor.PNG",
+      "AmbientOcclusionMap" : "",
+      "Emissive" : "0.200000,0.200000,0.200000,1.000000",
+      "EmissiveMap" : "",
+      "HeightMap" : "",
+      "Metallic" : "0.552786",
+      "MetallicMap" : "",
       "NormalMap" : "../Contents/_Objects/Lantern/T_lantern_Normal.PNG",
       "PixelShaderPath" : "../Engine/HLSL/PS_StaticMesh.hlsl",
-      "Specular" : "0.200000,0.200000,0.200000,20.000000",
-      "SpecularMap" : "",
+      "Roughness" : "0.552786",
+      "RoughnessMap" : "",
       "VertexShaderPath" : "../Engine/HLSL/VS_StaticMesh.hlsl"
    }
 }

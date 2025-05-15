@@ -10,10 +10,12 @@ ALightActor::ALightActor()
 	SetRootComponent(Mesh.get());
 	LightComp = CreateComponent<ULightComponent>(this, ELightType::Spot);
 	LightComp->SetUpAttachment(GetRootComponent());
-	DirectionalLightComp = CreateComponent<ULightComponent>(this, ELightType::Directional);
-
+	//DirectionalLightComp = CreateComponent<ULightComponent>(this, ELightType::Directional);
+	//DirectionalLightComp->GetLightInfo()->direction = Vector3(-1.0f, 0.0f, 0.0f);
+	//DirectionalLightComp->GetLightInfo()->strength = Vector3(15.5f, 15.5f, 15.5f);
+	//DirectionalLightComp->SetUpAttachment(GetRootComponent());
 	LightComp->CachedEulerRotation = GetActorTransform()->GetRotation();
-	//DirectionalLightComp->GetLightInfo()->strength = Vector3(1.5f, 1.5f, 1.5f);
+	LightComp->GetLightInfo()->strength = Vector3(40.5f, 40.5f, 85.5f);
 
 
 }
@@ -26,15 +28,6 @@ void ALightActor::Tick(float deltaTime)
 {
 	Super::Tick(deltaTime);
 
-	ImGui::SliderFloat3("Light Position", &GetActorTransform()->Position.x, -20.0f, 20.0f);
-
-	ImGui::SliderFloat3("Light Rotation", &LightComp->CachedEulerRotation.x, -180.0f, 180.0f);
-	GetActorTransform()->SetRotation(LightComp->CachedEulerRotation);
-
-	ImGui::SliderFloat("Light fallOffStart", &LightComp->GetLightInfo()->fallOffStart, 0.0f, 5.0f);
-	ImGui::SliderFloat("Light fallOffEnd", &LightComp->GetLightInfo()->fallOffEnd, 0.0f, 100.0f);
-	ImGui::SliderFloat("Light spotPower", &LightComp->GetLightInfo()->spotPower, 1.0f, 100.0f);
-	ImGui::SliderFloat3("Light Strengh", &LightComp->GetLightInfo()->strength.x, 0.0f, 100.0f);
 
 }
 
@@ -42,7 +35,7 @@ void ALightActor::Render()
 {
 	Super::Render();
 
-	DirectionalLightComp->RenderComponent();
+	//DirectionalLightComp->RenderComponent();
 	LightComp->RenderComponent();
 	Mesh->RenderComponent();
 	

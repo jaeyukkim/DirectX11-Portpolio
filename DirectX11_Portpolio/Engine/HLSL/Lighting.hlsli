@@ -3,16 +3,15 @@
 
 #include "Common.hlsli"
 
-#define LIGHT_None 0
-#define LIGHT_CubeMap 1
-#define LIGHT_Directional 2
-#define LIGHT_Spot 3
-#define LIGHT_Point 4
-#define LIGHT_Lim 5
+#define LIGHT_None (1 << 0)
+#define LIGHT_Directional (1 << 1)
+#define LIGHT_Spot (1 << 2)
+#define LIGHT_Point (1 << 3)
+#define LIGHT_Lim (1 << 4)
 
 struct Light
 {
-    int LightType;
+    int Type;
     int LightID;
     float3 strength;
     float fallOffStart;
@@ -25,103 +24,30 @@ struct Light
 };
 
 
-cbuffer CBLightCnt : register(b5)
+cbuffer CBLightInfo : register(b5)
 {
     int LightCnt;
+    float IBLStrength;
 }
 
 StructuredBuffer<Light> lights : register(t11);
 
-/*
-float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal,
-    float3 toEye, MaterialDesc mat)
+
+float3 ComputeLimLight(Light light, float3 toEye, float3 finalNormal)
 {
-    float3 halfway = normalize(toEye + lightVec);
-    float hdotn = dot(halfway, normal);
-    float3 Specular = mat.Specular * pow(max(hdotn, 0.0f), 1.0f);
+    float3 color = float3(0.0f, 0.0f, 0.0f);
+    float rim = (1.0f - dot(finalNormal, toEye));
+    rim = smoothstep(0.0f, 1.0f, rim);
+    rim = pow(abs(rim), light.spotPower);
+    color += rim * color * length(light.strength);
 
-    return mat.Ambient + (mat.Diffuse + Specular) * lightStrength;
+    return color;
 }
-
-float3 ComputeDirectionalLight(Light L, MaterialDesc mat, float3 normal,
-    float3 toEye)
-{
-    float3 lightVec = -L.direction;
-
-    float ndotl = max(dot(lightVec, normal), 0.0f);
-    float3 lightStrength = L.strength * ndotl;
-
-    // Luna DX12 책에서는 Specular 계산에도
-    // Lambert's law가 적용된 lightStrength를 사용합니다.
-    return BlinnPhong(lightStrength, lightVec, normal, toEye, mat);
-}
-
-float CalcAttenuation(float d, float falloffStart, float falloffEnd)
-{
-    // Linear falloff
-    return saturate((falloffEnd - d) / (falloffEnd - falloffStart));
-}
-
-float3 ComputePointLight(Light L, MaterialDesc mat, float3 pos, float3 normal,
-    float3 toEye)
-{
-    float3 lightVec = L.position - pos;
-
-    // 쉐이딩할 지점부터 조명까지의 거리 계산
-    float d = length(lightVec);
-
-    // 너무 멀면 조명이 적용되지 않음
-    if (d > L.fallOffEnd)
-    {
-        return float3(0.0, 0.0, 0.0);
-    }
-    else
-    {
-        lightVec /= d;
-
-        float ndotl = max(dot(lightVec, normal), 0.0f);
-        float3 lightStrength = L.strength * ndotl;
-
-        float att = CalcAttenuation(d, L.fallOffStart, L.fallOffEnd);
-        lightStrength *= att;
-
-        return BlinnPhong(lightStrength, lightVec, normal, toEye, mat);
-    }
-}
-
-
-float3 ComputeSpotLight(Light L, MaterialDesc mat, float3 pos, float3 normal, float3 toEye)
-{
-    float3 lightVec = L.position - pos;
-    float d = length(lightVec);
-
-    if (d > L.fallOffEnd)
-        return float3(0.0f, 0.0f, 0.0f);
-
-    lightVec = normalize(lightVec);
-
-    float ndotl = max(dot(lightVec, normal), 0.0f);
-    float3 lightStrength = L.strength * ndotl;
-
-    float att = CalcAttenuation(d, L.fallOffStart, L.fallOffEnd);
-    lightStrength *= att;
-
-   
-    float spotCos = dot(L.direction, -lightVec);
-    float rawSpotFactor = smoothstep(L.outerCone, L.innerCone, spotCos);
-    float spotFactor = pow(rawSpotFactor, L.spotPower);
-
-    lightStrength *= spotFactor;
-
-    return BlinnPhong(lightStrength, lightVec, normal, toEye, mat);
-}
-*/
 
 float3 SchlickFresnel(float3 F0, float NdotH)
 {
     return F0 + (1.0 - F0) * pow(2.0, (-5.55473 * NdotH - 6.98316) * NdotH);
 }
-
 
 float3 DiffuseIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
     float metallic)
@@ -177,6 +103,40 @@ float SchlickGGX(float NdotI, float NdotO, float roughness)
     float r = roughness + 1.0;
     float k = (r * r) / 8.0;
     return SchlickG1(NdotI, k) * SchlickG1(NdotO, k);
+}
+
+
+float3 LightRadiance(Light light, float3 posWorld, float3 normalWorld)
+{
+
+    // Directional light
+    float3 lightVec = light.Type & LIGHT_Directional
+        ? -light.direction
+        : light.position - posWorld;
+
+    float lightDist = length(lightVec);
+    lightVec /= lightDist;
+
+    // Spot light
+    float spotFactor = 1.0f;
+    if (light.Type & LIGHT_Spot)
+    {
+        float cosTheta = max(-dot(lightVec, light.direction), 0.0f);
+        float raw = smoothstep(light.outerCone, light.innerCone, cosTheta); // inner > outer!
+        spotFactor = pow(raw, light.spotPower);
+    }
+       
+
+    // Distance attenuation
+    float att = saturate((light.fallOffEnd - lightDist)
+        / (light.fallOffEnd - light.fallOffStart));
+
+    // Shadow map
+    float shadowFactor = 1.0;
+
+    float3 radiance = light.strength * spotFactor * att * shadowFactor;
+
+    return radiance;
 }
 
 #endif // __LIGHTING_HLSLI__
