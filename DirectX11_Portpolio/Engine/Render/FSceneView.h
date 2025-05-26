@@ -10,6 +10,7 @@ struct FViewContext
     Matrix ViewInverse = Matrix::Identity;
     Matrix Projection = Matrix::Identity;
     Matrix ViewProjection = Matrix::Identity;
+    Matrix ReflectRow = Matrix::Identity;
     Vector3 EyePos = Vector3(0, 0, 0);
     float padding;
 };
@@ -62,7 +63,7 @@ public:
 
 public:
     void UpdateSceneView(const FViewContext& InContext);
-    D3D_PRIMITIVE_TOPOLOGY GetPrimitiveType() const { return Instance->IAPrimitive; }
+    void UpdateReflactRow(const Matrix InReflactRow);
     FViewContext* GetSceneViewContext() { return &Context; }
     void UpdateIBLStrength(float InIBLStrength) {LightInfoCbuffer.IBLStrength = InIBLStrength;}
     FLightInfo* GetLightInfo() { return &LightInfoCbuffer; }
@@ -74,7 +75,9 @@ public:
 
 private:
     FViewContext Context;
+    FViewContext ReflactContext;
     shared_ptr<ConstantBuffer> ViewConstantBuffer;
+    shared_ptr<ConstantBuffer> ReflactViewConstantBuffer;
 
 private:
     FLightInfo LightInfoCbuffer;
@@ -92,8 +95,5 @@ private:
 
 private:
     static FSceneView* Instance; 
-    
 
-private:
-    D3D_PRIMITIVE_TOPOLOGY IAPrimitive = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 };

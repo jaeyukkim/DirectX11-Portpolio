@@ -12,6 +12,8 @@ public:
 	
 	virtual void Tick(float deltaTime);
 	virtual void Render();
+	virtual void PostRender();
+
 public:
 	void SetRootComponent(USceneComponent* InRootComponent);
 	USceneComponent* GetRootComponent();

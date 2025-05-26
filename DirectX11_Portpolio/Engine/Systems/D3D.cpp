@@ -21,7 +21,7 @@ void D3D::Create()
 	Instance->CreateDSV();
 	Instance->CreateViewport();
 	Instance->CreatePostProcess();
-	Shader::CreateDefaultDepthStencilState();
+	Shader::InitDefaultState();
 }
 
 void D3D::Destroy()
@@ -71,6 +71,11 @@ void D3D::ClearRTV()
 void D3D::ClearFloatRTV()
 {
 	DeviceContext->ClearRenderTargetView(FloatRTV.Get(), clearColor);
+}
+
+void D3D::ClearBlendState()
+{
+	DeviceContext->OMSetBlendState(nullptr, NULL, 0xffffffff);
 }
 
 
@@ -286,7 +291,7 @@ void D3D::CreateDSV()
 		Check(Device->CreateDepthStencilView(DSV_Texture.Get(), &desc, DepthStencilView.GetAddressOf()));
 	}
 
-	Shader::CreateDefaultDepthStencilState();
+
 	
 }
 

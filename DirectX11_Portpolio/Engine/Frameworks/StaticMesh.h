@@ -16,8 +16,9 @@ public:
 
 public:
     virtual void Tick();
-    virtual void Render(bool bUsePreRender = false);
+    virtual void Render();
     virtual void DrawIndexed();
+    virtual void RenderMirror(const Matrix& refl);
 
 protected:
     virtual void SetWorld(const FTransform* InTransform);

@@ -18,6 +18,10 @@ void Actor::Render()
 {
 
 }
+void Actor::PostRender()
+{
+
+}
 
 void Actor::SetRootComponent(USceneComponent* InRootComponent)
 {

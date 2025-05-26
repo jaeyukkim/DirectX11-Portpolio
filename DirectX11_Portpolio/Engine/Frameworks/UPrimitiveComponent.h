@@ -9,7 +9,7 @@ public:
 
 public:
     virtual void TickComponent(float deltaTime) override;
-    virtual void RenderComponent(bool bUsePreRender = false) override;
+    virtual void RenderComponent() override;
 
 
 };

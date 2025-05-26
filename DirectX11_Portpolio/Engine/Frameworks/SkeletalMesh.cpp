@@ -33,7 +33,7 @@ void SkeletalMesh::BindRenderStage()
 }
 
 
-void SkeletalMesh::Render(bool bUsePreRender)
+void SkeletalMesh::Render()
 {
 	Super::Render();
 	

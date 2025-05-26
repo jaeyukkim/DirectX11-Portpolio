@@ -9,6 +9,7 @@ public:
     virtual void Destroy();
     virtual void Tick(float deltaTime);
     virtual void Render();
+    virtual void PostRender();
 
 
 public:
@@ -16,8 +17,10 @@ public:
     Actor* GetActor(int InObjectID);
     void AddActorToLevel(const shared_ptr<Actor>& InActor);
     void DestroyActor(Actor* InActor);
+    void AddToPostRenderActor(Actor* InActor);
 private:
     unordered_map<UINT32, shared_ptr<Actor>> Actors;
+    vector<Actor*> PostRenderedActor;
     static ULevel* level;
     static atomic<UINT32> ObjectCount;
 };

@@ -4,6 +4,7 @@
 #include "ALightActor.h"
 #include "Enviroment/AFloor.h"
 #include "Enviroment/ACubeMap.h"
+#include "Enviroment/AMirror.h"
 
 atomic<UINT32> ULevel::ObjectCount = -1;
 
@@ -16,6 +17,7 @@ void ULevel::Initialize()
     SpawnActor<AKachujin>(this);
     SpawnActor<AFloor>(this);
     SpawnActor<ACubeMap>(this);
+    SpawnActor<AMirror>(this);
 }
 
 void ULevel::Destroy()
@@ -33,6 +35,14 @@ void ULevel::Render()
     for (shared_ptr<Actor>& actor : GetAllActor())
     {
         actor->Render();
+    }
+}
+
+void ULevel::PostRender()
+{
+    for (Actor* actor : PostRenderedActor)
+    {
+        actor->PostRender();
     }
 }
 
@@ -88,4 +98,9 @@ void ULevel::DestroyActor(Actor* InActor)
     }*/
 
     FTickTaskManager::bNeedUpdate = true;
+}
+
+void ULevel::AddToPostRenderActor(Actor* InActor)
+{
+    PostRenderedActor.push_back(InActor);
 }

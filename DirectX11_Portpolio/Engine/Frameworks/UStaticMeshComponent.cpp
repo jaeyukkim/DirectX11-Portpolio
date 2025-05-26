@@ -111,15 +111,23 @@ void UStaticMeshComponent::TickComponent(float deltaTime)
 /**
  * InitRenderer 완료되었으면 호출 가능
  */
-void UStaticMeshComponent::RenderComponent(bool bUsePreRender)
+void UStaticMeshComponent::RenderComponent()
 {
-	Super::RenderComponent(bUsePreRender);
+	Super::RenderComponent();
 
 	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
 	{
-		meshPtr->Render(bUsePreRender);
+		meshPtr->Render();
 	}
 	
+}
+
+void UStaticMeshComponent::RenderMirror(const Matrix& refl)
+{
+	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
+	{
+		meshPtr->RenderMirror(refl);
+	}
 }
 
 void UStaticMeshComponent::DrawComponentIndex()

@@ -13,7 +13,8 @@ public:
 
 public:
     virtual void TickComponent(float deltaTime) override;
-    virtual void RenderComponent(bool bUsePreRender = false) override;
+    virtual void RenderComponent() override;
+    virtual void RenderMirror(const Matrix& refl);
     virtual void DrawComponentIndex();
 
 public:
@@ -21,9 +22,8 @@ public:
     void ReverseIndices();
 
     vector<Material*> GetAllMaterials();
-    
-private:
 
+private:
     void ReadFile(wstring InFileName);
     void ReadMaterial(wstring InFilePath);
     void ReadMesh(wstring InFilePath);

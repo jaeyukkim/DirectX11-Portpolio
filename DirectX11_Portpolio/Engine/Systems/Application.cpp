@@ -75,6 +75,7 @@ void Application::MainRender()
 	D3D::Get()->ClearFloatRTV();
 	D3D::Get()->ClearRTV();
 	D3D::Get()->ClearDSV();
+	D3D::Get()->ClearBlendState();
 	D3D::Get()->SetFloatRTV();
 	Shader::SetDefaultDepthStencilState();
 	FSceneView::Get()->PreRender();
@@ -82,6 +83,6 @@ void Application::MainRender()
 	D3D::Get()->RunPostProcess();
 	D3D::Get()->EndDraw();
 
-
+	
 }
 

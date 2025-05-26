@@ -2,6 +2,9 @@
 #include "StaticMesh.h"
 #include "UStaticMeshComponent.h"
 #include "Utility/BinaryFile.h"
+#include <Render/FSceneView.h>
+#include "../Game/System/ULevel.h"
+#include "../Game/System/World.h"
 
 
 StaticMesh::StaticMesh()
@@ -25,7 +28,7 @@ void StaticMesh::BindRenderStage()
 
 }
 
-void StaticMesh::Render(bool bUsePreRender)
+void StaticMesh::Render()
 {
 	MaterialData->GetRenderer()->Bind();	// VS, PS 등 스테이지 바인딩
 	BindRenderStage();   //파생 클래스 바인딩 먼저 진행(본 정보 세팅 등)
@@ -33,14 +36,34 @@ void StaticMesh::Render(bool bUsePreRender)
 	VBuffer->IASetVertexBuffer();
 	IBuffer->IASetIndexBuffer();
 	MaterialData->Render();
-
-	if(!bUsePreRender)
-		MaterialData->GetRenderer()->DrawIndexed(IBuffer->GetCount());
+	MaterialData->GetRenderer()->DrawIndexed(IBuffer->GetCount());
 }
 
 void StaticMesh::DrawIndexed()
 {
 	MaterialData->GetRenderer()->DrawIndexed(IBuffer->GetCount());
+}
+
+void StaticMesh::RenderMirror(const Matrix& refl)
+{
+	Shader* renderer = MaterialData->GetRenderer();
+
+	// 거울 위치만 StencilBuffer에 1로 표기
+	renderer->SetStencilMaskPipeline();
+	renderer->DrawIndexed(IBuffer->GetCount());
+	
+	// 거울 위치에 반사된 물체들을 렌더링
+	renderer->SetReflactPipeline();
+	FSceneView::Get()->UpdateReflactRow(refl);
+	D3D::Get()->ClearDSV();
+	World::GetLevel()->Render();
+	
+	// 거울 자체의 재질을 "Blend"로 그린 후 복구
+	renderer->SetMirrorPipeline();
+	Render();
+	D3D::Get()->ClearBlendState();
+	renderer->SetDefaultDepthStencilState();
+
 }
 
 void StaticMesh::SetWorld(const FTransform* InTransform)

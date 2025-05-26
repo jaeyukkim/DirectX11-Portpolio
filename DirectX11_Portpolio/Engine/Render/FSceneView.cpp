@@ -21,6 +21,7 @@ void FSceneView::Create()
     CheckNull(Instance);
 
     Instance->ViewConstantBuffer = make_shared<ConstantBuffer>(&Instance->Context, sizeof(Instance->Context));
+    Instance->ReflactViewConstantBuffer = make_shared<ConstantBuffer>(&Instance->ReflactContext, sizeof(Instance->ReflactContext));
     Instance->LightCountCBuffer = make_shared<ConstantBuffer>(&Instance->LightInfoCbuffer, sizeof(Instance->LightInfoCbuffer));
     Instance->LightConstantBuffer = make_shared<StructuredBuffer>(nullptr, sizeof(LightInformation), MAX_LIGHT_COUNT);
     Instance->CachedLights.resize(MAX_LIGHT_COUNT, LightInformation{});
@@ -54,6 +55,18 @@ void FSceneView::UpdateSceneView(const FViewContext& InContext)
     Context.ViewProjection = InContext.ViewProjection.Transpose();
     Context.EyePos = InContext.EyePos;
     
+}
+
+void FSceneView::UpdateReflactRow(const Matrix InReflactRow)
+{
+    ReflactContext = Context;
+    ReflactContext.ReflectRow = InReflactRow.Transpose();
+    ReflactContext.View = (InReflactRow * Context.View.Transpose()).Transpose();
+    ReflactContext.ViewProjection = (InReflactRow * Context.View.Transpose() * Context.Projection.Transpose()).Transpose();
+
+    Instance->ReflactViewConstantBuffer->UpdateConstBuffer();
+    Instance->ReflactViewConstantBuffer->VSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
+    Instance->ReflactViewConstantBuffer->PSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
 }
 
 void FSceneView::AddToLightMap(LightInformation* InLightInfo)

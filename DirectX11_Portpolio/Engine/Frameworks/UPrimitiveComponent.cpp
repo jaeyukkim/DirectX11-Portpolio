@@ -11,7 +11,7 @@ void UPrimitiveComponent::TickComponent(float deltaTime)
 	Super::TickComponent(deltaTime);
 }
 
-void UPrimitiveComponent::RenderComponent(bool bUsePreRender)
+void UPrimitiveComponent::RenderComponent()
 {
-	Super::RenderComponent(bUsePreRender);
+	Super::RenderComponent();
 }

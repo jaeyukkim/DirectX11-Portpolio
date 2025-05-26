@@ -55,6 +55,7 @@ public:
 	void ClearDSV();
 	void ClearRTV();
 	void ClearFloatRTV();
+	void ClearBlendState();
 	void Present();
 	void EndDraw();
 

@@ -24,6 +24,7 @@ void World::Tick(float deltaTime)
 void World::Render()
 {
 	PersistentLevel->Render();
+	PersistentLevel->PostRender();
 }
 
 ULevel* World::GetLevel()
