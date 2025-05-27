@@ -124,9 +124,21 @@ void UStaticMeshComponent::RenderComponent()
 
 void UStaticMeshComponent::RenderMirror(const Matrix& refl)
 {
+	USceneComponent::RenderComponent();
 	for (const shared_ptr<StaticMesh>& meshPtr : m_Mesh)
 	{
 		meshPtr->RenderMirror(refl);
+
+		Shader* renderer = meshPtr->GetMaterialData()->GetRenderer();
+
+		// 거울 자체의 재질을 "Blend"로 그린 후 복구
+		renderer->SetMirrorPipeline();
+		FSceneView::Get()->PreRender();
+		renderer->SetDefaultRasterizeState();
+		USceneComponent::RenderComponent();
+		meshPtr->Render();
+		D3D::Get()->ClearBlendState();
+		renderer->SetDefaultDepthStencilState();
 	}
 }
 

@@ -10,19 +10,19 @@ AMirror::AMirror()
     SetRootComponent(mirror.get());
     World::GetLevel()->AddToPostRenderActor(this);
 
-    plane = SimpleMath::Plane(mirror->GetWorldTransform()->GetPosition(), Vector3(0.0f, 0.0f, -1.0f));
+    plane = SimpleMath::Plane(GetActorTransform()->Position, Vector3(-1.0f, 0.0f, 0.0f));
     ReflectRow = Matrix::CreateReflection(plane);
 }
 
 void AMirror::Tick(float deltaTime)
 {
     Super::Tick(deltaTime);
-    
+
 }
 
 void AMirror::Render()
 {
-    
+    //mirror->RenderComponent();
 }
 
 void AMirror::PostRender()

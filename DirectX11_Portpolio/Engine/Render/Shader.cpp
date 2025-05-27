@@ -141,6 +141,15 @@ void Shader::CreateSamplerState(const ESamplerSlot sampSlot)
     
 }
 
+void Shader::SetDefaultRasterizeState()
+{
+    if (DrawAsWire)
+        D3D::Get()->GetDeviceContext()->RSSetState(wireRS.Get());
+    else
+    {
+        D3D::Get()->GetDeviceContext()->RSSetState(RSState.Get());
+    }
+}
 
 void Shader::Bind()
 {
@@ -148,13 +157,6 @@ void Shader::Bind()
     D3D::Get()->GetDeviceContext()->VSSetShader(VertexShader.Get(), nullptr, 0);
     D3D::Get()->GetDeviceContext()->PSSetShader(PixelShader.Get(), nullptr, 0);
     PSSetSampler();
-
-    if(DrawAsWire)
-        D3D::Get()->GetDeviceContext()->RSSetState(wireRS.Get());
-    else
-    {
-        D3D::Get()->GetDeviceContext()->RSSetState(RSState.Get());
-    }
 }
 
 void Shader::VSSetConstantBuffers(UINT StartSlot, const vector<ID3D11Buffer*>& InBuffers) const
@@ -196,12 +198,12 @@ void Shader::SetReflactPipeline()
     Bind();
     if (DrawAsWire)
     {
-        D3D::Get()->GetDeviceContext()->RSSetState(solidCCWRS.Get());
-        D3D::Get()->GetDeviceContext()->OMSetDepthStencilState(MaskDSS.Get(), 1);
+        D3D::Get()->GetDeviceContext()->RSSetState(wireCCWRS.Get());
     }
     else
     {
-        D3D::Get()->GetDeviceContext()->RSSetState(wireCCWRS.Get());
+        D3D::Get()->GetDeviceContext()->RSSetState(solidCCWRS.Get());
+        D3D::Get()->GetDeviceContext()->OMSetDepthStencilState(DrawMaskedDSS.Get(), 1);
     }
 }
 
@@ -209,7 +211,7 @@ void Shader::SetMirrorPipeline()
 {
     Bind();
     D3D::Get()->GetDeviceContext()->OMSetBlendState(MirrorBS.Get(), BlendFactor, 0xffffffff);
-    D3D::Get()->GetDeviceContext()->OMSetDepthStencilState(MaskDSS.Get(), 1);
+    D3D::Get()->GetDeviceContext()->OMSetDepthStencilState(DrawMaskedDSS.Get(), 1);
 }
 
 void Shader::CreateDefaultDepthStencilState()
@@ -387,7 +389,7 @@ void Shader::CreateDepthOnlyPS()
     wstring filename = L"../Engine/HLSL/PS_DepthOnly.hlsl";
 
     HRESULT hr = D3DCompileFromFile(filename.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-        "VS_Main", "vs_5_0", flags, 0, VsBlob.GetAddressOf(), ErrorBlob.GetAddressOf());
+        "PS_Main", "ps_5_0", flags, 0, VsBlob.GetAddressOf(), ErrorBlob.GetAddressOf());
 
     hr = D3D::Get()->GetDevice()->CreatePixelShader(VsBlob->GetBufferPointer(),
         VsBlob->GetBufferSize(), nullptr, DepthOnlyPS.GetAddressOf());

@@ -35,12 +35,14 @@ public:
     void CreateDepthStencilState(const D3D11_DEPTH_STENCIL_DESC& InDepthStencilDesc);
     void SetCustomDepthStencilState();
   
-    
     // PixelShader
     void PSSetSampler();
 
     // SamplerState
     void CreateSamplerState(const ESamplerSlot SampSlot);
+
+    // RasterizeState
+    void SetDefaultRasterizeState();
     
 private:
     static void CreateDefaultDepthStencilState();
@@ -99,5 +101,5 @@ public:
     
 private:
     void Assert_IF_FailedCompile(HRESULT hr);
-    float BlendFactor[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    float BlendFactor[4] = { 0.93f, 0.93f, 0.93f, 1.0f };
 };

@@ -1,17 +1,17 @@
 {
    "WorldGridMaterial" : {
       "Albedo" : "0.200000,0.200000,0.200000,1.000000",
-      "AlbedoMap" : "",
-      "AmbientOcclusionMap" : "",
+      "AlbedoMap" : "../Contents/_Objects/Floor/textures/subtle-black-granite_albedo.png",
+      "AmbientOcclusionMap" : "../Contents/_Objects/Floor/textures/subtle-black-granite_ao.png",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "EmissiveMap" : "",
       "HeightMap" : "",
-      "Metallic" : "0.152786",
-      "MetallicMap" : "",
+      "Metallic" : "1.0",
+      "MetallicMap" : "../Contents/_Objects/Floor/textures/subtle-black-granite_metallic.png",
       "NormalMap" : "",
       "PixelShaderPath" : "../Engine/HLSL/PS_StaticMesh.hlsl",
-      "Roughness" : "0.552786",
-      "RoughnessMap" : "",
+      "Roughness" : "1.0",
+      "RoughnessMap" : "../Contents/_Objects/Floor/textures/subtle-black-granite_roughness.png",
       "VertexShaderPath" : "../Engine/HLSL/VS_StaticMesh.hlsl"
    }
 }

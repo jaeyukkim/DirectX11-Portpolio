@@ -19,12 +19,12 @@ public:
     virtual void Render();
     virtual void DrawIndexed();
     virtual void RenderMirror(const Matrix& refl);
-
+    Material* GetMaterialData() { return MaterialData; }
 protected:
     virtual void SetWorld(const FTransform* InTransform);
     virtual void BindRenderStage();
     virtual void CreateBuffer();
-
+    
 private:
     static void ReadFile(BinaryReader* InReader,
         const map<string, shared_ptr<Material>>& InMaterialTable, vector<shared_ptr<StaticMesh>>& OutMeshes);

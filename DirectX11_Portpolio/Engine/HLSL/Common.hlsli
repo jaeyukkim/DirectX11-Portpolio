@@ -16,7 +16,6 @@ cbuffer CB_ViewContext : register(b2)
     matrix ViewInverse;
     matrix Projection;
     matrix ViewProjection;
-    matrix ReflectRow;
     float3 EyePos;
 }
 

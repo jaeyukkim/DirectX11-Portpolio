@@ -39,6 +39,7 @@ private:
 	void CreateDSV();
 	void CreatePostProcess();
 
+
 private:
 	Color clearColor;
 
@@ -53,6 +54,7 @@ public:
 	void SetFloatRTV();
 	void SetRenderTarget();
 	void ClearDSV();
+	void ClearOnlyDepth();
 	void ClearRTV();
 	void ClearFloatRTV();
 	void ClearBlendState();

@@ -60,13 +60,14 @@ void FSceneView::UpdateSceneView(const FViewContext& InContext)
 void FSceneView::UpdateReflactRow(const Matrix InReflactRow)
 {
     ReflactContext = Context;
-    ReflactContext.ReflectRow = InReflactRow.Transpose();
     ReflactContext.View = (InReflactRow * Context.View.Transpose()).Transpose();
     ReflactContext.ViewProjection = (InReflactRow * Context.View.Transpose() * Context.Projection.Transpose()).Transpose();
 
     Instance->ReflactViewConstantBuffer->UpdateConstBuffer();
     Instance->ReflactViewConstantBuffer->VSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
     Instance->ReflactViewConstantBuffer->PSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
+    D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::CubeMapTexture),
+        static_cast<int>(CubeMapType::MAX_CUBEMAP_TEXTURE_COUNT), Instance->IBLSRV->GetAddressOf());
 }
 
 void FSceneView::AddToLightMap(LightInformation* InLightInfo)

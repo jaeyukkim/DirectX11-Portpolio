@@ -10,7 +10,6 @@ struct FViewContext
     Matrix ViewInverse = Matrix::Identity;
     Matrix Projection = Matrix::Identity;
     Matrix ViewProjection = Matrix::Identity;
-    Matrix ReflectRow = Matrix::Identity;
     Vector3 EyePos = Vector3(0, 0, 0);
     float padding;
 };

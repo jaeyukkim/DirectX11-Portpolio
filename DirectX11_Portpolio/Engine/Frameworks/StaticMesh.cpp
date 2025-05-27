@@ -48,22 +48,19 @@ void StaticMesh::RenderMirror(const Matrix& refl)
 {
 	Shader* renderer = MaterialData->GetRenderer();
 
+	
 	// 거울 위치만 StencilBuffer에 1로 표기
 	renderer->SetStencilMaskPipeline();
+	VBuffer->IASetVertexBuffer();
+	IBuffer->IASetIndexBuffer();
 	renderer->DrawIndexed(IBuffer->GetCount());
 	
 	// 거울 위치에 반사된 물체들을 렌더링
 	renderer->SetReflactPipeline();
 	FSceneView::Get()->UpdateReflactRow(refl);
-	D3D::Get()->ClearDSV();
+	D3D::Get()->ClearOnlyDepth();
 	World::GetLevel()->Render();
 	
-	// 거울 자체의 재질을 "Blend"로 그린 후 복구
-	renderer->SetMirrorPipeline();
-	Render();
-	D3D::Get()->ClearBlendState();
-	renderer->SetDefaultDepthStencilState();
-
 }
 
 void StaticMesh::SetWorld(const FTransform* InTransform)

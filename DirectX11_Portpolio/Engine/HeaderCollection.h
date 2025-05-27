@@ -60,6 +60,7 @@ using namespace DirectX::SimpleMath;
 #include "Render/Texture.h"
 #include "Render/Material.h"
 #include "Render/Shader.h"
+#include "Render/FSceneView.h"
 
 #include "MathLibrary/FTransform.h"
 #include "Render/VertexData.h"

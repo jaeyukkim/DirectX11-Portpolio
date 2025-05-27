@@ -63,6 +63,11 @@ void D3D::ClearDSV()
 	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
+void D3D::ClearOnlyDepth()
+{
+	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+}
+
 void D3D::ClearRTV()
 {
 	DeviceContext->ClearRenderTargetView(RenderTargetView.Get(), clearColor);
@@ -301,3 +306,5 @@ void D3D::CreatePostProcess()
 		vector<ComPtr<ID3D11ShaderResourceView>>{ ResolvedSRV },
 		vector<ComPtr<ID3D11RenderTargetView>>{ RenderTargetView });
 }
+
+
