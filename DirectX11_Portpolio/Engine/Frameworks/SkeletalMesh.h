@@ -14,42 +14,53 @@ class Material;
 struct FTransform;
 class Skeletal;
 
-class SkeletalMesh : public StaticMesh
+struct SkeletalMeshInfo
 {
-public:
-    SkeletalMesh();
-    virtual ~SkeletalMesh();
+    string Name = "";
 
-    virtual void Tick() override;
-    virtual void Render() override;
+    Material* MaterialData = nullptr;
+    Matrix* Transforms;
 
-private:
-    virtual void SetWorld(const FTransform* InTransform) override;
-    virtual void BindRenderStage() override;
-private:
-    static void ReadFile(BinaryReader* InReader,const map<string, shared_ptr<Material>>& InMaterialTable,
-        vector<shared_ptr<SkeletalMesh>>& OutMeshes);
+    UINT VertexCount = 0;
+    VertexModel* ModelVertices = nullptr;
 
-protected:
-    virtual void CreateBuffer() override;
+    UINT IndexCount = 0;
+    UINT* Indices = nullptr;  
 
-private:
     UINT BoneIndex = 0;
     Skeletal* Bone = nullptr;
-    VertexModel* ModelVertices = nullptr;
-private:
-    shared_ptr<ConstantBuffer> BoneBuffer = nullptr;
+};
+
+class SkeletalMesh
+{
+public:
+    SkeletalMesh() = default;
+    ~SkeletalMesh() = default;
+
+    void Tick();
+    void Render();
+    Material* GetMaterialData() const { return Data.MaterialData; }
     
+protected:
+    void CreateBuffer();
 
 private:
+    void SetWorld(const FTransform* InTransform);
+
+private:
+    SkeletalMeshInfo Data;
+    shared_ptr<FTransform> MeshWorld;
+    shared_ptr<VertexBuffer> VBuffer = nullptr;
+    shared_ptr<IndexBuffer> IBuffer = nullptr;
+    shared_ptr<ConstantBuffer> BoneBuffer = nullptr;
+    
     struct BoneDesc
     {
         Matrix Transforms[MAX_MODEL_TRANSFORM];
         UINT BoneIndex;
         float Padding[3];
     } BoneData;
-
-
-private:
+    
     friend class USkeletalMeshComponent;
+    friend class Converter;
 };

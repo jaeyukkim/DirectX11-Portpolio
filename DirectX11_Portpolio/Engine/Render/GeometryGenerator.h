@@ -3,7 +3,7 @@
 
 struct StaticMeshData;
 
-class Geometry 
+class GeometryGenerator 
 {
 public:
 

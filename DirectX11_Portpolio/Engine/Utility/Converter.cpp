@@ -2,15 +2,16 @@
 #include "HeaderCollection.h"
 #include "Render/VertexData.h"
 #include "Render/RenderData.h"
-#include <json/json.h>
-#include <fstream>
-#include "BinaryFile.h"
 #include <directxtk/WICTextureLoader.h>
 #include <wincodec.h>
 
 #pragma comment(lib, "windowscodecs.lib")
 
 #include "Converter.h"
+
+#include "Frameworks/USceneComponent.h"
+#include "Frameworks/USkeletalMeshComponent.h"
+#include "Frameworks/UStaticMeshComponent.h"
 
 Converter::Converter()
 {
@@ -22,13 +23,30 @@ Converter::~Converter()
 
 }
 
-void Converter::ReadFile(const wstring InFileName, bool InbIsGLTF)
+void Converter::ReadFile(const wstring objectName)
 {
-	bIsGLTF = InbIsGLTF;
+	wstring fbxPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
+	wstring gltfPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
+	bool bIsGLTF = false;
+	wstring finalPath;
+	if (filesystem::exists(fbxPath))
+	{
+		finalPath = fbxPath;
+	}
+	else if (filesystem::exists(gltfPath))
+	{
+		finalPath = gltfPath;
+		bIsGLTF = true;
+	}
+	else
+	{
+		wcout << L"모델 파일이 존재하지 않습니다: " << endl;
+		return;
+	}
 
 	Scene = Loader->ReadFile
 	(
-		String::ToString(InFileName).c_str(),
+		String::ToString(finalPath).c_str(),
 		aiProcess_ConvertToLeftHanded
 		| aiProcess_Triangulate
 		| aiProcess_GenUVCoords
@@ -37,9 +55,12 @@ void Converter::ReadFile(const wstring InFileName, bool InbIsGLTF)
 		| aiProcess_GenBoundingBoxes
 
 	);
-
-	Assert(Scene != nullptr, "모델 정상 로드 않됨");
+	Assert(Scene != nullptr, "모델 정상 로드 안됨");
+	ExportMaterial(objectName, true, EMeshType::StaticMeshType);
+	ExportMesh(objectName, EMeshType::StaticMeshType);
+	
 }
+
 
 void Converter::ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType)
 {
@@ -67,9 +88,7 @@ void Converter::ReadMaterials(EMeshType InMeshType)
 		MaterialData* data = new MaterialData();
 		
 		data->Name = material->GetName().C_Str();
-		data->VertexShaderPath = GetVertexShaderFileName(InMeshType);
-		data->PixelShaderPath = GetPixelShaderFileName(InMeshType);
-
+		
 		aiColor4D color;
 		float value;
 
@@ -134,9 +153,7 @@ void Converter::WriteMaterial(wstring InSaveFileName, bool InOverwrite)
 	for (MaterialData* data : Materials)
 	{
 		Json::Value value;
-
-		value["VertexShaderPath"] = data->VertexShaderPath;
-		value["PixelShaderPath"] = data->PixelShaderPath;
+		
 		value["Albedo"] = ColorToJson(data->Albedo);
 		value["Roughness"] = FloatToJson(data->Roughness);
 		value["Metallic"] = FloatToJson(data->Metallic);
@@ -173,6 +190,14 @@ string Converter::ColorToJson(const Color& InColor)
 string Converter::FloatToJson(const float val)
 {
 	return String::Format("%f", val);
+}
+
+Color Converter::JsonStringToColor(string InString)
+{
+	vector<string> v;
+	String::SplitString(&v, InString, ",");
+
+	return Color(stof(v[0]), stof(v[1]), stof(v[2]), stof(v[3]));
 }
 
 string Converter::SaveTexture(string InSaveFolder, string InFileName)
@@ -485,35 +510,4 @@ void Converter::WriteStaticMeshData(wstring InSaveFileName)
 	w->Close();
 }
 
-string Converter::GetPixelShaderFileName(EMeshType InMeshType)
-{
-	string path = "";
-	switch (InMeshType)
-	{
-	case EMeshType::StaticMeshType:
-		path = "../Engine/HLSL/PS_StaticMesh.hlsl";
-		break;
-
-	case EMeshType::SkeletalMeshType:
-		path = "../Engine/HLSL/PS_SkeletalMesh.hlsl";
-		break;
-	}
-	return path;
-}
-
-string Converter::GetVertexShaderFileName(EMeshType InMeshType)
-{
-	string path = "";
-	switch (InMeshType)
-	{
-	case EMeshType::StaticMeshType:
-		path = "../Engine/HLSL/VS_StaticMesh.hlsl";
-		break;
-
-	case EMeshType::SkeletalMeshType:
-		path = "../Engine/HLSL/VS_SkeletalMesh.hlsl";
-		break;
-	}
-	return path;
-}
 

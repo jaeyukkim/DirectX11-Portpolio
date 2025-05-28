@@ -2,7 +2,7 @@
 
 #include "ImageFilter.h"
 
-class Geometry;
+class GeometryGenerator;
 class IndexBuffer;
 class VertexBuffer;
 struct StaticMeshData;
@@ -34,10 +34,5 @@ private:
     vector<ComPtr<ID3D11RenderTargetView>> bloomRTVs;
 
 private:
-    
-    const wstring VSPath = L"../Engine/HLSL/VS_Sampling.hlsl";
-    const wstring BloomDownPSPath = L"../Engine/HLSL/PS_BloomDown.hlsl";
-    const wstring BloomUpPSPath = L"../Engine/HLSL/PS_BloomUp.hlsl";
-    const wstring CombinePSPath = L"../Engine/HLSL/PS_Combine.hlsl";
     const int BloomLevels = 4;
 };

@@ -2,16 +2,13 @@
 #include "VertexData.h"
 #include "ImageFilter.h"
 
-ImageFilter::ImageFilter(wstring VSPath, wstring PSPath, int width, int height)
+ImageFilter::ImageFilter(int width, int height)
 {
-    Initialize(VSPath, PSPath, width, height);
+    Initialize(width, height);
 }
 
-void ImageFilter::Initialize(wstring VSPath, wstring PSPath, int width, int height)
+void ImageFilter::Initialize(int width, int height)
 {
-    renderer = make_shared<Shader>(VSPath, PSPath);
-    renderer->InitRenderer(InputElementCollection::basicInputElement, ESamplerSlot::ClampSampler);
- 
     ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
     m_viewport.TopLeftX = 0;
     m_viewport.TopLeftY = 0;
@@ -42,11 +39,10 @@ void ImageFilter::DrawIndexed(UINT IndexCount) const
     D3D::Get()->GetDeviceContext()->RSSetViewports(1, &m_viewport);
     D3D::Get()->GetDeviceContext()->OMSetRenderTargets(UINT(RTV.size()), RTV.data(), NULL);
 
-    renderer->Bind();
-
+    
     D3D::Get()->GetDeviceContext()->PSSetShaderResources(0, UINT(SRV.size()), SRV.data());
     CBuffer->PSSetConstantBuffer(EConstBufferSlot::ImageFilterData, 1);
-    renderer->DrawIndexed(IndexCount);
+    Renderer::Get()->DrawIndexed(IndexCount);
 }
 
 void ImageFilter::SetShaderResources(const vector<ComPtr<ID3D11ShaderResourceView>>& resources) 

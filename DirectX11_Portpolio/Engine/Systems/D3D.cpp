@@ -21,7 +21,7 @@ void D3D::Create()
 	Instance->CreateDSV();
 	Instance->CreateViewport();
 	Instance->CreatePostProcess();
-	Shader::InitDefaultState();
+	
 }
 
 void D3D::Destroy()

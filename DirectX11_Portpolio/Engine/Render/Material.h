@@ -1,7 +1,7 @@
 #pragma once
 
 
-class Shader;
+class Renderer;
 
 enum class MaterialMapType : UINT8
 {
@@ -31,11 +31,8 @@ public:
     Material();
     ~Material() = default;
 
-    void Render();
+    void BindMaterial();
 
-private:
-    void Initialize();
-    
 
 public:
     void SetAlbedo(const Color& InColor) { MaterialDesc.Albedo = InColor; }
@@ -43,7 +40,6 @@ public:
     void SetMetallic(const float InColor) { MaterialDesc.Metallic = InColor; }
     void SetEmissive(const Color& InColor) { MaterialDesc.Emissive = InColor; }
     
-    Shader* GetRenderer() const { return Renderer.get(); }
     ConstantBuffer* GetConstantBuffer() const { return ColorConstantBuffer.get(); }
     ESamplerSlot GetSamplerDesc() const { return SampDesc; }
     ID3D11ShaderResourceView* GetSRV(MaterialMapType InMaterialMapType);
@@ -87,7 +83,6 @@ public:
 
 private:
     static constexpr int MAX_TEXTURE_COUNT = static_cast<int>(MaterialMapType::MAX_TEXTURE_COUNT);
-    shared_ptr<Shader> Renderer = nullptr;
     shared_ptr<Texture> Textures[MAX_TEXTURE_COUNT];
     ComPtr<ID3D11ShaderResourceView> SRVs[MAX_TEXTURE_COUNT];
     ESamplerSlot SampDesc = ESamplerSlot::DefaultSampler;

@@ -6,9 +6,9 @@ class ImageFilter
 {
 public:
     ImageFilter() {};
-    ImageFilter(wstring VSPath, wstring PSPath, int width, int height);
+    ImageFilter(int width, int height);
 
-    void Initialize(wstring VSPath, wstring PSPath,int width, int height);
+    void Initialize(int width, int height);
     void UpdateConstantBuffers();
     void DrawIndexed(UINT IndexCount) const;
     void SetShaderResources(const vector<ComPtr<ID3D11ShaderResourceView>>& resources);
@@ -30,7 +30,6 @@ public:
     ImageFilterConstData FilterData = {};
 
 protected:
-    shared_ptr<Shader> renderer;
     shared_ptr<ConstantBuffer> CBuffer;
     D3D11_VIEWPORT m_viewport = {};
 

@@ -4,15 +4,17 @@
 
 Material::Material()
 {
-	Initialize();
-
+	for (int i = 0; i < static_cast<int>(MaterialMapType::MAX_TEXTURE_COUNT); i++)
+	{
+		Textures[i] = nullptr;		//// 텍스처 포인터 초기화
+		SRVs[i] = nullptr;		// Shader Resource View 초기화
+	}
+	
 	ColorConstantBuffer = make_shared<ConstantBuffer>(&MaterialDesc, sizeof(MaterialDescription));
-	Renderer = make_shared<Shader>();
-
 }
 
 
-void Material::Render()
+void Material::BindMaterial()
 {
 	GetConstantBuffer()->UpdateConstBuffer();
 	GetConstantBuffer()->PSSetConstantBuffer(EConstBufferSlot::MaterialDesc, 1);
@@ -26,15 +28,6 @@ void Material::Render()
 	{
 		D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::CubeMapTexture),
 			static_cast<int>(CubeMapType::MAX_CUBEMAP_TEXTURE_COUNT), SRVs->GetAddressOf());
-	}
-}
-
-void Material::Initialize()
-{
-	for (int i = 0; i < static_cast<int>(MaterialMapType::MAX_TEXTURE_COUNT); i++)
-	{
-		Textures[i] = nullptr;		//// 텍스처 포인터 초기화
-		SRVs[i] = nullptr;		// Shader Resource View 초기화
 	}
 }
 

@@ -47,7 +47,6 @@ struct SkeletalMeshData
 struct StaticMeshData
 {
     string Name;
-
     string MaterialName;
 
     vector<VertexObject> Vertices;

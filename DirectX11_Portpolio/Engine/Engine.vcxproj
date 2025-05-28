@@ -164,8 +164,9 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Frameworks\USkeletalMeshComponent.h" />
     <ClInclude Include="Light\ULightComponent.h" />
     <ClInclude Include="Manager\TickTaskManager.h" />
+    <ClInclude Include="Render\FPSO.h" />
     <ClInclude Include="Render\FSceneView.h" />
-    <ClInclude Include="Render\Geometry.h" />
+    <ClInclude Include="Render\GeometryGenerator.h" />
     <ClInclude Include="Render\ImageFilter.h" />
     <ClInclude Include="Render\Material.h" />
     <ClInclude Include="Frameworks\Skeletal.h" />
@@ -177,7 +178,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Render\Buffers.h" />
     <ClInclude Include="Definition.h" />
     <ClInclude Include="Render\RenderData.h" />
-    <ClInclude Include="Render\Shader.h" />
+    <ClInclude Include="Render\Renderer.h" />
     <ClInclude Include="Render\VertexData.h" />
     <ClInclude Include="Systems\Application.h" />
     <ClInclude Include="Systems\D3D.h" />
@@ -289,8 +290,9 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Light\ULightComponent.cpp" />
     <ClCompile Include="Manager\TickTaskManager.cpp" />
     <ClCompile Include="MathLibrary\FTransform.cpp" />
+    <ClCompile Include="Render\FPSO.cpp" />
     <ClCompile Include="Render\FSceneView.cpp" />
-    <ClCompile Include="Render\Geometry.cpp" />
+    <ClCompile Include="Render\GeometryGenerator.cpp" />
     <ClCompile Include="Render\ImageFilter.cpp" />
     <ClCompile Include="Render\Material.cpp" />
     <ClCompile Include="Frameworks\Skeletal.cpp" />
@@ -301,7 +303,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Render\Buffers.cpp" />
-    <ClCompile Include="Render\Shader.cpp" />
+    <ClCompile Include="Render\Renderer.cpp" />
     <ClCompile Include="Systems\Application.cpp" />
     <ClCompile Include="Systems\D3D.cpp" />
     <ClCompile Include="Systems\Keyboard.cpp" />

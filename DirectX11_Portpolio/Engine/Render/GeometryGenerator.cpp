@@ -1,12 +1,12 @@
 #include "HeaderCollection.h"
 #include "RenderData.h"
-#include "Geometry.h"
+#include "GeometryGenerator.h"
 
 
 /*
 * 사각형을 만드는 함수
 */
-StaticMeshData Geometry::MakeSquare(const float scale, const Vector2 texScale) 
+StaticMeshData GeometryGenerator::MakeSquare(const float scale, const Vector2 texScale) 
 {
     vector<Vector3> positions;
     vector<Vector3> colors;
@@ -53,7 +53,7 @@ StaticMeshData Geometry::MakeSquare(const float scale, const Vector2 texScale)
 /**
 * 사각형 그리드를 생성하는 함수
 */
-StaticMeshData Geometry::MakeSquareGrid(const int numSlices, const int numStacks,
+StaticMeshData GeometryGenerator::MakeSquareGrid(const int numSlices, const int numStacks,
     const float scale, const Vector2 texScale) 
 {
     StaticMeshData meshData;
@@ -100,7 +100,7 @@ StaticMeshData Geometry::MakeSquareGrid(const int numSlices, const int numStacks
 /**
 * 박스를 생성하는 함수
 */
-StaticMeshData Geometry::MakeBox(const float scale) 
+StaticMeshData GeometryGenerator::MakeBox(const float scale) 
 {
 
     vector<Vector3> positions;
@@ -239,7 +239,7 @@ StaticMeshData Geometry::MakeBox(const float scale)
     return meshData;
 }
 
-StaticMeshData Geometry::MakeCylinder(const float bottomRadius,
+StaticMeshData GeometryGenerator::MakeCylinder(const float bottomRadius,
     const float topRadius, float height, int numSlices) 
 {
 
@@ -291,7 +291,7 @@ StaticMeshData Geometry::MakeCylinder(const float bottomRadius,
     return meshData;
 }
 
-StaticMeshData Geometry::MakeSphere(const float radius, const int numSlices,
+StaticMeshData GeometryGenerator::MakeSphere(const float radius, const int numSlices,
     const int numStacks,
     const Vector2 texScale) 
 {
@@ -351,7 +351,7 @@ StaticMeshData Geometry::MakeSphere(const float radius, const int numSlices,
     return meshData;
 }
 
-StaticMeshData Geometry::MakeIcosahedron() 
+StaticMeshData GeometryGenerator::MakeIcosahedron() 
 {
 
     const float X = 0.525731f;
@@ -386,7 +386,7 @@ StaticMeshData Geometry::MakeIcosahedron()
     return newMesh;
 }
 
-StaticMeshData Geometry::MakeTetrahedron() 
+StaticMeshData GeometryGenerator::MakeTetrahedron() 
 {
 
     const float a = 1.0f;
@@ -429,7 +429,7 @@ StaticMeshData Geometry::MakeTetrahedron()
 
     return meshData;
 }
-StaticMeshData Geometry::SubdivideToSphere(const float radius,
+StaticMeshData GeometryGenerator::SubdivideToSphere(const float radius,
     StaticMeshData meshData) 
 {
 

@@ -52,14 +52,14 @@ using namespace DirectX::SimpleMath;
 #include <imgui_impl_win32.h>
 
 
-
+#include "Render/FPSO.h"
 #include "Definition.h"
 #include "Systems/D3D.h"
 
 #include "Render/Buffers.h"
 #include "Render/Texture.h"
 #include "Render/Material.h"
-#include "Render/Shader.h"
+#include "Render/Renderer.h"
 #include "Render/FSceneView.h"
 
 #include "MathLibrary/FTransform.h"

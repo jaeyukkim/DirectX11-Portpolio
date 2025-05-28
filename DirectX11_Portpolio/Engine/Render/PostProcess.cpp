@@ -1,5 +1,5 @@
 #include "HeaderCollection.h"
-#include "Geometry.h"
+#include "GeometryGenerator.h"
 #include "RenderData.h"
 #include "PostProcess.h"
 
@@ -13,7 +13,7 @@ void PostProcess::Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& res
                                             const vector<ComPtr<ID3D11RenderTargetView>>& targets) 
 {
     
-    MeshData = make_shared<StaticMeshData>(Geometry::MakeSquare());
+    MeshData = make_shared<StaticMeshData>(GeometryGenerator::MakeSquare());
     VBuffer = make_shared<VertexBuffer>(MeshData->Vertices.data(), MeshData->Vertices.size(), sizeof(VertexObject));
     IdxCount = MeshData->Indices.size();
     IBuffer = make_shared<IndexBuffer>(MeshData->Indices.data(), IdxCount);
@@ -34,7 +34,7 @@ void PostProcess::Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& res
     for (int i = 0; i < BloomLevels - 1; i++) 
     {
         int div = int(pow(2, i + 1));
-        BloomDownFilters[i].Initialize(VSPath, BloomDownPSPath, width / div, height / div);
+        BloomDownFilters[i].Initialize(width / div, height / div);
         if (i == 0) 
         {
             BloomDownFilters[i].SetShaderResources({ resources[0] });
@@ -52,13 +52,13 @@ void PostProcess::Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& res
     {
         int level = BloomLevels - 2 - i;
         int div = int(pow(2, level));
-        BloomUpFilters[i].Initialize(VSPath, BloomUpPSPath,width / div, height / div);
+        BloomUpFilters[i].Initialize(width / div, height / div);
         BloomUpFilters[i].SetShaderResources({ bloomSRVs[level + 1] });
         BloomUpFilters[i].SetRenderTargets({ bloomRTVs[level] });
     }
 
     // Combine + ToneMapping
-    CombineFilter.Initialize(VSPath, CombinePSPath, width, height);
+    CombineFilter.Initialize(width, height);
     CombineFilter.SetShaderResources({ resources[0], bloomSRVs[0] });
     CombineFilter.SetRenderTargets(targets);
     CombineFilter.FilterData.strength = 0.0f; // Bloom strength
@@ -71,7 +71,6 @@ void PostProcess::Initialize(const vector<ComPtr<ID3D11ShaderResourceView>>& res
 void PostProcess::Render() 
 {
     
-   
     VBuffer->IASetVertexBuffer();
     IBuffer->IASetIndexBuffer();
 

@@ -21,8 +21,6 @@ class D3D
 {
 public:
 	static D3D* Get();
-
-public:
 	static void Create();
 	static void Destroy();
 

@@ -15,20 +15,11 @@ public:
     virtual void TickComponent(float deltaTime) override;
     virtual void RenderComponent() override;
     virtual void RenderMirror(const Matrix& refl);
-    virtual void DrawComponentIndex();
+ 
 
 public:
-    void InitRenderer();
     void ReverseIndices();
-
     vector<Material*> GetAllMaterials();
-
-private:
-    void ReadFile(wstring InFileName);
-    void ReadMaterial(wstring InFilePath);
-    void ReadMesh(wstring InFilePath);
-
-    Color JsonStringToColor(string InString);
 
 private:
     vector<shared_ptr<StaticMesh>> m_Mesh;
@@ -36,5 +27,6 @@ private:
 
 private:
     mutable bool bInitRenderComplete = false;
+    friend class Converter;
 };
 
