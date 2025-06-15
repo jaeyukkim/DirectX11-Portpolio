@@ -1,9 +1,9 @@
 
 #include "HeaderCollection.h"
 #include "IExecutable.h"
-#include "Render/FSceneView.h"
-#include "Render/PostProcess.h"
 #include "Application.h"
+
+#include "Render/FSceneRender.h"
 
 IExecutable* Application::Main = nullptr;
 bool Application::bIsRunning = false;
@@ -24,8 +24,9 @@ void Application::InitApplication(IExecutable* InMain)
 	Timer::Create();
 	Keyboard::Create();
 	Mouse::Create();
+	FSceneRender::Create();
 	FSceneView::Create();
-
+	
 	Main = InMain;
 	Main->Initialize();
 	bIsRunning = true;
@@ -35,11 +36,13 @@ void Application::InitApplication(IExecutable* InMain)
 
 void Application::Destroy()
 {
+	
 	Main->Destroy();
+	FSceneView::Destroy();
+	FSceneRender::Destroy();
 	Mouse::Destroy();
 	Keyboard::Destroy();
 	Timer::Destroy();
-	FSceneView::Destroy();
 	D3D::Destroy();
 
 	D3DDesc desc = D3D::GetDesc();
@@ -56,7 +59,8 @@ void Application::Run()
 	Mouse::Get()->Tick(deltaTime);
 	Main->Tick(deltaTime);
 
-	MainRender();
+	//메인 렌더 루프
+	FSceneRender::Get()->Render();
 }
 
 void Application::Close()
@@ -70,18 +74,4 @@ bool Application::IsRunning()
 }
 
 
-void Application::MainRender()
-{
-	D3D::Get()->ClearFloatRTV();
-	D3D::Get()->ClearRTV();
-	D3D::Get()->ClearDSV();
-	D3D::Get()->ClearBlendState();
-	D3D::Get()->SetFloatRTV();
-	FSceneView::Get()->PreRender();
-	Main->Render();
-	D3D::Get()->RunPostProcess();
-	D3D::Get()->EndDraw();
-
-	
-}
 

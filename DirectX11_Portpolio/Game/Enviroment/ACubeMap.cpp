@@ -1,43 +1,36 @@
 #include "Pch.h"
 #include "ACubeMap.h"
-#include "Render/Material.h"
-#include <Render/FSceneView.h>
-#include "Frameworks/UStaticMeshComponent.h"
+#include <Render/Resource/Material.h>
+#include <Render/Resource/FSceneView.h>
+#include "Frameworks/Components/UStaticMeshComponent.h"
+#include "Render/FSceneRender.h"
 
 
 ACubeMap::ACubeMap()
 {
-    Sphere = CreateComponent<UStaticMeshComponent>(this, L"SkySphere");
-
+    StaticMeshCreateInfo info;
+    info.bIsSkyBox = true;
+    
+    Sphere = CreateComponent<UStaticMeshComponent>(this, L"SkySphere", info);
+    FSceneRender::Get()->CreateRenderProxy<SkyBoxRenderProxy>(Sphere.get());
     
     for (Material* mat : Sphere->GetAllMaterials())
     {
         mat->SetIsCubeMap(true);
         
-        FSceneView::Get()->UpdateSkyLight(CubeMapType::ENVTEX, mat->GetSkyMapSRV(CubeMapType::ENVTEX));
-        FSceneView::Get()->UpdateSkyLight(CubeMapType::SPECULAR, mat->GetSkyMapSRV(CubeMapType::SPECULAR));
-        FSceneView::Get()->UpdateSkyLight(CubeMapType::IRRADIENCE, mat->GetSkyMapSRV(CubeMapType::IRRADIENCE));
-        FSceneView::Get()->UpdateSkyLight(CubeMapType::BRDF, mat->GetSkyMapSRV(CubeMapType::BRDF));
+        FSceneView::Get()->UpdateSkyLight(ECubeMapType::ENVTEX, mat->GetSkyMapSRV(ECubeMapType::ENVTEX));
+        FSceneView::Get()->UpdateSkyLight(ECubeMapType::SPECULAR, mat->GetSkyMapSRV(ECubeMapType::SPECULAR));
+        FSceneView::Get()->UpdateSkyLight(ECubeMapType::IRRADIENCE, mat->GetSkyMapSRV(ECubeMapType::IRRADIENCE));
+        FSceneView::Get()->UpdateSkyLight(ECubeMapType::BRDF, mat->GetSkyMapSRV(ECubeMapType::BRDF));
     }
 
     SetRootComponent(Sphere.get());
-   FSceneView::Get()->UpdateIBLStrength(IBLStength);
-   
-
+    FSceneView::Get()->UpdateIBLStrength(IBLStength);
+    
 }
 
 void ACubeMap::Tick(float deltaTime)
 {
     Super::Tick(deltaTime);
 }
-
-void ACubeMap::Render()
-{
-    Super::Render();
-
-   
-    Sphere->RenderComponent();
-
-}
-
 

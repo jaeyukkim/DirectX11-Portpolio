@@ -9,9 +9,7 @@
       "Metallic" : "1.000000",
       "MetallicMap" : "../Contents/_Texture/CubeMap/SkyMap/SkyMapSpecularHDR.dds",
       "NormalMap" : "../Contents/_Texture/CubeMap/SkyMap/SkyMapBrdf.dds",
-      "PixelShaderPath" : "../Engine/HLSL/PS_CubeMap.hlsl",
       "Roughness" : "1.000000",
       "RoughnessMap" : "../Contents/_Texture/CubeMap/SkyMap/SkyMapDiffuseHDR.dds",
-      "VertexShaderPath" : "../Engine/HLSL/VS_CubeMap.hlsl"
    }
 }

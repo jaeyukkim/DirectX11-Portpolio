@@ -9,9 +9,7 @@
       "Metallic" : "1.0",
       "MetallicMap" : "../Contents/_Objects/Floor/textures/subtle-black-granite_metallic.png",
       "NormalMap" : "",
-      "PixelShaderPath" : "../Engine/HLSL/PS_StaticMesh.hlsl",
       "Roughness" : "1.0",
       "RoughnessMap" : "../Contents/_Objects/Floor/textures/subtle-black-granite_roughness.png",
-      "VertexShaderPath" : "../Engine/HLSL/VS_StaticMesh.hlsl"
    }
 }

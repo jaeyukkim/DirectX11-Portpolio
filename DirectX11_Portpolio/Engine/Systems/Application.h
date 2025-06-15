@@ -1,5 +1,4 @@
 #pragma once
-#include "Utility/Delegate.h"
 
 
 class Application
@@ -10,11 +9,7 @@ public:
 	static void Run();
 	static void Close();
 	static bool IsRunning();
-	
 
-private:
-
-	static void MainRender();
 
 private:
 	Application();

@@ -9,10 +9,8 @@
       "Metallic" : "1.000000",
       "MetallicMap" : "",
       "NormalMap" : "",
-      "PixelShaderPath" : "../Engine/HLSL/PS_SkeletalMesh.hlsl",
       "Roughness" : "1.000000",
       "RoughnessMap" : "",
-      "VertexShaderPath" : "../Engine/HLSL/VS_SkeletalMesh.hlsl"
    },
    "blinn1SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
@@ -24,10 +22,8 @@
       "Metallic" : "1.000000",
       "MetallicMap" : "../Contents/_Models/Knight/textures/blinn1SG_metallicRoughness.png",
       "NormalMap" : "../Contents/_Models/Knight/textures/blinn1SG_normal.jpeg",
-      "PixelShaderPath" : "../Engine/HLSL/PS_SkeletalMesh.hlsl",
       "Roughness" : "1.000000",
       "RoughnessMap" : "../Contents/_Models/Knight/textures/blinn1SG_metallicRoughness.png",
-      "VertexShaderPath" : "../Engine/HLSL/VS_SkeletalMesh.hlsl"
    },
    "blinn2SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
@@ -39,10 +35,8 @@
       "Metallic" : "1.000000",
       "MetallicMap" : "../Contents/_Models/Knight/textures/blinn2SG_metallicRoughness.png",
       "NormalMap" : "../Contents/_Models/Knight/textures/blinn2SG_normal.jpeg",
-      "PixelShaderPath" : "../Engine/HLSL/PS_SkeletalMesh.hlsl",
       "Roughness" : "1.000000",
       "RoughnessMap" : "../Contents/_Models/Knight/textures/blinn2SG_metallicRoughness.png",
-      "VertexShaderPath" : "../Engine/HLSL/VS_SkeletalMesh.hlsl"
    },
    "blinn3SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
@@ -54,10 +48,8 @@
       "Metallic" : "1.000000",
       "MetallicMap" : "../Contents/_Models/Knight/textures/blinn3SG_metallicRoughness.png",
       "NormalMap" : "../Contents/_Models/Knight/textures/blinn3SG_normal.jpeg",
-      "PixelShaderPath" : "../Engine/HLSL/PS_SkeletalMesh.hlsl",
       "Roughness" : "1.000000",
       "RoughnessMap" : "../Contents/_Models/Knight/textures/blinn3SG_metallicRoughness.png",
-      "VertexShaderPath" : "../Engine/HLSL/VS_SkeletalMesh.hlsl"
    },
    "blinn4SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
@@ -69,10 +61,8 @@
       "Metallic" : "1.000000",
       "MetallicMap" : "../Contents/_Models/Knight/textures/blinn4SG_metallicRoughness.png",
       "NormalMap" : "../Contents/_Models/Knight/textures/blinn4SG_normal.jpeg",
-      "PixelShaderPath" : "../Engine/HLSL/PS_SkeletalMesh.hlsl",
       "Roughness" : "1.000000",
       "RoughnessMap" : "../Contents/_Models/Knight/textures/blinn4SG_metallicRoughness.png",
-      "VertexShaderPath" : "../Engine/HLSL/VS_SkeletalMesh.hlsl"
    },
    "blinn5SG" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
@@ -84,9 +74,7 @@
       "Metallic" : "1.000000",
       "MetallicMap" : "../Contents/_Models/Knight/textures/blinn5SG_metallicRoughness.png",
       "NormalMap" : "../Contents/_Models/Knight/textures/blinn5SG_normal.jpeg",
-      "PixelShaderPath" : "../Engine/HLSL/PS_SkeletalMesh.hlsl",
       "Roughness" : "1.000000",
       "RoughnessMap" : "../Contents/_Models/Knight/textures/blinn5SG_metallicRoughness.png",
-      "VertexShaderPath" : "../Engine/HLSL/VS_SkeletalMesh.hlsl"
    }
 }

@@ -10,9 +10,7 @@
       "HeightMap" : "../Contents/_Models/Kachujin/Kachujin_normal.png",
       "MetallicMap" : "",
       "NormalMap" : "../Contents/_Models/Kachujin/Kachujin_normal.png",
-      "PixelShaderPath" : "../Engine/HLSL/PS_SkeletalMesh.hlsl",
       "Shininess" : "20.000000",
       "Specular" : "0.500000,0.500000,0.500000,20.000000",
-      "VertexShaderPath" : "../Engine/HLSL/VS_SkeletalMesh.hlsl"
    }
 }

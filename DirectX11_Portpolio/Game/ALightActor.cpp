@@ -1,11 +1,11 @@
 #include "Pch.h"
-#include "Light/ULightComponent.h"
+#include "Frameworks/LightComponents//ULightComponent.h"
+#include "Frameworks/Components/UStaticMeshComponent.h"
 #include "ALightActor.h"
-
-#include "Frameworks/UStaticMeshComponent.h"
 
 ALightActor::ALightActor()
 {
+	
 	Mesh = CreateComponent<UStaticMeshComponent>(this, L"Lantern");
 	SetRootComponent(Mesh.get());
 	LightComp = CreateComponent<ULightComponent>(this, ELightType::Spot);
@@ -29,14 +29,4 @@ void ALightActor::Tick(float deltaTime)
 	Super::Tick(deltaTime);
 
 
-}
-
-void ALightActor::Render()
-{
-	Super::Render();
-
-	//DirectionalLightComp->RenderComponent();
-	LightComp->RenderComponent();
-	Mesh->RenderComponent();
-	
 }

@@ -1,5 +1,6 @@
 #pragma once
-#include "Frameworks/ACharacter.h"
+
+#include "Frameworks/Objects/ACharacter.h"
 
 class UCameraComponent;
 
@@ -12,7 +13,7 @@ public:
 
 public:
     virtual void Tick(float deltaTime) override;
-    virtual void Render() override;
+
     
     float Roughness = 1.0f;     //4
     float Metallic = 1.0f;      //4

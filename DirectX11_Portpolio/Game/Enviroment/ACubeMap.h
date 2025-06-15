@@ -1,5 +1,6 @@
 #pragma once
-#include "Frameworks/Actor.h"
+
+#include "Frameworks/Objects/Actor.h"
 
 class UStaticMeshComponent;
 
@@ -11,7 +12,7 @@ public:
 	virtual ~ACubeMap() = default;
 
 	virtual void Tick(float deltaTime) override;
-	virtual void Render() override;
+
 
 
 private:

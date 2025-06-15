@@ -2,9 +2,9 @@
 #include "Editor/Application/guiEditor.h"
 #include "DetailWindow.h"
 #include "Editor/Widget/TransformWidget.h"
-#include "Render/PostProcess.h"
-#include "Render/ImageFilter.h"
-#include <Render/FSceneView.h>
+#include "Render/PostProcess/PostProcess.h"
+#include "Render/PostProcess/ImageFilter.h"
+
 
 
 DetailWindow::DetailWindow()

@@ -1,6 +1,6 @@
 #include "HeaderCollection.h"
 #include "TransformWidget.h"
-#include "Frameworks/Actor.h"
+#include "Frameworks/Objects/Actor.h"
 
 
 TransformWidget::TransformWidget(Actor* target)

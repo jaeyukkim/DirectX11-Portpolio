@@ -1,5 +1,5 @@
 #pragma once
-#include "Frameworks/Actor.h"
+#include "Frameworks/Objects/Actor.h"
 
 class UStaticMeshComponent;
 class AFloor : public Actor
@@ -9,7 +9,6 @@ public:
 	virtual ~AFloor() = default;
 
 	virtual void Tick(float deltaTime) override;
-	virtual void Render() override;
 
 
 public:

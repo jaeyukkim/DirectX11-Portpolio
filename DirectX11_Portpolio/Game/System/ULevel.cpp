@@ -30,21 +30,7 @@ void ULevel::Tick(float deltaTime)
     FTickTaskManager::LevelTick(deltaTime);
 }
 
-void ULevel::Render()
-{
-    for (shared_ptr<Actor>& actor : GetAllActor())
-    {
-        actor->Render();
-    }
-}
 
-void ULevel::PostRender()
-{
-    for (Actor* actor : PostRenderedActor)
-    {
-        actor->PostRender();
-    }
-}
 
 vector<shared_ptr<Actor>> ULevel::GetAllActor()
 {
@@ -98,9 +84,4 @@ void ULevel::DestroyActor(Actor* InActor)
     }*/
 
     FTickTaskManager::bNeedUpdate = true;
-}
-
-void ULevel::AddToPostRenderActor(Actor* InActor)
-{
-    PostRenderedActor.push_back(InActor);
 }

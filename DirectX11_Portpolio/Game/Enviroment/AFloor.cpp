@@ -1,7 +1,7 @@
 #include "Pch.h"
-#include "Frameworks/UStaticMeshComponent.h"
+#include "Frameworks/Components/UStaticMeshComponent.h"
 #include "AFloor.h"
-#include "Render/Material.h"
+
 
 
 AFloor::AFloor()
@@ -16,11 +16,5 @@ AFloor::AFloor()
 void AFloor::Tick(float deltaTime)
 {
     
-}
-
-void AFloor::Render()
-{
-	floor->RenderComponent();
-	
 }
 

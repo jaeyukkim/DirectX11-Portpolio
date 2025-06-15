@@ -1,5 +1,5 @@
 #pragma once
-#include "Frameworks/Actor.h"
+#include "Frameworks/Objects/Actor.h"
 
 
 class UStaticMeshComponent;
@@ -11,7 +11,7 @@ public:
 	ALightActor();
 	virtual ~ALightActor();
 	virtual void Tick(float deltaTime) override;
-	virtual void Render() override;
+
 
 	shared_ptr<ULightComponent> LightComp;
 	shared_ptr<ULightComponent> DirectionalLightComp;

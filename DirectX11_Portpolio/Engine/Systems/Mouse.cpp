@@ -33,7 +33,6 @@ void Mouse::Create()
 void Mouse::Destroy()
 {
 	assert(Instance != nullptr);
-
 	Delete(Instance);
 }
 

@@ -1,12 +1,11 @@
 #include "Pch.h"
-#include "Render/Material.h"
-#include "Frameworks/UCameraComponent.h"
+#include "Frameworks/Camera/UCameraComponent.h"
 #include "AKachujin.h"
 
 AKachujin::AKachujin()
 {
-    Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Samurai");
-    SetRootComponent(Mesh.get());
+    //Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Samurai", true);
+    //SetRootComponent(Mesh.get());
 
     Camera = CreateComponent<UCameraComponent>(this);
     Camera->GetRelativeTransform()->SetRotation(30.0f, 0.0f, 0.0f);
@@ -60,11 +59,3 @@ void AKachujin::Tick(float deltaTime)
     
     */
 }
-
-void AKachujin::Render()
-{
-    Super::Render();
-    Camera->RenderComponent();
-    Mesh->RenderComponent();
-}
-

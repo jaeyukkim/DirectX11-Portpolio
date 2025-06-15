@@ -5,11 +5,11 @@
 #include "Editor/WindowView/ContentWindow.h"
 #include "Editor/WindowView/DetailWindow.h"
 #include "Editor/WindowView/OutlinerWindow.h"
-#include "Frameworks/Actor.h"
+#include "Frameworks/Objects/Actor.h"
 #include <Systems/Application.h>
 
 #include "EditorApplication.h"
-#include <Render/FSceneView.h>
+
 
 
 

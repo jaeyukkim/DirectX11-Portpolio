@@ -1,7 +1,7 @@
 #include "HeaderCollection.h"
 #include "Editor/Application/guiEditor.h"
 #include "OutlinerWindow.h"
-#include "Frameworks/Actor.h"
+#include "Frameworks/Objects/Actor.h"
 #include "../Game/System/World.h"
 #include "../Game/System/ULevel.h"
 

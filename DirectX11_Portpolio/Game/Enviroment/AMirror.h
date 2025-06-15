@@ -1,5 +1,5 @@
 #pragma once
-#include "Frameworks/Actor.h"
+#include "Frameworks/Objects/Actor.h"
 
 class UStaticMeshComponent;
 class AMirror : public Actor
@@ -9,11 +9,13 @@ public:
     virtual ~AMirror() = default;
 
     virtual void Tick(float deltaTime) override;
-    virtual void Render() override;
-    virtual void PostRender() override;
 
-public:
+
+private:
     shared_ptr<UStaticMeshComponent> mirror;
     DirectX::SimpleMath::Plane plane;
     Matrix ReflectRow;
+    array<float, 4> BlendFactor = { 0.93f, 0.93f, 0.93f, 1.0f };
+
+    friend class MirrorRenderProxy;
 };

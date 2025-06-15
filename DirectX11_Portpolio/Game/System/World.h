@@ -16,7 +16,7 @@ public:
 	void Destroy();
 
 	void Tick(float deltaTime);
-	void Render();
+
 
 	static ULevel* GetLevel();
 	
