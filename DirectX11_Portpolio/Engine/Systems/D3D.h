@@ -1,5 +1,6 @@
 #pragma once
 
+struct FShadowMapResources;
 class PostProcess;
 
 struct D3DDesc
@@ -27,27 +28,18 @@ public:
 	static const D3DDesc& GetDesc();
 	static void SetDesc(const D3DDesc& InDesc);
 	
-
 	FWinSizeChangedSignature WinSizeChanged;
 
-private:
-	void CreateDevice();
-	void CreateRTV();
-	void CreateViewport();
-	void CreateDSV();
-	void CreatePostProcess();
 
-
-private:
-	Color clearColor;
 
 public:
 	ID3D11Device* GetDevice() { return Device.Get(); }
 	ID3D11DeviceContext* GetDeviceContext() { return DeviceContext.Get(); }
 	ID3D11ShaderResourceView* GetRenderTargetSRV() { return RenderTargetSRV.Get(); }
 	PostProcess* GetPostProcess() { return postProcess.get(); }
-
-
+	
+	void CreateShadowResources(UINT8 InLightID);
+	void DeleteShadowResource(UINT8 InLightID);
 	void RunPostProcess();
 	void SetFloatRTV();
 	void SetRenderTarget();
@@ -61,45 +53,68 @@ public:
 
 	void ResizeScreen(float InWidth, float InHeight);
 	
-private:
-	D3D();
-	~D3D();
 
-private:
-	static D3D* Instance;
-	static D3DDesc D3dDesc;
 
-	
-
-private:
-	ComPtr<IDXGISwapChain> SwapChain;
-
-	ComPtr<ID3D11Device> Device;
-	ComPtr<ID3D11DeviceContext> DeviceContext;
-
-	
-	shared_ptr<D3D11_VIEWPORT> Viewport;
-
+public:
 	ComPtr<ID3D11Texture2D> DSV_Texture;
 	ComPtr<ID3D11DepthStencilView> DepthStencilView;
 
-private:
-	ComPtr<ID3D11Texture2D> FloatBuffer;
-	ComPtr<ID3D11ShaderResourceView> FloatSRV;
-	ComPtr<ID3D11RenderTargetView> FloatRTV;
+	// Depth buffer 관련
+	ComPtr<ID3D11Texture2D> DepthOnlyBuffer; // No MSAA
+	ComPtr<ID3D11DepthStencilView> DepthOnlyDSV;
+	ComPtr<ID3D11ShaderResourceView> DepthOnlySRV;
 
+	// 기본 RenderTarget
+	ComPtr<ID3D11Texture2D> RenderTargetBuffer;
+	ComPtr<ID3D11RenderTargetView> RenderTargetView;
+	ComPtr<ID3D11ShaderResourceView> RenderTargetSRV;
+
+	//Resolved
 	ComPtr<ID3D11Texture2D> ResolvedBuffer;
 	ComPtr<ID3D11ShaderResourceView> ResolvedSRV;
 	ComPtr<ID3D11RenderTargetView> ResolvedRTV;
-	
-	ComPtr<ID3D11Texture2D> RenderTargetBuffer;
-	ComPtr<ID3D11ShaderResourceView> RenderTargetSRV;
-	ComPtr<ID3D11RenderTargetView> RenderTargetView;
 
+	//Float Buffer
+	ComPtr<ID3D11Texture2D> FloatBuffer;
+	ComPtr<ID3D11RenderTargetView> FloatRTV;
+	ComPtr<ID3D11ShaderResourceView> FloatSRV;
+
+	//PostEffect
+	ComPtr<ID3D11Texture2D> PostEffectsBuffer;
+	ComPtr<ID3D11RenderTargetView> PostEffectRTV;
+	ComPtr<ID3D11ShaderResourceView> PostEffectSRV;
+
+	unordered_map<UINT8, FShadowMapResources> ShadowResources;
+	
+	//PostProcess
 	shared_ptr<PostProcess> postProcess;
 
+	shared_ptr<D3D11_VIEWPORT> Viewport;
+	shared_ptr<D3D11_VIEWPORT> ShadowViewport;
+
+private:
+	D3D();
+	~D3D();
+	void CreateDevice();
+	void CreateRTV();
+	void CreateViewport();
+	void CreateDSV();
+	void CreatePostProcess();
+
+	
+private:
+	static D3D* Instance;
+	static D3DDesc D3dDesc;
+	ComPtr<IDXGISwapChain> SwapChain;
+	ComPtr<ID3D11Device> Device;
+	ComPtr<ID3D11DeviceContext> DeviceContext;
+	
+
+	
 private:
 	UINT NumQualityLevels = 0;
 	bool bUseMSAA = true;
-	
+	const UINT ShadowWidth = 1280;
+	const UINT ShadowHeight = 1280;
+	Color clearColor;
 };

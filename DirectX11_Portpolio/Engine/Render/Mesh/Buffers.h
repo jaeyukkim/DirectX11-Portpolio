@@ -59,6 +59,7 @@ public:
 	operator const ID3D11Buffer* () { return Buffer.Get(); }
 
 	void UpdateConstBuffer() const;
+	void UpdateData(void* InData);
 	void VSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot);
 	void PSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot);
 private:

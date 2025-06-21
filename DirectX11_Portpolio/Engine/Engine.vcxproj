@@ -182,6 +182,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Render\Mesh\VertexData.h" />
     <ClInclude Include="Render\Pipeline\FGlobalPSO.h" />
     <ClInclude Include="Render\Pipeline\FPSO.h" />
+    <ClInclude Include="Render\PostEffects\PostEffect.h" />
     <ClInclude Include="Render\PostProcess\ImageFilter.h" />
     <ClInclude Include="Render\PostProcess\PostProcess.h" />
     <ClInclude Include="Render\RenderDefinition.h" />
@@ -1143,6 +1144,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <AdditionalIncludeDirectories>./;;C:\Users\77\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
       <LibCompiled>true</LibCompiled>
     </ClCompile>
+    <ClCompile Include="Render\PostEffects\PostEffect.cpp" />
     <ClCompile Include="Render\PostProcess\ImageFilter.cpp" />
     <ClCompile Include="Render\PostProcess\PostProcess.cpp" />
     <ClCompile Include="Render\RenderProxy\LightSceneRenderProxy.cpp" />
@@ -1431,6 +1433,14 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Render\HLSL\PS_DepthOnly.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Render\HLSL\PS_PostEffect.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

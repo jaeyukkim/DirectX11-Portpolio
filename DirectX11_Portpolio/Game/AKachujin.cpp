@@ -4,8 +4,8 @@
 
 AKachujin::AKachujin()
 {
-    //Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Samurai", true);
-    //SetRootComponent(Mesh.get());
+    Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Samurai");
+    SetRootComponent(Mesh.get());
 
     Camera = CreateComponent<UCameraComponent>(this);
     Camera->GetRelativeTransform()->SetRotation(30.0f, 0.0f, 0.0f);

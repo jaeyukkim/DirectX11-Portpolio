@@ -196,11 +196,13 @@ void Converter::InitMaterial(wstring InFilePath, MeshType InMesh)
 template <typename MeshType>
 void Converter::InitMesh(wstring InFilePath, MeshType InMesh)
 {
-	if (auto staticMeshComp = dynamic_cast<UStaticMeshComponent*>(InMesh))
+	UStaticMeshComponent* staticMeshComp = nullptr;
+	USkeletalMeshComponent* skeletalMeshComp = nullptr;
+	if (staticMeshComp = dynamic_cast<UStaticMeshComponent*>(InMesh))
 	{
 		InFilePath = L"../Contents/_Objects/" + InFilePath + L".mesh";
 	}
-	else if (auto skeletalMeshComp = dynamic_cast<USkeletalMeshComponent*>(InMesh))
+	else if (skeletalMeshComp = dynamic_cast<USkeletalMeshComponent*>(InMesh))
 	{
 		InFilePath = L"../Contents/_Models/" + InFilePath + L".mesh";
 	}
@@ -213,15 +215,47 @@ void Converter::InitMesh(wstring InFilePath, MeshType InMesh)
 	reader->Open(InFilePath);
 	ReadMeshData(reader.get(), InMesh);
 	reader->Close();
+
+	//스켈레탈 메시 타입이 아니라면 종료
+	if(skeletalMeshComp == nullptr)
+		return;
+	
+	int count = 0;
+
+	vector<shared_ptr<SkeletalMesh>>& mesh = skeletalMeshComp->m_Mesh;
+	for (shared_ptr<Skeletal>& bone : skeletalMeshComp->Bones)
+	{
+		skeletalMeshComp->Transforms[count++] = bone->Transform;
+		
+		for (UINT number : bone->MeshNumbers)
+		{
+			mesh[number]->Data.BoneIndex = bone->Index;
+			mesh[number]->Data.Bone = bone.get();
+			mesh[number]->Data.Transforms = skeletalMeshComp->Transforms;
+		}
+	}
+
+	for (UINT i = 0; i < SkeletalMeshes.size(); i++)
+	{
+		if (mesh[i]->Data.Transforms == nullptr)
+		{
+			Assert(true, "SkeletalMesh의 Transform 정보가 없습니다.");
+		}
+	}
+		
+	
+		
 }
 
 template <typename MeshType>
 void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
 {
-	UINT count = InReader->FromUInt();
+	
 
 	if (auto staticMeshComp = dynamic_cast<UStaticMeshComponent*>(InMesh))
 	{
+		UINT count = InReader->FromUInt();
+		
 		for (UINT i = 0; i < count; i++)
 		{
 			auto mesh = make_shared<StaticMesh>();
@@ -245,6 +279,9 @@ void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
 	
 	else if (auto skeletalMeshComp = dynamic_cast<USkeletalMeshComponent*>(InMesh))
 	{
+		ReadBoneData(InReader, skeletalMeshComp);
+		
+		UINT count = InReader->FromUInt();
 		for (UINT i = 0; i < count; i++)
 		{
 			auto mesh = make_shared<SkeletalMesh>();
@@ -252,7 +289,7 @@ void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
 
 			meshData.Name = InReader->FromString();
 			string materialName = InReader->FromString();
-			meshData.MaterialData = skeletalMeshComp->MaterialTable[materialName].get();
+			meshData.MaterialData = skeletalMeshComp->MaterialTable.at(materialName).get();
 
 			mesh->BoneData.BoneIndex = InReader->FromUInt();
 
@@ -269,8 +306,7 @@ void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
 
 		for (shared_ptr<SkeletalMesh>& mesh : skeletalMeshComp->m_Mesh)
 			mesh->CreateBuffer();
-
-		ReadBoneData(InReader, skeletalMeshComp);
+		
 	}
 	else
 	{

@@ -43,8 +43,6 @@ void D3D::SetDesc(const D3DDesc& InDesc)
 
 void D3D::RunPostProcess()
 {
-	DeviceContext->ResolveSubresource(ResolvedBuffer.Get(), 0,
-		FloatBuffer.Get(), 0, DXGI_FORMAT_R16G16B16A16_FLOAT);
 	postProcess->Render();
 }
 
@@ -76,6 +74,7 @@ void D3D::ClearRTV()
 void D3D::ClearFloatRTV()
 {
 	DeviceContext->ClearRenderTargetView(FloatRTV.Get(), clearColor);
+
 }
 
 void D3D::ClearBlendState()
@@ -215,6 +214,7 @@ void D3D::CreateRTV()
 		desc.SampleDesc.Quality = 0;
 	}
 
+	
 	// FLOAT MSAA 적용 된 RTV, SRV
 	FAILED(Device->CreateTexture2D(&desc, NULL, FloatBuffer.GetAddressOf()));
 	FAILED(Device->CreateShaderResourceView(FloatBuffer.Get(), NULL, FloatSRV.GetAddressOf()));
@@ -228,6 +228,12 @@ void D3D::CreateRTV()
 	FAILED(Device->CreateShaderResourceView(ResolvedBuffer.Get(), NULL, ResolvedSRV.GetAddressOf()));
 	FAILED(Device->CreateRenderTargetView(ResolvedBuffer.Get(), NULL, ResolvedRTV.GetAddressOf()));
 
+	
+	//PostEffect용 SRV/RTV
+	FAILED(Device->CreateTexture2D(&desc, NULL, PostEffectsBuffer.GetAddressOf()));
+	FAILED(Device->CreateShaderResourceView(PostEffectsBuffer.Get(), NULL, PostEffectSRV.GetAddressOf()));
+	FAILED(Device->CreateRenderTargetView(PostEffectsBuffer.Get(), NULL, PostEffectRTV.GetAddressOf()));
+
 
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -236,24 +242,41 @@ void D3D::CreateRTV()
 
 }
 
+
 void D3D::CreateViewport()
 {
-	Viewport = make_shared<D3D11_VIEWPORT>();
-	Viewport->TopLeftX = 0;
-	Viewport->TopLeftY = 0;
-	Viewport->Width = D3dDesc.Width;
-	Viewport->Height = D3dDesc.Height;
-	Viewport->MinDepth = 0;
-	Viewport->MaxDepth = 1;
+	{
+		Viewport = make_shared<D3D11_VIEWPORT>();
+		ZeroMemory(Viewport.get(), sizeof(D3D11_VIEWPORT));
+		Viewport->TopLeftX = 0;
+		Viewport->TopLeftY = 0;
+		Viewport->Width = D3dDesc.Width;
+		Viewport->Height = D3dDesc.Height;
+		Viewport->MinDepth = 0;
+		Viewport->MaxDepth = 1;
+	}
 
+	
+	{
+		ShadowViewport =  make_shared<D3D11_VIEWPORT>();
+		ZeroMemory(ShadowViewport.get(), sizeof(D3D11_VIEWPORT));
+		ShadowViewport->TopLeftX = 0;
+		ShadowViewport->TopLeftY = 0;
+		ShadowViewport->Width = ShadowWidth;
+		ShadowViewport->Height = ShadowHeight;
+		ShadowViewport->MinDepth = 0;
+		ShadowViewport->MaxDepth = 1;
+	}
+
+	
 	DeviceContext->RSSetViewports(1, Viewport.get());
+	
 }
+
 
 void D3D::CreateDSV()
 {
-	DXGI_FORMAT format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
-
+	
 	//Create Texture - DSV
 	{
 		D3D11_TEXTURE2D_DESC desc;
@@ -262,7 +285,7 @@ void D3D::CreateDSV()
 		desc.Height = (UINT)D3dDesc.Height;
 		desc.MipLevels = 1;
 		desc.ArraySize = 1;
-		desc.Format = format;
+		desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		desc.CPUAccessFlags = 0;
@@ -280,14 +303,20 @@ void D3D::CreateDSV()
 		}
 
 		Check(Device->CreateTexture2D(&desc, nullptr, DSV_Texture.GetAddressOf()));
-	}
 
+		// Depth 전용
+		desc.Format = DXGI_FORMAT_R32_TYPELESS;
+		desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		Check(Device->CreateTexture2D(&desc, nullptr, DepthOnlyBuffer.GetAddressOf()));
+	}
 	
 	//Create DSV
 	{
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
 		ZeroMemory(&desc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
-		desc.Format = format;
+		desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		if (NumQualityLevels > 0)
 			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS; //  MSAA용
 		else
@@ -295,16 +324,84 @@ void D3D::CreateDSV()
 
 		Check(Device->CreateDepthStencilView(DSV_Texture.Get(), &desc, DepthStencilView.GetAddressOf()));
 	}
+	
+	//DepthOnlyDSV
+	{
+		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.Format = DXGI_FORMAT_D32_FLOAT;
+		desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		Check(Device->CreateDepthStencilView(DepthOnlyBuffer.Get(), &desc, DepthOnlyDSV.GetAddressOf()));
+	}
 
-
+	//DepthOnlySRV
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.Format = DXGI_FORMAT_R32_FLOAT;
+		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipLevels = 1;
+		Check(Device->CreateShaderResourceView(DepthOnlyBuffer.Get(), &desc, DepthOnlySRV.GetAddressOf()));
+	}
 	
 }
+
 
 void D3D::CreatePostProcess()
 {
 	postProcess = make_shared<PostProcess>(
-		vector<ComPtr<ID3D11ShaderResourceView>>{ ResolvedSRV },
+		vector<ComPtr<ID3D11ShaderResourceView>>{ PostEffectSRV },
 		vector<ComPtr<ID3D11RenderTargetView>>{ RenderTargetView });
 }
 
+void D3D::CreateShadowResources(UINT8 InLightID)
+{
+	FShadowMapResources sdwResource;
+	
+	//Create Texture - ShadowTexture
+	{
+		D3D11_TEXTURE2D_DESC desc;
+		ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
+		desc.Width = ShadowWidth;
+		desc.Height = ShadowHeight;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = DXGI_FORMAT_R32_TYPELESS;
+		desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = 0;
+		desc.SampleDesc.Count = 1; 
+		desc.SampleDesc.Quality = 0;
+		
 
+		Check(Device->CreateTexture2D(&desc, nullptr, sdwResource.ShadowBuffer.GetAddressOf()));
+	}
+
+	
+	//ShadowDSV
+	{
+		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.Format = DXGI_FORMAT_D32_FLOAT;
+		desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		Check(Device->CreateDepthStencilView(sdwResource.ShadowBuffer.Get(), &desc, sdwResource.ShadowDSV.GetAddressOf()));
+	}
+
+	//ShadowSRV
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.Format = DXGI_FORMAT_R32_FLOAT;
+		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipLevels = 1;
+		Check(Device->CreateShaderResourceView(sdwResource.ShadowBuffer.Get(), &desc, sdwResource.ShadowSRV.GetAddressOf()));
+	}
+
+	ShadowResources.insert({InLightID, sdwResource});
+}
+
+void D3D::DeleteShadowResource(UINT8 InLightID)
+{
+	ShadowResources.erase(InLightID);
+}

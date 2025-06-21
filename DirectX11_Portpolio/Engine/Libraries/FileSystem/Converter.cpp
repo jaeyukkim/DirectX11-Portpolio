@@ -15,7 +15,7 @@ void Converter::ReadFile(const wstring objectName, const EMeshType& meshType)
 {
 	wstring fbxPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
 	wstring gltfPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
-	bool bIsGLTF = false;
+	bIsGLTF = false;
 	wstring finalPath;
 	if (filesystem::exists(fbxPath))
 	{
@@ -61,6 +61,9 @@ void Converter::ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshTy
 	case EMeshType::SkeletalMeshType:
 		InSaveFileName = L"../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".material";
 		break;
+
+	default:
+		Assert(true, "ExportMaterial 실패");
 	}
 	
 	ReadMaterials(InMeshType);

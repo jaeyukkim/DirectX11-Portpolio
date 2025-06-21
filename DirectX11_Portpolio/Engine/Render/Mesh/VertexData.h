@@ -143,5 +143,10 @@ struct StaticMeshData
     vector<UINT> Indices;
 };
 
+struct VertexTextureData
+{
+    vector<VertexTexture> Data;
+    vector<UINT> Indices;
+};
 
 #define MAX_MODEL_TRANSFORM 250

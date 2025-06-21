@@ -62,7 +62,7 @@
 
 
 
-//********************************* Enum Á¤ÀÇ*****************************************
+//********************************* Enum ????*****************************************
 
 // Defines all bitwise operators for enum classes so it can be (mostly) used as a regular flags enum
 #define ENUM_CLASS_FLAGS(Enum) \

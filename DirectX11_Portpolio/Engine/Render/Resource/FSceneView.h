@@ -17,33 +17,34 @@ public:
 
 public:
     void UpdateSceneView(const FViewContext& InContext);
-    void UpdateReflactRow(const Matrix InReflactRow);
-    FViewContext* GetSceneViewContext() { return &Context; }
-    void UpdateIBLStrength(float InIBLStrength) {LightInfoCbuffer.IBLStrength = InIBLStrength;}
-    FLightInfo* GetLightInfo() { return &LightInfoCbuffer; }
+    void UpdateReflactView(const Matrix InReflactRow);
+    void UpdateLightView(FLightInformation* InLightInfo);
+    
+    FViewContext* GetSceneViewContext() { return &DefaultView; }
+    void UpdateIBLStrength(float InIBLStrength) {LightInfo.IBLStrength = InIBLStrength;}
+    FLightInfo* GetLightInfo() { return &LightInfo; }
 
 public:
     void AddToLightMap(FLightInformation* InLightInfo);
-    void UpdateLightMap(FLightInformation& InLightInfo);
+    void DeleteFromLightMap(int InLightID);
+    void UpdateLightMap(FLightInformation* InLightInfo);
     void UpdateSkyLight(ECubeMapType IBLType, ID3D11ShaderResourceView* InIBLSRV);
-
+    
 private:
-    FViewContext Context;
-    FViewContext ReflactContext;
+    FViewContext DefaultView;
+    FViewContext ReflactView;
+    FViewContext ShadowView[MAX_LIGHT_COUNT];
     shared_ptr<ConstantBuffer> ViewConstantBuffer;
     shared_ptr<ConstantBuffer> ReflactViewConstantBuffer;
+    shared_ptr<ConstantBuffer> LightViewConstantBuffer[MAX_LIGHT_COUNT];
+
 
 private:
-    FLightInfo LightInfoCbuffer;
+    FLightInfo LightInfo;
+    static atomic<UINT8> LightCounter;
+    shared_ptr<ConstantBuffer> LightsCBuffer;
+  
     
-    static atomic<uint8_t> LightCounter;
-    
-    shared_ptr<ConstantBuffer> LightCountCBuffer;
-    unordered_map<uint8_t, FLightInformation> LightMap;
-    vector<FLightInformation> CachedLights;
-    shared_ptr<StructuredBuffer> LightConstantBuffer;
-
-
     static constexpr int MaxIBLMap = static_cast<int>(ECubeMapType::MAX_CUBEMAP_TEXTURE_COUNT);
     ComPtr<ID3D11ShaderResourceView> IBLSRV[MaxIBLMap] = { nullptr };
 

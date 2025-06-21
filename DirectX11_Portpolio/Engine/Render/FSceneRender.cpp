@@ -1,5 +1,6 @@
 #include "HeaderCollection.h"
 #include "FSceneRender.h"
+#include "PostEffects/PostEffect.h"
 
 
 FSceneRender* FSceneRender::Instance = nullptr;
@@ -9,6 +10,7 @@ void FSceneRender::Create()
     assert(Instance == nullptr);
     Instance = new FSceneRender();
     FGlobalPSO::Create();
+    Instance->PostEffectEntity = make_shared<PostEffect>();
 }
 
 void FSceneRender::Destroy()
@@ -25,6 +27,18 @@ FSceneRender* FSceneRender::Get()
     return Instance;
 }
 
+void FSceneRender::Render()
+{
+    BeginRender();
+    RenderDepthOnly();
+    RenderShadowMap();
+    D3D::Get()->SetFloatRTV();
+
+
+    RenderObjects(GetDefaultRenderType());
+    RenderMirror();
+    EndRender();
+}
 
 void FSceneRender::BeginRender()
 {
@@ -33,32 +47,78 @@ void FSceneRender::BeginRender()
     D3D::Get()->ClearDSV();
     D3D::Get()->ClearBlendState();
     D3D::Get()->SetFloatRTV();
-    FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->RenderPSO);
+
+}
+
+void FSceneRender::RenderDepthOnly()
+{
+    D3D::Get()->GetDeviceContext()->OMSetRenderTargets(1, D3D::Get()->ResolvedRTV.GetAddressOf(),
+                                  D3D::Get()->DepthOnlyDSV.Get());
+    D3D::Get()->GetDeviceContext()->ClearDepthStencilView(D3D::Get()->DepthOnlyDSV.Get(), D3D11_CLEAR_DEPTH,
+                                     1.0f, 0);
+    
     FRenderOption option = GetDefaultRenderType();
     ViewProxy->Render(option);
     LightSceneProxy->Render(option);
-  
+
+    FRenderOption defaultOption = GetDefaultRenderType();
+    RenderObjects(defaultOption);
+    for(shared_ptr<MirrorRenderProxy> mirror : MirrorProxy)
+    {
+        mirror->Render(defaultOption);
+    }
+
 }
 
-void FSceneRender::Render()
+void FSceneRender::RenderShadowMap()
 {
-    BeginRender();
-
-
-    //기본 렌더링
-    FRenderOption defaultOption = GetDefaultRenderType();
-    for(const shared_ptr<StaticMeshRenderProxy>& proxy : MeshProxies)
+    D3D::Get()->GetDeviceContext()->RSSetViewports(1, D3D::Get()->ShadowViewport.get());
+    FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->DepthOnlyPSO);
+    
+    for(FLightInformation& info : FSceneView::Get()->GetLightInfo()->Lights)
     {
-        proxy->Render(defaultOption);
+        int id = info.LightID;
+        if(info.LightType & LT_UseShadow)
+        {
+            auto it = D3D::Get()->ShadowResources.find(id);
+            if (it != D3D::Get()->ShadowResources.end())
+            {
+                auto& shadow = it->second;
+                D3D::Get()->GetDeviceContext()->OMSetRenderTargets(0, nullptr, shadow.ShadowDSV.Get());
+                D3D::Get()->GetDeviceContext()->ClearDepthStencilView(shadow.ShadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+                ViewProxy->SetLightViewMode(id);
+            }
+
+            FRenderOption noOption = FRenderOption();
+            RenderObjects(noOption);
+            for(shared_ptr<MirrorRenderProxy> mirror : MirrorProxy)
+            {
+                mirror->Render(noOption);
+            }
+        }
     }
-    for(const shared_ptr<SkeletalMeshRenderProxy>& proxy : SkeletalMeshProxies)
+
+    D3D::Get()->GetDeviceContext()->RSSetViewports(1, D3D::Get()->Viewport.get());  //다시복구
+    ViewProxy->Render(GetDefaultRenderType());
+}
+
+
+void FSceneRender::RenderObjects(FRenderOption option)
+{
+    for(shared_ptr<StaticMeshRenderProxy> proxy: MeshProxies)
     {
-        proxy->Render(defaultOption);
+        proxy->Render(option);
     }
-    SkyBoxProxy->Render(defaultOption);
+    for(shared_ptr<SkeletalMeshRenderProxy> proxy : SkeletalMeshProxies)
+    {
+        proxy->Render(option);
+    }
+    SkyBoxProxy->Render(option);
+}
 
 
-    //거울 렌더링
+void FSceneRender::RenderMirror()
+{
     FRenderOption mirrorOption = GetMirrorRenderType();
     for(shared_ptr<MirrorRenderProxy> mirror : MirrorProxy)
     {
@@ -66,29 +126,21 @@ void FSceneRender::Render()
         D3D::Get()->ClearOnlyDepth();
 
         //뷰 타입을 mirror로 변경
-        FSceneView::Get()->UpdateReflactRow(mirror->GetReflactRow());
+        FSceneView::Get()->UpdateReflactView(mirror->GetReflactRow());
         ViewProxy->Render(mirrorOption);
-
-        for(shared_ptr<StaticMeshRenderProxy> proxy: MeshProxies)
-        {
-            proxy->Render(mirrorOption);
-        }
-        for(shared_ptr<SkeletalMeshRenderProxy> proxy : SkeletalMeshProxies)
-        {
-            proxy->Render(mirrorOption);
-        }
-        SkyBoxProxy->Render(mirrorOption);
-
+        RenderObjects(mirrorOption);
         
-        ViewProxy->Render(defaultOption);
+        ViewProxy->Render(GetDefaultRenderType());
         mirror->Render(GetBlendRenderType()); //거울의 재질 블랜드
     }
-
-    EndRender();
 }
 
 void FSceneRender::EndRender()
 {
+    D3D::Get()->GetDeviceContext()->ResolveSubresource(D3D::Get()->ResolvedBuffer.Get(), 0,
+        D3D::Get()->FloatBuffer.Get(), 0, DXGI_FORMAT_R16G16B16A16_FLOAT);
+
+    PostEffectEntity->Render();
     D3D::Get()->RunPostProcess();
     D3D::Get()->EndDraw();
 }
@@ -130,5 +182,13 @@ FRenderOption FSceneRender::GetBlendRenderType()
     FRenderOption option;
     
     option.bBlendOn = true;
+    return option;
+}
+
+FRenderOption FSceneRender::GetDepthOnlyRenderType()
+{
+    FRenderOption option;
+
+    option.bDepthOnly = true;
     return option;
 }

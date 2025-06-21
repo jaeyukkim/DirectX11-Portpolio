@@ -6,6 +6,11 @@ ViewRenderProxy::ViewRenderProxy(FSceneView* sceneView)
 {
     Data.ViewConstantBuffer = sceneView->ViewConstantBuffer;
     Data.ReflactViewConstantBuffer = sceneView->ReflactViewConstantBuffer;
+    
+    for (int i = 0; i < MAX_LIGHT_COUNT; ++i)
+    {
+        Data.LightViewConstantBuffer[i] = sceneView->LightViewConstantBuffer[i];
+    }
 }
 
 
@@ -23,4 +28,12 @@ void ViewRenderProxy::Render(const FRenderOption& option)
         Data.ViewConstantBuffer->VSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
         Data.ViewConstantBuffer->PSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
     }
+}
+
+void ViewRenderProxy::SetLightViewMode(UINT8 InLightID)
+{
+    if(InLightID >= MAX_LIGHT_COUNT) return;
+    Data.LightViewConstantBuffer[InLightID]->UpdateConstBuffer();
+    Data.LightViewConstantBuffer[InLightID]->VSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
+    Data.LightViewConstantBuffer[InLightID]->PSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
 }

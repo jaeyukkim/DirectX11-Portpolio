@@ -8,6 +8,7 @@
 #include "RenderProxy/ViewRenderProxy.h"
 
 
+class PostEffect;
 enum ERenderProxyType : UINT8;
 class RenderProxy;
 class LightSceneRenderProxy;
@@ -25,17 +26,27 @@ public:
     template <typename ProxyType, typename... Args>
     void CreateRenderProxy(Args&&... args);
 
-    void BeginRender();
     void Render();
-    void EndRender();
+    void BeginRender();
+    void RenderDepthOnly();
+    void RenderShadowMap();
+    void RenderMirror();
     
+    void EndRender();
+    void RenderObjects(FRenderOption option);
+    
+    
+public:
     FRenderOption GetDefaultRenderType();
     FRenderOption GetMirrorRenderType();
     FRenderOption GetStencilRenderType();
     FRenderOption GetBlendRenderType();
+    FRenderOption GetDepthOnlyRenderType();
+
 
     void SetRenderTypeWire() {bWireRender = true;}
     void SetRenderTypeDefault() {bWireRender = false;}
+    PostEffect* GetPostEffect() { return PostEffectEntity.get(); }
 
 private:
     FSceneRender() = default;
@@ -54,6 +65,7 @@ private:
     vector<shared_ptr<MirrorRenderProxy>> MirrorProxy;
     shared_ptr<SkyBoxRenderProxy> SkyBoxProxy;
 
+    shared_ptr<PostEffect> PostEffectEntity;
     bool bWireRender = false;
 };
 

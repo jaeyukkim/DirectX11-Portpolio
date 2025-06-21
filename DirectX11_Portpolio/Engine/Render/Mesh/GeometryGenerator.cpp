@@ -2,6 +2,39 @@
 #include "GeometryGenerator.h"
 
 
+
+/*
+* PostEffect 등에 사용하는 사각형을 만드는 함수
+*/
+VertexTextureData GeometryGenerator::MakeScreen(const float scale, const Vector2 texScale)
+{
+    vector<Vector3> positions;
+    vector<Vector2> Uvs;
+
+    positions.push_back(Vector3(-1.0f, 1.0f, 0.0f) * scale);
+    positions.push_back(Vector3(1.0f, 1.0f, 0.0f) * scale);
+    positions.push_back(Vector3(1.0f, -1.0f, 0.0f) * scale);
+    positions.push_back(Vector3(-1.0f, -1.0f, 0.0f) * scale);
+
+    Uvs.push_back(Vector2(0.0f, 0.0f));
+    Uvs.push_back(Vector2(1.0f, 0.0f));
+    Uvs.push_back(Vector2(1.0f, 1.0f));
+    Uvs.push_back(Vector2(0.0f, 1.0f));
+
+    VertexTextureData ScreenData;
+
+    for (size_t i = 0; i < positions.size(); i++)
+    {
+        VertexTexture v;
+        v.Position = positions[i];
+        v.Uv = Uvs[i] * texScale;
+        ScreenData.Data.push_back(v);
+    }
+
+    ScreenData.Indices = { 0, 1, 2, 0, 2, 3 };
+
+    return ScreenData;
+}
 /*
 * 사각형을 만드는 함수
 */

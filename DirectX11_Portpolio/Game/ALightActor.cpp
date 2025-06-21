@@ -8,7 +8,7 @@ ALightActor::ALightActor()
 	
 	Mesh = CreateComponent<UStaticMeshComponent>(this, L"Lantern");
 	SetRootComponent(Mesh.get());
-	LightComp = CreateComponent<ULightComponent>(this, ELightType::Spot);
+	LightComp = CreateComponent<ULightComponent>(this, (LT_Spot|LT_UseShadow));
 	LightComp->SetUpAttachment(GetRootComponent());
 	//DirectionalLightComp = CreateComponent<ULightComponent>(this, ELightType::Directional);
 	//DirectionalLightComp->GetLightInfo()->direction = Vector3(-1.0f, 0.0f, 0.0f);

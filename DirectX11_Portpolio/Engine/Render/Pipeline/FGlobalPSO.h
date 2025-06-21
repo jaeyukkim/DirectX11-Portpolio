@@ -72,6 +72,7 @@ public:
     FPSO ReflectSkyboxSolidPSO;
     FPSO ReflectSkyboxWirePSO;
     FPSO NormalsPSO;
+    FPSO DepthOnlyPSO;
     FPSO PostEffectsPSO;
     FPSO PostProcessingPSO;
     FPSO BloomUpPSO;

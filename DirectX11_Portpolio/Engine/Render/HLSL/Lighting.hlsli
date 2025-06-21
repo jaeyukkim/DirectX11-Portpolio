@@ -2,35 +2,43 @@
 #define __LIGHTING_HLSLI__
 
 #include "Common.hlsli"
+#define MAX_LIGHT_COUNT 30
+#define LIGHT_None 0
+#define LIGHT_Directional (1 << 0)
+#define LIGHT_Spot (1 << 1)
+#define LIGHT_Point (1 << 2)
+#define LIGHT_Lim (1 << 3)
+#define Use_Shadow (1 << 4)
 
-#define LIGHT_None (1 << 0)
-#define LIGHT_Directional (1 << 1)
-#define LIGHT_Spot (1 << 2)
-#define LIGHT_Point (1 << 3)
-#define LIGHT_Lim (1 << 4)
 
 struct Light
 {
     int Type;
     int LightID;
+    float2 Light_padding0;
+
     float3 strength;
     float fallOffStart;
+
     float3 direction;
     float fallOffEnd;
+
     float3 position;
     float spotPower;
+
     float innerCone;
     float outerCone;
+    float2 Light_padding1;
 };
 
 
 cbuffer CBLightInfo : register(b5)
 {
+    Light Lights[MAX_LIGHT_COUNT];
     int LightCnt;
     float IBLStrength;
+    float2 Light_padding;
 }
-
-StructuredBuffer<Light> lights : register(t11);
 
 
 float3 ComputeLimLight(Light light, float3 toEye, float3 finalNormal)

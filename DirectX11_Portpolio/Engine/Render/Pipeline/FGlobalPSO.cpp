@@ -60,7 +60,7 @@ void FGlobalPSO::BindPSO(const FPSO& pso)
 
 }
 
-void FGlobalPSO::DrawIndexed(const int nIndex)
+void FGlobalPSO:: DrawIndexed(const int nIndex)
 {
     D3D::Get()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     D3D::Get()->GetDeviceContext()->DrawIndexed(nIndex, 0, 0);
@@ -144,7 +144,7 @@ void FGlobalPSO::InitPixelShader()
     CompilePS(CombinePSPath, CombinePS);
     CompilePS(BloomUpPSPath, BloomUpPS);
     CompilePS(BloomDownPSPath, BloomDownPS);
-    //CompilePS(PostEffectPSPath, PostEffectsPS);
+    CompilePS(PostEffectPSPath, PostEffectsPS);
     //CompilePS(NormalPSPath, NormalPS);
 }
 
@@ -445,6 +445,12 @@ void FGlobalPSO::InitPSO()
     // CombinePSO
     CombinePSO = PostProcessingPSO;
     CombinePSO.m_pixelShader = CombinePS;
+
+    //DepthOnlyPSO
+    DepthOnlyPSO = MeshSolidPSO;
+    DepthOnlyPSO.m_vertexShader = DepthOnlyVS;
+    DepthOnlyPSO.m_pixelShader = DepthOnlyPS;
+    
 
 }
 

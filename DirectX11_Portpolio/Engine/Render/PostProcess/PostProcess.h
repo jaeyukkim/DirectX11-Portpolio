@@ -7,7 +7,7 @@ class IndexBuffer;
 class VertexBuffer;
 struct StaticMeshData;
 
-class PostProcess 
+class PostProcess
 {
 public:
     PostProcess(const vector<ComPtr<ID3D11ShaderResourceView>>& resources,

@@ -1,7 +1,11 @@
 #include "HeaderCollection.h"
 #include "ULightComponent.h"
 
-ULightComponent::ULightComponent(ELightType InLightType)
+/**
+ * 
+ * @param InLightType ELightType의 형식으로 넣을것
+ */
+ULightComponent::ULightComponent(UINT InLightType)
 {
     LightInfo.LightType = InLightType;
     FSceneView::Get()->AddToLightMap(&LightInfo);
@@ -9,6 +13,7 @@ ULightComponent::ULightComponent(ELightType InLightType)
 
 ULightComponent::~ULightComponent()
 {
+    FSceneView::Get()->DeleteFromLightMap(LightInfo.LightID);
 }
 
 void ULightComponent::TickComponent(float deltaTime)
@@ -24,5 +29,6 @@ void ULightComponent::TickComponent(float deltaTime)
     Vector3 defaultDirection = Vector3(0.0f, -1.0f, 0.0f);
     Vector3 rotatedDirection = XMVector3Rotate(defaultDirection, transform->Rotation);
     LightInfo.direction = XMVector3Normalize(rotatedDirection);
-    FSceneView::Get()->UpdateLightMap(LightInfo);
+    FSceneView::Get()->UpdateLightMap(&LightInfo);
+    
 }

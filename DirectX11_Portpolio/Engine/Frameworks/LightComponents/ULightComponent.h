@@ -6,7 +6,7 @@
 class ULightComponent : public USceneComponent
 {
 public:
-    ULightComponent(ELightType InLightType);
+    ULightComponent(UINT InLightType);
     virtual ~ULightComponent();
 
 public:

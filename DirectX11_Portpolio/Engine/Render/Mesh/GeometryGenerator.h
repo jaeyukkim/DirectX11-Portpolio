@@ -7,6 +7,7 @@ class GeometryGenerator
 {
 public:
 
+    static VertexTextureData MakeScreen(const float scale = 1.0f, const Vector2 texScale = Vector2(1.0f));
     static StaticMeshData MakeSquare(const float scale = 1.0f, const Vector2 texScale = Vector2(1.0f));
     static StaticMeshData MakeSquareGrid(const int numSlices, const int numStacks,const float scale = 1.0f,
         const Vector2 texScale = Vector2(1.0f));

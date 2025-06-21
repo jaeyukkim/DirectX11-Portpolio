@@ -120,6 +120,12 @@ void ConstantBuffer::UpdateConstBuffer() const
 	D3D::Get()->GetDeviceContext()->Unmap(Buffer.Get(), 0);
 }
 
+void ConstantBuffer::UpdateData(void* InData)
+{
+	Data = InData;
+	UpdateConstBuffer();
+}
+
 void ConstantBuffer::VSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot)
 {
 	D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(static_cast<UINT>(bufferSlot), numSlot, Buffer.GetAddressOf());
