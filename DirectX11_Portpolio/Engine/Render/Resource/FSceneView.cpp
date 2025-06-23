@@ -5,6 +5,7 @@
 
 FSceneView* FSceneView::Instance = nullptr;
 atomic<uint8_t> FSceneView::LightCounter = 0;
+atomic<uint8_t> FSceneView::ShadowCounter = 0;
 
 FSceneView* FSceneView::Get()
 {
@@ -87,10 +88,11 @@ void FSceneView::AddToLightMap(FLightInformation* InLightInfo)
             InLightInfo->LightID = i;
             LightInfo.Lights[i] = *InLightInfo; // 라이트맵에 등록
             LightInfo.CurrentLightCnt = ++LightCounter;
-
+            LightInfo.ShadowCount = ++ShadowCounter;
 
             if(InLightInfo->LightType & LT_UseShadow)
             {
+                
                 UpdateLightView(InLightInfo);
                 D3D::Get()->CreateShadowResources(InLightInfo->LightID);
             }
@@ -108,10 +110,13 @@ void FSceneView::DeleteFromLightMap(int InLightID)
         return;
 
     if(LightInfo.Lights[InLightID].LightType & LT_UseShadow)
+    {
         D3D::Get()->DeleteShadowResource(InLightID);
+        LightInfo.ShadowCount = --ShadowCounter;
+    }
     
     LightInfo.Lights[InLightID] = FLightInformation();
-    --LightCounter;
+    LightInfo.CurrentLightCnt = --LightCounter;
     ShadowView[InLightID] = FViewContext();
 }
 
@@ -123,7 +128,7 @@ void FSceneView::UpdateLightMap(FLightInformation* InLightInfo)
 
     LightInfo.Lights[InLightInfo->LightID] = *InLightInfo;
     LightInfo.CurrentLightCnt = LightCounter;
-
+    LightInfo.ShadowCount = ShadowCounter;
     UpdateLightView(InLightInfo);
 }
 
@@ -156,7 +161,7 @@ void FSceneView::UpdateLightView(FLightInformation* InLightInfo)
             InLightInfo->position, InLightInfo->position + InLightInfo->direction, up);
 
         Matrix lightProjRow = XMMatrixPerspectiveFovLH(
-            XMConvertToRadians(120.0f), 1.0f, 0.1f, 10.0f);
+            XMConvertToRadians(75.0f), 1.0f, 0.3f, 1000.0f);
 
         
         auto& view = ShadowView[InLightInfo->LightID];
@@ -168,7 +173,23 @@ void FSceneView::UpdateLightView(FLightInformation* InLightInfo)
             lightProjRow.Invert().Transpose();
         view.ViewProjection =
             (lightViewRow * lightProjRow).Transpose();
-        
+
+        InLightInfo->invProj = view.ProjectionInverse;
+        InLightInfo->viewProj = view.ViewProjection;
+
+
+        /*
+        // LIGHT_FRUSTUM_WIDTH 확인
+         Vector4 eye(0.0f, 0.0f, 0.0f, 1.0f);
+         Vector4 xLeft(-1.0f, -1.0f, 0.0f, 1.0f);
+         Vector4 xRight(1.0f, 1.0f, 0.0f, 1.0f);
+         eye = Vector4::Transform(eye, lightProjRow);
+         xLeft = Vector4::Transform(xLeft, lightProjRow.Invert());
+         xRight = Vector4::Transform(xRight, lightProjRow.Invert());
+         xLeft /= xLeft.w;
+         xRight /= xRight.w;
+         auto light_frustum_width =  xRight.x - xLeft.x;
+        cout << light_frustum_width;*/
     }
     
 }

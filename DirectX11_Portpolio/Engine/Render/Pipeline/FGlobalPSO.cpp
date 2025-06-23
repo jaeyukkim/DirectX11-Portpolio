@@ -283,7 +283,31 @@ void FGlobalPSO::InitSamplerState()
     }
     hr = D3D::Get()->GetDevice()->CreateSamplerState(&clampSDE, Samplers[ESamplerSlot::LinearClampSampler].GetAddressOf());
     AssertHR(hr, "Create ClampSamplerState failed");
+
+
+    D3D11_SAMPLER_DESC shadowPointSDE = clampSDE;
+    {
+        shadowPointSDE.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+        shadowPointSDE.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+        shadowPointSDE.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+        shadowPointSDE.BorderColor[0] = 1.0f; // 큰 Z값
+        shadowPointSDE.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    }
+    hr = D3D::Get()->GetDevice()->CreateSamplerState(&shadowPointSDE, Samplers[ESamplerSlot::shadowPointSampler].GetAddressOf());
+    AssertHR(hr, "Create shadowPointSampler failed");
+    
+
+    D3D11_SAMPLER_DESC shadowCompareSDE = shadowPointSDE;
+    {
+        shadowCompareSDE.BorderColor[0] = 100.0f; // 큰 Z값
+        shadowCompareSDE.Filter =
+            D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+        shadowCompareSDE.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+    }
+    hr = D3D::Get()->GetDevice()->CreateSamplerState(&shadowCompareSDE, Samplers[ESamplerSlot::shadowCompareSampler].GetAddressOf());
+    AssertHR(hr, "Create shadowCompareSampler failed");
 }
+
 
 
 void FGlobalPSO::InitBlendState()

@@ -11,7 +11,11 @@ public:
     virtual void OnGUI() override;
 
 private:
-    FTransform* mTransform;
+    FTransform* ActorTransform;
+    Vector3 Position;
+    Vector3 Rotation;
+    Vector3 Scale;
+    
     ImVec2 BoxSize;
     ImVec4 BoxColor;
 };

@@ -42,6 +42,7 @@ private:
 private:
     FLightInfo LightInfo;
     static atomic<UINT8> LightCounter;
+    static atomic<UINT8> ShadowCounter;
     shared_ptr<ConstantBuffer> LightsCBuffer;
   
     

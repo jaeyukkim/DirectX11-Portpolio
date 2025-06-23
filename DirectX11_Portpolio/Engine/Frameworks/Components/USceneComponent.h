@@ -29,7 +29,6 @@ public:
 public:
 	bool bDirty = false;
 	int AttachDepth = 0;
-	Vector3 CachedEulerRotation;
 	
 
 protected:

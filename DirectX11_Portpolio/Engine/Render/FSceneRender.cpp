@@ -33,8 +33,6 @@ void FSceneRender::Render()
     RenderDepthOnly();
     RenderShadowMap();
     D3D::Get()->SetFloatRTV();
-
-
     RenderObjects(GetDefaultRenderType());
     RenderMirror();
     EndRender();
@@ -74,7 +72,8 @@ void FSceneRender::RenderShadowMap()
 {
     D3D::Get()->GetDeviceContext()->RSSetViewports(1, D3D::Get()->ShadowViewport.get());
     FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->DepthOnlyPSO);
-    
+
+    vector<ID3D11ShaderResourceView*> shadowSRV;
     for(FLightInformation& info : FSceneView::Get()->GetLightInfo()->Lights)
     {
         int id = info.LightID;
@@ -84,6 +83,7 @@ void FSceneRender::RenderShadowMap()
             if (it != D3D::Get()->ShadowResources.end())
             {
                 auto& shadow = it->second;
+                shadowSRV.push_back(shadow.ShadowSRV.Get());
                 D3D::Get()->GetDeviceContext()->OMSetRenderTargets(0, nullptr, shadow.ShadowDSV.Get());
                 D3D::Get()->GetDeviceContext()->ClearDepthStencilView(shadow.ShadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
                 ViewProxy->SetLightViewMode(id);
@@ -95,9 +95,11 @@ void FSceneRender::RenderShadowMap()
             {
                 mirror->Render(noOption);
             }
+            
         }
     }
 
+    D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::ShadowMap), shadowSRV.size(), shadowSRV.data());
     D3D::Get()->GetDeviceContext()->RSSetViewports(1, D3D::Get()->Viewport.get());  //다시복구
     ViewProxy->Render(GetDefaultRenderType());
 }

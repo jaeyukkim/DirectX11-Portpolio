@@ -158,7 +158,10 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Frameworks\Components\USceneComponent.h" />
     <ClInclude Include="Frameworks\Components\USkeletalMeshComponent.h" />
     <ClInclude Include="Frameworks\Components\UStaticMeshComponent.h" />
+    <ClInclude Include="Frameworks\LightComponents\UDirectionalLightComponent.h" />
     <ClInclude Include="Frameworks\LightComponents\ULightComponent.h" />
+    <ClInclude Include="Frameworks\LightComponents\UPointLightComponent.h" />
+    <ClInclude Include="Frameworks\LightComponents\USpotLightComponent.h" />
     <ClInclude Include="Frameworks\Manager\TickTaskManager.h" />
     <ClInclude Include="Frameworks\Objects\ACharacter.h" />
     <ClInclude Include="Frameworks\Objects\Actor.h" />
@@ -759,7 +762,10 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <AdditionalIncludeDirectories>./;;C:\Users\77\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
       <LibCompiled>true</LibCompiled>
     </ClCompile>
+    <ClCompile Include="Frameworks\LightComponents\UDirectionalLightComponent.cpp" />
     <ClCompile Include="Frameworks\LightComponents\ULightComponent.cpp" />
+    <ClCompile Include="Frameworks\LightComponents\UPointLightComponent.cpp" />
+    <ClCompile Include="Frameworks\LightComponents\USpotLightComponent.cpp" />
     <ClCompile Include="Frameworks\Manager\TickTaskManager.cpp" />
     <ClCompile Include="Frameworks\Objects\ACharacter.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>

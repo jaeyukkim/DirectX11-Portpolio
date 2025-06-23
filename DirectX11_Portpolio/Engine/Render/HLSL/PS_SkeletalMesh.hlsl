@@ -27,6 +27,8 @@ float4 PS_Main(VertexOutput input) : SV_TARGET
     float3 ambientLighting = AmbientLightingByIBL(albedo, finalNormal, toEye, ao, metallic, roughness) * IBLStrength;
 
     float3 directLighting = float3(0, 0, 0);
+
+    [unroll]
     for (int i = 0; i < MAX_LIGHT_COUNT; ++i)
     {
         if(Lights[i].Type)
@@ -49,7 +51,7 @@ float4 PS_Main(VertexOutput input) : SV_TARGET
             float3 G = SchlickGGX(NdotI, NdotO, roughness);
             float3 specularBRDF = (F * D * G) / max(1e-5, 4.0 * NdotI * NdotO);
 
-            float3 radiance = LightRadiance(Lights[i], input.posWorld, finalNormal);
+            float3 radiance = LightRadiance(Lights[i], input.posWorld, finalNormal, ShadowMap[i]);
 
             directLighting += (Lights[i].Type & LIGHT_Lim) ? float3(0.0f, 0.0f, 0.0f) :
                 ComputeLimLight(Lights[i], toEye, finalNormal);

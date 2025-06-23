@@ -8,6 +8,7 @@ class ConstantBuffer;
 class IndexBuffer;
 
 #define MAX_LIGHT_COUNT 30
+#define MAX_SHADOW_COUNT 9
 
 enum ELightType : UINT
 {
@@ -80,7 +81,7 @@ enum class EShaderResourceSlot : UINT8
 {
     CubeMapTexture = 0,
     MaterialTexture = 4,
-    LightMap = 11,
+    ShadowMap = 11,
     PostEffect = 20
 };
 
@@ -89,7 +90,9 @@ enum ESamplerSlot : UINT8
 {
     LinearWrapSampler = 0,
     LinearClampSampler = 1,
-    MaxSamplerSlot = 2
+    shadowPointSampler = 2,
+    shadowCompareSampler = 3,
+    MaxSamplerSlot = 4
 };
 
 
@@ -167,11 +170,15 @@ __declspec(align(16)) struct FLightInformation
     float fallOffEnd = 30.0f;                      
 
     Vector3 position = Vector3(0.0f, 0.0f, -2.0f); 
-    float spotPower = 10.0f;                      
+    float spotPower = 1.0f;                      
 
     float innerCone = static_cast<float>(cos(XMConvertToRadians(20.0f)));
-    float outerCone = static_cast<float>(cos(XMConvertToRadians(30.0f)));
-    float padding1[2] = { 0 };
+    float outerCone = static_cast<float>(cos(XMConvertToRadians(80.0f)));
+    float radius = 0.1f;
+    float padding1 = 0.0f;
+
+    Matrix viewProj;
+    Matrix invProj;
 };
 
 
@@ -180,7 +187,8 @@ struct FLightInfo
     FLightInformation Lights[MAX_LIGHT_COUNT];
     int CurrentLightCnt = 0;
     float IBLStrength = 2.5f;
-    float padding[2] = { 0 };
+    int ShadowCount = 0;
+    float padding2 = 0.0f;
 };
 
 
