@@ -2,48 +2,56 @@
 #define __LIGHTING_HLSLI__
 
 #include "Common.hlsli"
-#define MAX_LIGHT_COUNT 30
+#define MAX_LIGHT_COUNT 9
 #define MAX_SHADOW_COUNT 9
-#define NEAR_PLANE 0.1
-#define LIGHT_FRUSTUM_WIDTH 0.460396 // <- 계산해서 찾은 값
+
+#define NEAR_PLANE 1.0
+#define LIGHT_FRUSTUM_WIDTH 1.53465 // <- 계산해서 찾은 값
+
 
 #define LIGHT_None 0
 #define LIGHT_Directional (1 << 0)
 #define LIGHT_Spot (1 << 1)
 #define LIGHT_Point (1 << 2)
 #define LIGHT_Lim (1 << 3)
-#define Use_Shadow (1 << 4)
-
-
-struct Light
-{
-    int Type;
-    int LightID;
-    float2 Light_padding0;
-
-    float3 strength;
-    float fallOffStart;
-
-    float3 direction;
-    float fallOffEnd;
-
-    float3 position;
-    float spotPower;
-
-    float innerCone;
-    float outerCone;
-    float radius;
-    float Light_padding1;
-
-    matrix viewProj;
-    matrix invProj;
-};
+#define LIGHT_Halo (1 << 4)
+#define Use_Shadow (1 << 5)
 
 Texture2D ShadowMap[MAX_SHADOW_COUNT] : register(t11);
 
-cbuffer CBLightInfo : register(b5)
+struct Light
+{
+    matrix viewProj;
+    matrix invProj;
+
+    float3 strength;
+    float Lpadding0;
+    float3 direction;
+    float Lpadding1;
+    float3 position;
+    float Lpadding2;
+
+    int Type;
+    int LightID;
+    float radius;
+    float spotPower;
+
+    float fallOffStart;
+    float fallOffEnd;
+    float innerCone;
+    float outerCone;
+
+};
+
+
+cbuffer CBLightObject : register(b5)
 {
     Light Lights[MAX_LIGHT_COUNT];
+}
+
+
+cbuffer CBLightInfo : register(b6)
+{
     int LightCnt;
     float IBLStrength;
     int ShadowCount;
@@ -140,9 +148,6 @@ float N2V(float ndcDepth, matrix invProj)
 }
 
 
-// Assuming that LIGHT_FRUSTUM_WIDTH == LIGHT_FRUSTUM_HEIGHT
-// #define LIGHT_RADIUS_UV (LIGHT_WORLD_RADIUS / LIGHT_FRUSTUM_WIDTH)
-
 float PCF_Filter(float2 uv, float zReceiverNdc, float filterRadiusUV, Texture2D shadowMap)
 {
     float sum = 0.0f;
@@ -155,13 +160,12 @@ float PCF_Filter(float2 uv, float zReceiverNdc, float filterRadiusUV, Texture2D 
     return sum / 64;
 }
 
-// void Func(out float a) <- c++의 void Func(float& a) 처럼 출력값 저장 가능
 
 void FindBlocker(out float avgBlockerDepthView, out float numBlockers, float2 uv,
-                 float zReceiverView, Texture2D shadowMap, matrix invProj, float lightRadiusWorld)
+    float zReceiverView, Texture2D shadowMap, matrix invProj, float lightRadiusWorld)
 {
     float lightRadiusUV = lightRadiusWorld / LIGHT_FRUSTUM_WIDTH;
-    
+
     float searchRadius = lightRadiusUV * (zReceiverView - NEAR_PLANE) / zReceiverView;
 
     float blockerSum = 0;
@@ -172,7 +176,7 @@ void FindBlocker(out float avgBlockerDepthView, out float numBlockers, float2 uv
             shadowMap.SampleLevel(shadowPointSampler, float2(uv + diskSamples64[i] * searchRadius), 0).r;
 
         shadowMapDepth = N2V(shadowMapDepth, invProj);
-        
+
         if (shadowMapDepth < zReceiverView)
         {
             blockerSum += shadowMapDepth;
@@ -185,9 +189,9 @@ void FindBlocker(out float avgBlockerDepthView, out float numBlockers, float2 uv
 float PCSS(float2 uv, float zReceiverNdc, Texture2D shadowMap, matrix invProj, float lightRadiusWorld)
 {
     float lightRadiusUV = lightRadiusWorld / LIGHT_FRUSTUM_WIDTH;
-    
+
     float zReceiverView = N2V(zReceiverNdc, invProj);
-    
+
     // STEP 1: blocker search
     float avgBlockerDepthView = 0;
     float numBlockers = 0;
@@ -209,6 +213,7 @@ float PCSS(float2 uv, float zReceiverNdc, Texture2D shadowMap, matrix invProj, f
         return PCF_Filter(uv, zReceiverNdc, filterRadiusUV, shadowMap);
     }
 }
+
 
 float3 LightRadiance(Light light, float3 posWorld, float3 normalWorld, Texture2D shadowMap)
 {
@@ -237,38 +242,75 @@ float3 LightRadiance(Light light, float3 posWorld, float3 normalWorld, Texture2D
 
     // Shadow map
     float shadowFactor = 1.0;
+    
     if (light.Type & Use_Shadow)
     {
-        const float nearZ = 0.03; // 카메라 설정과 동일
-        
+        const float nearZ = 0.01; // 카메라 설정과 동일
+
         // 1. Project posWorld to light screen    
         float4 lightScreen = mul(float4(posWorld, 1.0), light.viewProj);
         lightScreen.xyz /= lightScreen.w;
-        
+
         // 2. 카메라(광원)에서 볼 때의 텍스춰 좌표 계산
         float2 lightTexcoord = float2(lightScreen.x, -lightScreen.y);
         lightTexcoord += 1.0;
         lightTexcoord *= 0.5;
-        
+
         // 3. 쉐도우맵에서 값 가져오기
         //float depth = shadowMap.Sample(shadowPointSampler, lightTexcoord).r;
-        
+
         // 4. 가려져 있다면 그림자로 표시
         //if (depth + 0.001 < lightScreen.z)
-        //  shadowFactor = 0.0;
-        
+          //  shadowFactor = 0.0;
+
         uint width, height, numMips;
         shadowMap.GetDimensions(0, width, height, numMips);
-        
+
         // Texel size
-        float dx = 5.0 / (float) width;
+        float dx = 5.0 / (float)width;
         // shadowFactor = PCF_Filter(lightTexcoord.xy, lightScreen.z - 0.001, dx, shadowMap);
         shadowFactor = PCSS(lightTexcoord, lightScreen.z - 0.01, shadowMap, light.invProj, light.radius);
     }
-
+    
     float3 radiance = light.strength * spotFactor * att * shadowFactor;
 
     return radiance;
+}
+
+
+
+float HaloEmission(Light light, float3 posView, float radius)
+{
+    // Halo
+    float3 rayStart = float3(0, 0, 0); // View space
+    float3 dir = normalize(posView - rayStart);
+
+    float3 center = mul(float4(light.position, 1.0), View).xyz; // View 공간으로 변환
+
+    float t1 = 0.0;
+    float t2 = 0.0;
+    
+    if (RaySphereIntersection(rayStart, dir, center, radius, t1, t2) && t1 < posView.z)
+    {
+        t2 = min(posView.z, t2);
+        
+        float3 p = rayStart - center;
+        float p2 = dot(p, p);
+        float R2 = radius*radius;
+        float invR2 = 1.0f / R2;
+
+ 
+        float haloEmission =  (1-p2 * invR2) * (t2-t1)
+                                -dot(p, dir) * invR2 * (t2*t2 - t1*t1)
+                                -(1.0f / (3.0f * R2)) * (t2*t2*t2 - t1*t1*t1);
+
+        haloEmission /= (4*radius/3.0);
+        return haloEmission;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 #endif // __LIGHTING_HLSLI__

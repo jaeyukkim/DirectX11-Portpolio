@@ -1,4 +1,7 @@
 #pragma once
+#include "Libraries/Utility/Delegate.h"
+
+DECLARE_DYNAMIC_DELEGATE(FTransformChanged);
 
 struct FTransform
 {
@@ -29,6 +32,8 @@ public:
     void SetScale(Vector3 InScale);
 
     Vector4 operator*(const Vector4& vec) const;
+    Vector4 operator=(const Vector4& vec) const;
+
 
     Vector3 GetForwardVector() const;
     Vector3 GetRightVector() const;
@@ -39,6 +44,9 @@ public:
     void SetUpVector(Vector3 InUp, Vector3 Forward = Vector3::Forward);
 
     void AddRotation(float yawDelta, float pitchDelta, float rollDelta);
+
+
+    FTransformChanged TransformChanged;
 
 private:
     static float NormalizeAngle(float angle);

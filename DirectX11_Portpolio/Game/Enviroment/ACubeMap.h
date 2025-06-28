@@ -17,5 +17,5 @@ public:
 
 private:
 	shared_ptr<UStaticMeshComponent> Sphere;
-	float IBLStength = 2.5f;
+	float IBLStength = 2.3f;
 };

@@ -59,6 +59,17 @@ void D3D::SetRenderTarget()
 void D3D::ClearDSV()
 {
 	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	for (auto& resource : ShadowResources)
+	{
+		ID3D11DepthStencilView* dsv = resource.second.ShadowDSV.Get();
+		if (dsv)
+		{
+			DeviceContext->ClearDepthStencilView(dsv,
+				D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+				1.0f, 0);
+		}
+	}
 }
 
 void D3D::ClearOnlyDepth()
@@ -69,6 +80,10 @@ void D3D::ClearOnlyDepth()
 void D3D::ClearRTV()
 {
 	DeviceContext->ClearRenderTargetView(RenderTargetView.Get(), clearColor);
+	DeviceContext->ClearRenderTargetView(PostEffectRTV.Get(), clearColor);
+	DeviceContext->ClearRenderTargetView(ResolvedRTV.Get(), clearColor);
+	DeviceContext->ClearRenderTargetView(FloatRTV.Get(), clearColor);
+
 }
 
 void D3D::ClearFloatRTV()
@@ -398,10 +413,11 @@ void D3D::CreateShadowResources(UINT8 InLightID)
 		Check(Device->CreateShaderResourceView(sdwResource.ShadowBuffer.Get(), &desc, sdwResource.ShadowSRV.GetAddressOf()));
 	}
 
-	ShadowResources.insert({InLightID, sdwResource});
+	ShadowResources[InLightID] = sdwResource;
 }
 
 void D3D::DeleteShadowResource(UINT8 InLightID)
 {
-	ShadowResources.erase(InLightID);
+	//새걸로 다시 만들어서 덮어씌우기
+	CreateShadowResources(InLightID);
 }

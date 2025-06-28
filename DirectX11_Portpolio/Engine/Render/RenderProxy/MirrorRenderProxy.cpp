@@ -63,7 +63,7 @@ void MirrorRenderProxy::Render(const FRenderOption& option)
     Data.MeshData.MaterialData->BindMaterial();
     Data.MeshData.VBuffer->IASetVertexBuffer();
     Data.MeshData.IBuffer->IASetIndexBuffer();
-    Data.MeshData.Transform->VSSetConstantBuffer(EConstBufferSlot::World, 1);
+    Data.MeshData.Transform->VSSetConstantBuffer(EConstBufferSlot::CB_World, 1);
     Data.MeshData.Transform->UpdateConstBuffer();
     D3D::Get()->GetDeviceContext()->DrawIndexed(Data.MeshData.IndexCount, 0, 0);
 }

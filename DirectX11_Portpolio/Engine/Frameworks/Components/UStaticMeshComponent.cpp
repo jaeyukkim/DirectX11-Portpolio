@@ -15,7 +15,7 @@
 UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, StaticMeshCreateInfo info)
 {
 	wstring objectName = InFileName;
-	InFileName = L"../Contents/_Objects/" + objectName + L".model";
+	InFileName = L"../../Contents/_Objects/" + objectName + L".model";
 
 	shared_ptr<Converter> converter = make_shared<Converter>();
 	if (info.bOverWrite)

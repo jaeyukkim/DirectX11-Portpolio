@@ -8,8 +8,6 @@ AKachujin::AKachujin()
     SetRootComponent(Mesh.get());
 
     Camera = CreateComponent<UCameraComponent>(this);
-    Camera->GetRelativeTransform()->SetRotation(30.0f, 0.0f, 0.0f);
-    Camera->GetRelativeTransform()->SetPosition(0.0f, 3.0f, -3.0f);
    // Camera->SetUpAttachment(GetRootComponent());
 }
 

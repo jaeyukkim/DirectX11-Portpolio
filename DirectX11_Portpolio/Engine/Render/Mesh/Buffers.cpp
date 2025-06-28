@@ -101,6 +101,7 @@ ConstantBuffer::ConstantBuffer(void* InData, UINT InDataSize)
 {
 	D3D11_BUFFER_DESC desc;
 	ZeroMemory(&desc, sizeof(D3D11_BUFFER_DESC));
+	
 	desc.ByteWidth = DataSize;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	desc.Usage = D3D11_USAGE_DYNAMIC;

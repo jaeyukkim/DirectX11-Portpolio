@@ -7,7 +7,7 @@ class Material;
 class ConstantBuffer;
 class IndexBuffer;
 
-#define MAX_LIGHT_COUNT 30
+#define MAX_LIGHT_COUNT 9
 #define MAX_SHADOW_COUNT 9
 
 enum ELightType : UINT
@@ -17,7 +17,8 @@ enum ELightType : UINT
     LT_Spot = (1 << 1),
     LT_Point = (1 << 2),
     LT_Lim = (1 << 3),
-    LT_UseShadow = (1 << 4)
+    LT_Halo = (1 << 4),
+    LT_UseShadow = (1 << 5)
 };
 
 
@@ -66,14 +67,15 @@ enum EPostProcessType : UINT8
 
 enum class EConstBufferSlot : UINT8
 {
-    MaterialDesc = 0,
-    World = 1,
-    ViewContext = 2,
-    Bone = 3,
-    MaterialTex = 4,
-    LightInfo = 5,
-    ImageFilterData = 6,
-    PostEffectData = 7
+    CB_MaterialDesc = 0,
+    CB_World = 1,
+    CB_ViewContext = 2,
+    CB_Bone = 3,
+    CB_MaterialTex = 4,
+    CB_LightObjects = 5,
+    CB_LightInfo = 6,
+    CB_ImageFilterData = 7,
+    CB_PostEffectData = 8
 };
 
 
@@ -119,7 +121,8 @@ struct FViewRenderData
 static constexpr int MaxIBLMap = static_cast<int>(ECubeMapType::MAX_CUBEMAP_TEXTURE_COUNT);
 struct FLightSceneRenderData
 {
-    shared_ptr<ConstantBuffer> LightInformation;
+    shared_ptr<ConstantBuffer> LightsCBuffer;
+    shared_ptr<ConstantBuffer> LightInfoCBuffer;
     ID3D11ShaderResourceView** IBLSRVRef = nullptr;
 };
 
@@ -157,40 +160,46 @@ struct FSkeletalMeshRenderData
 
 
 // 조명 정보
-__declspec(align(16)) struct FLightInformation
+struct FLight
 {
-    UINT LightType = ELightType::LT_None; 
-    int LightID; 
-    float padding0[2] = { 0 };
-
-    Vector3 strength = Vector3(2.0f, 2.0f, 2.0f);     
-    float fallOffStart = 0.0f;  
-
-    Vector3 direction = Vector3(0.0f, -1.0f, 0.0f); 
-    float fallOffEnd = 30.0f;                      
-
-    Vector3 position = Vector3(0.0f, 0.0f, -2.0f); 
-    float spotPower = 1.0f;                      
-
-    float innerCone = static_cast<float>(cos(XMConvertToRadians(20.0f)));
-    float outerCone = static_cast<float>(cos(XMConvertToRadians(80.0f)));
-    float radius = 0.1f;
-    float padding1 = 0.0f;
-
     Matrix viewProj;
     Matrix invProj;
+
+
+    Vector3 strength = Vector3(2.0f, 2.0f, 2.0f);
+    float padding0 = 0.0f;
+    Vector3 direction = Vector3(0.0f, 0.0f, 1.0f);
+    float padding1 = 0.0f;;
+    Vector3 position = Vector3(0.0f, 0.0f, -2.0f);
+    float padding2 = 0.0f;;
+
+
+    UINT LightType = ELightType::LT_None; 
+    int LightID; 
+    float radius = 0.5f;
+    float spotPower = 1.0f;
+
+
+    float fallOffStart = 0.0f;  
+    float fallOffEnd = 30.0f;                      
+    float innerCone = static_cast<float>(cos(XMConvertToRadians(20.0f)));
+    float outerCone = static_cast<float>(cos(XMConvertToRadians(30.0f)));
+
 };
 
 
+struct FLightObjects
+{
+    FLight Lights[MAX_LIGHT_COUNT];
+};
+
 struct FLightInfo
 {
-    FLightInformation Lights[MAX_LIGHT_COUNT];
     int CurrentLightCnt = 0;
     float IBLStrength = 2.5f;
     int ShadowCount = 0;
     float padding2 = 0.0f;
 };
-
 
 __declspec(align(256)) struct FViewContext
 {

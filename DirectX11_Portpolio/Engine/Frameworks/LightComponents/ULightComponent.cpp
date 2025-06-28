@@ -21,10 +21,21 @@ void ULightComponent::TickComponent(float deltaTime)
 	Super::TickComponent(deltaTime);
     
     FTransform* transform = GetWorldTransform();
-    LightInfo.position = transform->GetPosition();
+    LightInfo.position = transform->GetPosition();   
+    
+    if (!(LightInfo.LightType & LT_Directional))
+    {
+        Vector3 defaultDirection = Vector3(0.0f, 0.0f, 1.0f);
+        Vector3 rotatedDirection = XMVector3Rotate(defaultDirection, transform->Rotation);
+        LightInfo.direction = XMVector3Normalize(rotatedDirection);
+    }
+    
+
 }
 
 void ULightComponent::UpdateLight()
 {
+    
+
     FSceneView::Get()->UpdateLightMap(&LightInfo);
 }

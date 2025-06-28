@@ -25,7 +25,7 @@ void FSceneView::Create()
 
     for(int i = 0 ; i < MAX_LIGHT_COUNT ; i++)
     {
-        Instance->LightInfo.Lights[i] = FLightInformation();
+        Instance->Lights.Lights[i] = FLight();
         Instance->ShadowView[i] = FViewContext();
         Instance->LightViewConstantBuffer[i] = make_shared<ConstantBuffer>(&Instance->ShadowView[i], sizeof(FViewContext));
     }
@@ -35,13 +35,17 @@ void FSceneView::Create()
     
     
 
-    Instance->LightsCBuffer = make_shared<ConstantBuffer>(&Instance->LightInfo, sizeof(Instance->LightInfo));
-
+    Instance->LightsCBuffer = make_shared<ConstantBuffer>(&Instance->Lights, sizeof(FLightObjects));
+    Instance->LightsInfoCBuffer = make_shared<ConstantBuffer>(&Instance->LightInfo, sizeof(FLightInfo));
     
+
+
     FSceneRender::Get()->CreateRenderProxy<LightSceneRenderProxy>(Instance);
     FSceneRender::Get()->CreateRenderProxy<ViewRenderProxy>(Instance);
-
-    
+    for (int i = 0; i < MAX_LIGHT_COUNT; i++)
+    {
+        D3D::Get()->CreateShadowResources(i);
+    }
 }
 
 
@@ -70,7 +74,7 @@ void FSceneView::UpdateReflactView(const Matrix InReflactRow)
     Instance->ReflactViewConstantBuffer->UpdateConstBuffer();
 }
 
-void FSceneView::AddToLightMap(FLightInformation* InLightInfo)
+void FSceneView::AddToLightMap(FLight* InLightInfo)
 {
     
     // 최대 라이트 수를 초과할경우
@@ -83,16 +87,15 @@ void FSceneView::AddToLightMap(FLightInformation* InLightInfo)
     //빈 라이트 공간 찾아서 넣음
     for(int i = 0 ; i<MAX_LIGHT_COUNT ; i++)
     {
-        if(LightInfo.Lights[i].LightType == ELightType::LT_None)
+        if(Lights.Lights[i].LightType == ELightType::LT_None)
         {
             InLightInfo->LightID = i;
-            LightInfo.Lights[i] = *InLightInfo; // 라이트맵에 등록
+            Lights.Lights[i] = *InLightInfo; // 라이트맵에 등록
             LightInfo.CurrentLightCnt = ++LightCounter;
             LightInfo.ShadowCount = ++ShadowCounter;
 
             if(InLightInfo->LightType & LT_UseShadow)
             {
-                
                 UpdateLightView(InLightInfo);
                 D3D::Get()->CreateShadowResources(InLightInfo->LightID);
             }
@@ -109,24 +112,24 @@ void FSceneView::DeleteFromLightMap(int InLightID)
     if(InLightID >= MAX_LIGHT_COUNT)
         return;
 
-    if(LightInfo.Lights[InLightID].LightType & LT_UseShadow)
+    if(Lights.Lights[InLightID].LightType & LT_UseShadow)
     {
         D3D::Get()->DeleteShadowResource(InLightID);
         LightInfo.ShadowCount = --ShadowCounter;
     }
     
-    LightInfo.Lights[InLightID] = FLightInformation();
+    Lights.Lights[InLightID] = FLight();
     LightInfo.CurrentLightCnt = --LightCounter;
     ShadowView[InLightID] = FViewContext();
 }
 
 
-void FSceneView::UpdateLightMap(FLightInformation* InLightInfo)
+void FSceneView::UpdateLightMap(FLight* InLightInfo)
 {
     if(InLightInfo->LightID >= MAX_LIGHT_COUNT)
         return;
 
-    LightInfo.Lights[InLightInfo->LightID] = *InLightInfo;
+    Lights.Lights[InLightInfo->LightID] = *InLightInfo;
     LightInfo.CurrentLightCnt = LightCounter;
     LightInfo.ShadowCount = ShadowCounter;
     UpdateLightView(InLightInfo);
@@ -145,7 +148,7 @@ void FSceneView::UpdateSkyLight(ECubeMapType IBLType, ID3D11ShaderResourceView* 
 /**
  * Light가 Shadow를 사용한다면 그 LightID에 맞는 Light시점 뷰 생성하여 ShadowView[LightID]에 저장
  */
-void FSceneView::UpdateLightView(FLightInformation* InLightInfo)
+void FSceneView::UpdateLightView(FLight* InLightInfo)
 {
     if(InLightInfo->LightID >= MAX_LIGHT_COUNT) return;
     
@@ -161,7 +164,7 @@ void FSceneView::UpdateLightView(FLightInformation* InLightInfo)
             InLightInfo->position, InLightInfo->position + InLightInfo->direction, up);
 
         Matrix lightProjRow = XMMatrixPerspectiveFovLH(
-            XMConvertToRadians(75.0f), 1.0f, 0.3f, 1000.0f);
+            XMConvertToRadians(75.0f), 1.0f, 1.0f, 50.0f);
 
         
         auto& view = ShadowView[InLightInfo->LightID];

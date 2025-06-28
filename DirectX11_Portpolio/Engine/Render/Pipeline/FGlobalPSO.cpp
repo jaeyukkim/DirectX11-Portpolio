@@ -290,7 +290,7 @@ void FGlobalPSO::InitSamplerState()
         shadowPointSDE.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
         shadowPointSDE.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
         shadowPointSDE.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-        shadowPointSDE.BorderColor[0] = 1.0f; // 큰 Z값
+        shadowPointSDE.BorderColor[0] = 1.0f;
         shadowPointSDE.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
     }
     hr = D3D::Get()->GetDevice()->CreateSamplerState(&shadowPointSDE, Samplers[ESamplerSlot::shadowPointSampler].GetAddressOf());

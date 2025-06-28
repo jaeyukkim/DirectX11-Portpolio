@@ -11,7 +11,7 @@ void SkeletalMesh::Tick()
 void SkeletalMesh::Render()
 {
 	BoneBuffer->UpdateConstBuffer();
-	BoneBuffer->VSSetConstantBuffer(EConstBufferSlot::Bone, 1);
+	BoneBuffer->VSSetConstantBuffer(EConstBufferSlot::CB_Bone, 1);
 }
 
 void SkeletalMesh::SetWorld(const FTransform* InTransform)

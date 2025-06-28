@@ -1,7 +1,6 @@
 #include "Lighting.hlsli"
 
 
-
 float4 PS_Main(VertexOutput input) : SV_TARGET
 {
     float4 PixelColor = float4(input.color, 1.0f);
@@ -29,11 +28,14 @@ float4 PS_Main(VertexOutput input) : SV_TARGET
     float3 directLighting = float3(0, 0, 0);
 
     [unroll]
-    for (int i = 0; i < MAX_LIGHT_COUNT; ++i)
+    for (int i = 0; i < MAX_LIGHT_COUNT; i++)
     {
         if(Lights[i].Type)
         {
-            float3 lightVec = Lights[i].position - input.posWorld;
+            float3 lightVec = Lights[i].Type & LIGHT_Directional
+                ? -Lights[i].direction
+                : Lights[i].position - input.posWorld;
+
             float lightDist = length(lightVec);
             lightVec /= lightDist;
             float3 halfway = normalize(toEye + lightVec);
@@ -66,4 +68,3 @@ float4 PS_Main(VertexOutput input) : SV_TARGET
         PixelColor = clamp(PixelColor, 0.0, 1000.0);
         return PixelColor;
 }
-

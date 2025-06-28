@@ -9,7 +9,7 @@
 USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, bool bOverwrite)
 {
 	wstring objectName = InFileName;
-	InFileName = L"../Contents/_Models/" + objectName + L".model";
+	InFileName = L"../../Contents/_Models/" + objectName + L".model";
 	
 	shared_ptr<Converter> converter = make_shared<Converter>();
 	if (bOverwrite)

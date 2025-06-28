@@ -29,7 +29,7 @@ void PostEffect::Render()
     D3D::Get()->GetDeviceContext()->OMSetRenderTargets(1, D3D::Get()->PostEffectRTV.GetAddressOf(), NULL);
    
     PostEffectCBuffer->UpdateConstBuffer();
-    PostEffectCBuffer->PSSetConstantBuffer(EConstBufferSlot::PostEffectData, 1);
+    PostEffectCBuffer->PSSetConstantBuffer(EConstBufferSlot::CB_PostEffectData, 1);
 
     VBuffer->IASetVertexBuffer();
     IBuffer->IASetIndexBuffer();

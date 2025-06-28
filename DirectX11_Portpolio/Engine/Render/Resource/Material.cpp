@@ -17,7 +17,7 @@ Material::Material()
 void Material::BindMaterial()
 {
 	GetConstantBuffer()->UpdateConstBuffer();
-	GetConstantBuffer()->PSSetConstantBuffer(EConstBufferSlot::MaterialDesc, 1);
+	GetConstantBuffer()->PSSetConstantBuffer(EConstBufferSlot::CB_MaterialDesc, 1);
 
 	if (!bCubeMap)
 	{

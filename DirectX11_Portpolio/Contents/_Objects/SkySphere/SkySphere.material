@@ -1,15 +1,15 @@
 {
    "M_Sky_Panning_Clouds2" : {
       "Albedo" : "1.000000,1.000000,1.000000,1.000000",
-      "AlbedoMap" : "../Contents/_Texture/CubeMap/SkyMap/SkyMapEnvHDR.dds",
+      "AlbedoMap" : "../../Contents/_Texture/CubeMap/SkyMap/SkyMapEnvHDR.dds",
       "AmbientOcclusionMap" : "",
       "Emissive" : "0.000000,0.000000,0.000000,1.000000",
       "EmissiveMap" : "",
       "HeightMap" : "",
       "Metallic" : "1.000000",
-      "MetallicMap" : "../Contents/_Texture/CubeMap/SkyMap/SkyMapSpecularHDR.dds",
-      "NormalMap" : "../Contents/_Texture/CubeMap/SkyMap/SkyMapBrdf.dds",
+      "MetallicMap" : "../../Contents/_Texture/CubeMap/SkyMap/SkyMapSpecularHDR.dds",
+      "NormalMap" : "../../Contents/_Texture/CubeMap/SkyMap/SkyMapBrdf.dds",
       "Roughness" : "1.000000",
-      "RoughnessMap" : "../Contents/_Texture/CubeMap/SkyMap/SkyMapDiffuseHDR.dds",
+      "RoughnessMap" : "../../Contents/_Texture/CubeMap/SkyMap/SkyMapDiffuseHDR.dds",
    }
 }

@@ -135,11 +135,11 @@ void Converter::InitMaterial(wstring InFilePath, MeshType InMesh)
 
     if (staticMeshComp = dynamic_cast<UStaticMeshComponent*>(InMesh))
 	{
-		InFilePath = L"../Contents/_Objects/" + InFilePath + L".material";
+		InFilePath = L"../../Contents/_Objects/" + InFilePath + L".material";
 	}
 	else if (skeletalMeshComp = dynamic_cast<USkeletalMeshComponent*>(InMesh))
 	{
-		InFilePath = L"../Contents/_Models/" + InFilePath + L".material";
+		InFilePath = L"../../Contents/_Models/" + InFilePath + L".material";
 	}
 	else
 	{
@@ -200,11 +200,11 @@ void Converter::InitMesh(wstring InFilePath, MeshType InMesh)
 	USkeletalMeshComponent* skeletalMeshComp = nullptr;
 	if (staticMeshComp = dynamic_cast<UStaticMeshComponent*>(InMesh))
 	{
-		InFilePath = L"../Contents/_Objects/" + InFilePath + L".mesh";
+		InFilePath = L"../../Contents/_Objects/" + InFilePath + L".mesh";
 	}
 	else if (skeletalMeshComp = dynamic_cast<USkeletalMeshComponent*>(InMesh))
 	{
-		InFilePath = L"../Contents/_Models/" + InFilePath + L".mesh";
+		InFilePath = L"../../Contents/_Models/" + InFilePath + L".mesh";
 	}
 	else
 	{

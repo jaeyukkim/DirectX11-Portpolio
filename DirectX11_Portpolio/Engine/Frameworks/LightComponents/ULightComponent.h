@@ -11,9 +11,9 @@ public:
 
 public:
     virtual void TickComponent(float deltaTime) override;
-    FLightInformation* GetLightInfo() { return &LightInfo; }
+    FLight* GetLightInfo() { return &LightInfo; }
     
 protected:
     virtual void UpdateLight();
-    FLightInformation LightInfo;
+    FLight LightInfo;
 };

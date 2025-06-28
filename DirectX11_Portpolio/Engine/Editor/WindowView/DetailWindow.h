@@ -2,6 +2,11 @@
 
 #include "Editor/EditorWindow/EditorWindow.h"
 
+
+enum class EDetailEditorType
+{
+	TransformEditor = 0
+};
 class Editor;
 
 class DetailWindow : public EditorWindow
@@ -18,6 +23,6 @@ public:
 	void OnDisable() override;
 	void OnDestroy() override;
 
-private:
-	vector<unique_ptr<Editor>> mEditors;
+
+	unordered_map<EDetailEditorType, unique_ptr<Editor>> mEditors;
 };

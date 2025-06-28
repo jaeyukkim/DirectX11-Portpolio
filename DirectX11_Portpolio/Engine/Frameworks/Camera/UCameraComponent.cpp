@@ -6,6 +6,8 @@ UCameraComponent::UCameraComponent()
 {
 	FTransform* T = GetWorldTransform();
 	SetViewMatrix();
+	GetRelativeTransform()->SetPosition(0.0f, 1.5f, -5.0f);
+	SetViewMatrix();
 }
 
 UCameraComponent::~UCameraComponent()
@@ -17,10 +19,12 @@ void UCameraComponent::TickComponent(float deltaTime)
 {
 	Super::TickComponent(deltaTime);
 
+	//CaptureCinematic(deltaTime);
+	
 	CheckFalse(Mouse::Get()->Press(MouseButton::Right));
 
 	FTransform* T = GetRelativeTransform();
-
+	
 	Vector3 moveDelta = Vector3::Zero;
 
 	if (Keyboard::Get()->Press('W'))
@@ -49,9 +53,12 @@ void UCameraComponent::TickComponent(float deltaTime)
 
 	T->AddRotation(yaw, pitch, 0.0f);
 
+	
+	
 	SetViewMatrix();
 
 
+	/*
 	string str = string("FrameRate : ") + to_string((int)ImGui::GetIO().Framerate);
 	Gui::Get()->RenderText(5, 5, 1, 1, 1, str);
 
@@ -63,8 +70,8 @@ void UCameraComponent::TickComponent(float deltaTime)
 
 	str = String::Format("MoveDelta : %f, %f, %f", moveDelta.x, moveDelta.y, moveDelta.z);
 	Gui::Get()->RenderText(5, 50, 1, 1, 1, str);
+	*/
 }
-
 
 
 void UCameraComponent::SetViewMatrix()
@@ -95,5 +102,14 @@ void UCameraComponent::SetViewMatrix()
 }
 
 
-
-
+void UCameraComponent::CaptureCinematic(float deltaTime)
+{
+	FTransform* T = GetRelativeTransform();
+	T->SetRotation(30.0f, 0.0f, 0.0f);
+	Vector3 pos = T->GetPosition();
+	Vector3 moveDelta = Vector3::Zero;
+	moveDelta +=  Vector3(0, 0, 1) * MoveSpeed * deltaTime;
+	T->SetPosition(pos + moveDelta);
+	
+	SetViewMatrix();
+}

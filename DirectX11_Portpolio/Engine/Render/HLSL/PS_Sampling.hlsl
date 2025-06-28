@@ -3,7 +3,7 @@
 Texture2D g_texture0 : register(t0);
 
 
-cbuffer SamplingPixelConstantData : register(b6)
+cbuffer SamplingPixelConstantData : register(b7)
 {
     float dx;
     float dy;

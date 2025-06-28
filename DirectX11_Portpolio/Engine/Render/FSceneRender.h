@@ -31,6 +31,7 @@ public:
     void RenderDepthOnly();
     void RenderShadowMap();
     void RenderMirror();
+    void MainRender();
     
     void EndRender();
     void RenderObjects(FRenderOption option);

@@ -50,11 +50,11 @@ void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
     {
         
         data.BoneBuffer->UpdateConstBuffer();
-        data.BoneBuffer->VSSetConstantBuffer(EConstBufferSlot::Bone, 1);
+        data.BoneBuffer->VSSetConstantBuffer(EConstBufferSlot::CB_Bone, 1);
         data.MaterialData->BindMaterial();
         data.VBuffer->IASetVertexBuffer();
         data.IBuffer->IASetIndexBuffer();
-        data.Transform->VSSetConstantBuffer(EConstBufferSlot::World, 1);
+        data.Transform->VSSetConstantBuffer(EConstBufferSlot::CB_World, 1);
         data.Transform->UpdateConstBuffer();
         D3D::Get()->GetDeviceContext()->DrawIndexed(data.IndexCount, 0, 0);
     }

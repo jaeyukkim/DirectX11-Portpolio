@@ -19,8 +19,9 @@
 #define MAX_CUBEMAP_TEXTURE_COUNT 3 // BRDF는 2D 텍스쳐임
 
 #define MaxLOD 10
-#define BasicLodScale 20
-#define NormalLod 1.5
+#define BasicLodScale 10
+#define NormalLod 4
+
 
 TextureCube textureCube[MAX_CUBEMAP_TEXTURE_COUNT] : register(t0);
 Texture2D brdfTex  : register(t3);
@@ -60,6 +61,36 @@ float ComputeLODBasedOnLog2(float distance, float lodScale)
     float lod = log2((distance + 1.0f) / lodScale);
     return clamp(lod, 0, MaxLOD);
 }
+
+float ComputeLODBasedOnLog3(float3 toEye, float3 normal, float distance, float lodScale)
+{
+    
+    float lod = log2((distance + 1.0f) / lodScale);
+
+    float cosAngle = saturate(dot(normal, toEye));
+    float angleFactor = 1.0f - cosAngle;
+
+    // 지수적 보정을 위한 커브 형태. 
+    // angleFactor가 0.293 (cos 45도 기준)일 때 약 +1 되도록 조정
+    float lodOffset = 0.0f;
+
+    if (angleFactor <= 0.2f)
+    {
+        // 선형 보정: 0 ~ 0.293 구간 → LOD +0 ~ +1
+        lodOffset = angleFactor / 0.2f;
+    }
+    else
+    {
+        // 그 이후부터는 지수적 증가: 커브를 강하게 적용
+        float x = (angleFactor - 0.2f) / (1.0f - 0.2f); // [0, 1] 정규화
+        float expGrowth = pow(x, 3.0f);                     // 지수 성장 (2.0~3.0 조절 가능)
+        lodOffset = 1.0f + expGrowth * 7.0f;                // 1~5 정도까지 상승
+    }
+
+    return clamp(lod + lodOffset, 0.0f, MaxLOD);
+    
+}
+
 
 float3 ApplyNormalMapping(float2 uv, float3 normal, float3 tangent, SamplerState samp, float LOD)
 {

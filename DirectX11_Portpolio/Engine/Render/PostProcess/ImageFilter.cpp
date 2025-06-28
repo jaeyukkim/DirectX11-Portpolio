@@ -49,7 +49,7 @@ void ImageFilter::DrawIndexed(UINT IndexCount) const
     D3D::Get()->GetDeviceContext()->OMSetRenderTargets(UINT(RTV.size()), RTV.data(), NULL);
     
     D3D::Get()->GetDeviceContext()->PSSetShaderResources(0, UINT(SRV.size()), SRV.data());
-    CBuffer->PSSetConstantBuffer(EConstBufferSlot::ImageFilterData, 1);
+    CBuffer->PSSetConstantBuffer(EConstBufferSlot::CB_ImageFilterData, 1);
     FGlobalPSO::Get()->DrawIndexed(IndexCount);
 }
 

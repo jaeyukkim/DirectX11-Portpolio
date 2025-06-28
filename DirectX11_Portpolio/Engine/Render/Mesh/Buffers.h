@@ -55,6 +55,8 @@ class ConstantBuffer
 public:
 	ConstantBuffer(void* InData, UINT InDataSize);
 
+
+
 	operator ID3D11Buffer* () { return Buffer.Get(); }
 	operator const ID3D11Buffer* () { return Buffer.Get(); }
 

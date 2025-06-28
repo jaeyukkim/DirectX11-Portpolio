@@ -9,13 +9,12 @@ class TransformWidget : public Editor
 public:
     TransformWidget(Actor* target);
     virtual void OnGUI() override;
-
-private:
+    virtual void UpdateTransform();
+    
     FTransform* ActorTransform;
     Vector3 Position;
     Vector3 Rotation;
     Vector3 Scale;
-    
     ImVec2 BoxSize;
     ImVec4 BoxColor;
 };

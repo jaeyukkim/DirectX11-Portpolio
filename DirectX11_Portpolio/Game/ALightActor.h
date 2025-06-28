@@ -2,6 +2,8 @@
 #include "Frameworks/Objects/Actor.h"
 
 
+class UPointLightComponent;
+class UHaloLightComponent;
 class UDirectionalLightComponent;
 class USpotLightComponent;
 class UStaticMeshComponent;
@@ -15,7 +17,11 @@ public:
 	virtual void Tick(float deltaTime) override;
 
 
-	shared_ptr<USpotLightComponent> LightComp;
+
+	shared_ptr<USpotLightComponent> SpotLightComp;
 	shared_ptr<UDirectionalLightComponent> DirectionalLightComp;
+	shared_ptr<UHaloLightComponent> HaloComp;
+	shared_ptr<UPointLightComponent> PointLightComp;
+
 	shared_ptr<UStaticMeshComponent> Mesh;
 };

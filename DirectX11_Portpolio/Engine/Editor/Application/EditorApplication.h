@@ -105,7 +105,7 @@ private:
 private:
 	const float TranslateSnapVal = 0.5f;
 	const float RotateSnapVal = 10.0f;
-
+	bool mWasGuizmoUsingLastFrame = false;
 
 	
 };

@@ -13,8 +13,8 @@ Converter::~Converter()
 
 void Converter::ReadFile(const wstring objectName, const EMeshType& meshType)
 {
-	wstring fbxPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
-	wstring gltfPath = L"../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
+	wstring fbxPath = L"../../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
+	wstring gltfPath = L"../../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
 	bIsGLTF = false;
 	wstring finalPath;
 	if (filesystem::exists(fbxPath))
@@ -55,11 +55,11 @@ void Converter::ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshTy
 	switch (InMeshType)
 	{
 	case EMeshType::StaticMeshType:
-		InSaveFileName = L"../Contents/_Objects/" + InSaveFileName + L"/" + InSaveFileName + L".material";
+		InSaveFileName = L"../../Contents/_Objects/" + InSaveFileName + L"/" + InSaveFileName + L".material";
 		break;
 
 	case EMeshType::SkeletalMeshType:
-		InSaveFileName = L"../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".material";
+		InSaveFileName = L"../../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".material";
 		break;
 
 	default:
@@ -267,13 +267,13 @@ void Converter::ExportMesh(wstring InSaveFileName, EMeshType FileType)
 	switch (FileType)
 	{
 	case EMeshType::StaticMeshType:
-		InSaveFileName = L"../Contents/_Objects/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
+		InSaveFileName = L"../../Contents/_Objects/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
 		ReadStaticMeshData();
 		WriteStaticMeshData(InSaveFileName);
 		break;
 
 	case EMeshType::SkeletalMeshType:
-		InSaveFileName = L"../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
+		InSaveFileName = L"../../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
 		ReadBoneData(Scene->mRootNode, 0, -1);
 		ReadSkeletalMeshData();
 		WriteSkeletalMeshData(InSaveFileName);

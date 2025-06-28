@@ -139,7 +139,7 @@ private:
 
 
 private:
-    const wstring HlslPath = L"../Engine/Render/HLSL/";
+    const wstring HlslPath = L"../../Engine/Render/HLSL/";
     
     const wstring MeshVSPath = HlslPath + L"VS_StaticMesh.hlsl";
     const wstring MeshPSPath = HlslPath + L"PS_StaticMesh.hlsl";

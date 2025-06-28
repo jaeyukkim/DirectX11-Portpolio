@@ -61,7 +61,7 @@ void StaticMeshRenderProxy::Render(const FRenderOption& option)
         data.VBuffer->IASetVertexBuffer();
         data.IBuffer->IASetIndexBuffer();
         data.Transform->UpdateConstBuffer();
-        data.Transform->VSSetConstantBuffer(EConstBufferSlot::World, 1);
+        data.Transform->VSSetConstantBuffer(EConstBufferSlot::CB_World, 1);
         D3D::Get()->GetDeviceContext()->DrawIndexed(data.IndexCount, 0, 0);
     }
 }

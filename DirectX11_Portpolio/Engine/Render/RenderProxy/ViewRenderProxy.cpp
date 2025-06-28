@@ -19,14 +19,14 @@ void ViewRenderProxy::Render(const FRenderOption& option)
     if(option.bIsMirror)
     {
         Data.ReflactViewConstantBuffer->UpdateConstBuffer();
-        Data.ReflactViewConstantBuffer->VSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
-        Data.ReflactViewConstantBuffer->PSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
+        Data.ReflactViewConstantBuffer->VSSetConstantBuffer(EConstBufferSlot::CB_ViewContext, 1);
+        Data.ReflactViewConstantBuffer->PSSetConstantBuffer(EConstBufferSlot::CB_ViewContext, 1);
     }
     else
     {
         Data.ViewConstantBuffer->UpdateConstBuffer();
-        Data.ViewConstantBuffer->VSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
-        Data.ViewConstantBuffer->PSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
+        Data.ViewConstantBuffer->VSSetConstantBuffer(EConstBufferSlot::CB_ViewContext, 1);
+        Data.ViewConstantBuffer->PSSetConstantBuffer(EConstBufferSlot::CB_ViewContext, 1);
     }
 }
 
@@ -34,6 +34,6 @@ void ViewRenderProxy::SetLightViewMode(UINT8 InLightID)
 {
     if(InLightID >= MAX_LIGHT_COUNT) return;
     Data.LightViewConstantBuffer[InLightID]->UpdateConstBuffer();
-    Data.LightViewConstantBuffer[InLightID]->VSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
-    Data.LightViewConstantBuffer[InLightID]->PSSetConstantBuffer(EConstBufferSlot::ViewContext, 1);
+    Data.LightViewConstantBuffer[InLightID]->VSSetConstantBuffer(EConstBufferSlot::CB_ViewContext, 1);
+    Data.LightViewConstantBuffer[InLightID]->PSSetConstantBuffer(EConstBufferSlot::CB_ViewContext, 1);
 }

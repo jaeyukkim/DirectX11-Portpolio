@@ -9,6 +9,7 @@
 #include <Systems/Application.h>
 
 #include "EditorApplication.h"
+#include <Editor/Widget/TransformWidget.h>
 
 
 
@@ -144,21 +145,7 @@ void EditorApplication::OpenScene(const std::filesystem::path& path)
 
 void EditorApplication::OnImGuiRender()
 {
-	// Load Fonts
-	// - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-	// - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-	// - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-	// - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-	// - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
-	// - Read 'docs/FONTS.md' for more instructions and details.
-	// - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-	//io.Fonts->AddFontDefault();
-	//io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-	//IM_ASSERT(font != NULL);
+	
 
 	// Our state
 	bool show_demo_window = true;
@@ -303,44 +290,66 @@ void EditorApplication::OnImGuiRender()
 		// game view camera setting
 
 		// Scene Camera
-		FViewContext* viewContext = FSceneView::Get()->GetSceneViewContext();
-		const Matrix* viewMatrix = &viewContext->View.Transpose();
-		const Matrix* projectionMatrix = &viewContext->Projection.Transpose();
-
-		// Object Transform
-		FTransform* transform = selectedObject->GetActorTransform();
-		Matrix worldMatrix = transform->ToMatrix();
-
-		// snapping
-		bool snap = Keyboard::Get()->Press(VK_LCONTROL);
-		float snapValue = TranslateSnapVal;
-
-		// snap to 45 degrees for rotation
-		if (mGuizmoType == ImGuizmo::OPERATION::ROTATE)
-			snapValue = RotateSnapVal;
-
-		float snapValues[3] = { snapValue, snapValue, snapValue };
-
-		ImGuizmo::Manipulate(*viewMatrix->m, *projectionMatrix->m, static_cast<ImGuizmo::OPERATION>(mGuizmoType)
-			, ImGuizmo::WORLD, *worldMatrix.m, nullptr, snap ? snapValues : nullptr);
-
-		if (ImGuizmo::IsUsing())
+		if (auto detailWindow = dynamic_cast<DetailWindow*>(mEditorWindows[EEditorWindowType::DetailWindow].get()))
 		{
-			// Decompose matrix to translation, rotation and scale
-			float translation[3];
-			float rotation[3];
-			float scale[3];
-			ImGuizmo::DecomposeMatrixToComponents(*worldMatrix.m, translation, rotation, scale);
+			TransformWidget* transformWidget =  static_cast<TransformWidget*>(detailWindow->mEditors[EDetailEditorType::TransformEditor].get());
 
-			// delta rotation from the current rotation
-			Vector3 deltaRotation = Vector3(rotation) - transform->GetRotation();
-			deltaRotation = transform->GetRotation() + deltaRotation;
+			FViewContext* viewContext = FSceneView::Get()->GetSceneViewContext();
+			const Matrix* viewMatrix = &viewContext->View.Transpose();
+			const Matrix* projectionMatrix = &viewContext->Projection.Transpose();
 
-			// set the new transform
-			transform->SetScale(Vector3(scale));
-			transform->SetRotation(Vector3(deltaRotation));
-			transform->SetPosition(Vector3(translation));
+			Vector3 S = transformWidget->Scale;
+			Vector3 R = transformWidget->Rotation;
+			Vector3 T = transformWidget->Position;
+			
+			Matrix MS = Matrix::CreateScale(S);
+			Matrix MR = Matrix::CreateFromYawPitchRoll(
+				XMConvertToRadians(R.y),  // Yaw
+				XMConvertToRadians(R.x),  // Pitch
+				XMConvertToRadians(R.z)   // Roll
+			);
+			Matrix MT = Matrix::CreateTranslation(T);
+			Matrix worldMatrix = MS * MR * MT;
+			
+			
+
+			// snapping
+			bool snap = Keyboard::Get()->Press(VK_LCONTROL);
+			float snapValue = TranslateSnapVal;
+
+			// snap to 45 degrees for rotation
+			if (mGuizmoType == ImGuizmo::OPERATION::ROTATE)
+				snapValue = RotateSnapVal;
+
+			float snapValues[3] = { snapValue, snapValue, snapValue };
+
+			ImGuizmo::Manipulate(*viewMatrix->m, *projectionMatrix->m, static_cast<ImGuizmo::OPERATION>(mGuizmoType)
+				, ImGuizmo::WORLD, *worldMatrix.m, nullptr, snap ? snapValues : nullptr);
+
+			bool isUsingGuizmo = ImGuizmo::IsUsing();
+			if (isUsingGuizmo)
+			{
+				// Decompose matrix to translation, rotation and scale
+				float translation[3];
+				float rotation[3];
+				float scale[3];
+			
+				ImGuizmo::DecomposeMatrixToComponents(*worldMatrix.m, translation, rotation, scale);
+
+				// rotation은 degree 단위의 XYZ(Euler)
+				transformWidget->Scale = Vector3(scale);
+				transformWidget->Rotation = Vector3(rotation); // 바로 대입
+				transformWidget->Position = Vector3(translation);
+			}
+			if(!isUsingGuizmo && mWasGuizmoUsingLastFrame)
+			{
+				transformWidget->UpdateTransform();
+			}
+
+			mWasGuizmoUsingLastFrame = isUsingGuizmo;
+
 		}
+		
 	}
 	
 	ImGui::End();	// Scene end

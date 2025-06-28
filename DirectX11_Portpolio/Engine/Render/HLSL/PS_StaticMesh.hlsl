@@ -1,15 +1,21 @@
 #include "Lighting.hlsli"
 
 
-
 float4 PS_Main(VertexOutput input) : SV_TARGET
 {
     float4 PixelColor = float4(input.color, 1.0f);
     float3 dist = EyePos - input.posWorld;
     float3 toEye = normalize(dist);
     float distance = length(dist);
-    float lod = ComputeLODBasedOnLog2(distance, BasicLodScale);
-    float normalLod = ComputeLODBasedOnLog2(distance, NormalLod);
+
+    //float lod = 0;
+    //float normalLod = 0;
+    //float lod = ComputeLODBasedOnLog2(distance, BasicLodScale);
+    //float normalLod = ComputeLODBasedOnLog2(distance, NormalLod);
+    float lod = ComputeLODBasedOnLog3(toEye, input.modelNormal, distance, BasicLodScale);
+    float normalLod = ComputeLODBasedOnLog3(toEye, input.modelNormal, distance, NormalLod);
+    
+  
     float2 uv = input.texCoord * Material.UV_Tiling + Material.UV_Offset;
     float3 finalNormal = ApplyNormalMapping(input.texCoord, input.modelNormal, input.tangent, LinearWarpSampler, normalLod);
 
@@ -28,12 +34,17 @@ float4 PS_Main(VertexOutput input) : SV_TARGET
 
     float3 directLighting = float3(0, 0, 0);
 
+
     [unroll]
-    for (int i = 0; i < MAX_LIGHT_COUNT; ++i)
+    for (int i = 0; i < MAX_LIGHT_COUNT; i++)
     {
         if(Lights[i].Type)
         {
-            float3 lightVec = Lights[i].position - input.posWorld;
+            float3 lightVec = Lights[i].Type & LIGHT_Directional
+                ? -Lights[i].direction
+                : Lights[i].position - input.posWorld;
+
+            
             float lightDist = length(lightVec);
             lightVec /= lightDist;
             float3 halfway = normalize(toEye + lightVec);

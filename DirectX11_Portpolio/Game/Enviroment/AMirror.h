@@ -15,7 +15,7 @@ private:
     shared_ptr<UStaticMeshComponent> mirror;
     DirectX::SimpleMath::Plane plane;
     Matrix ReflectRow;
-    array<float, 4> BlendFactor = { 0.93f, 0.93f, 0.93f, 1.0f };
+    array<float, 4> BlendFactor = { 0.7f, 0.7f, 0.7f, 1.0f };
 
     friend class MirrorRenderProxy;
 };

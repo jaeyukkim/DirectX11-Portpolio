@@ -46,7 +46,7 @@ void SkyBoxRenderProxy::Render(const FRenderOption& option)
     Data.MaterialData->BindMaterial();
     Data.VBuffer->IASetVertexBuffer();
     Data.IBuffer->IASetIndexBuffer();
-    Data.Transform->VSSetConstantBuffer(EConstBufferSlot::World, 1);
+    Data.Transform->VSSetConstantBuffer(EConstBufferSlot::CB_World, 1);
     Data.Transform->UpdateConstBuffer();
     D3D::Get()->GetDeviceContext()->DrawIndexed(Data.IndexCount, 0, 0);
 

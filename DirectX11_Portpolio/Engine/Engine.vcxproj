@@ -159,6 +159,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Frameworks\Components\USkeletalMeshComponent.h" />
     <ClInclude Include="Frameworks\Components\UStaticMeshComponent.h" />
     <ClInclude Include="Frameworks\LightComponents\UDirectionalLightComponent.h" />
+    <ClInclude Include="Frameworks\LightComponents\UHaloLightComponent.h" />
     <ClInclude Include="Frameworks\LightComponents\ULightComponent.h" />
     <ClInclude Include="Frameworks\LightComponents\UPointLightComponent.h" />
     <ClInclude Include="Frameworks\LightComponents\USpotLightComponent.h" />
@@ -763,6 +764,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <LibCompiled>true</LibCompiled>
     </ClCompile>
     <ClCompile Include="Frameworks\LightComponents\UDirectionalLightComponent.cpp" />
+    <ClCompile Include="Frameworks\LightComponents\UHaloLightComponent.cpp" />
     <ClCompile Include="Frameworks\LightComponents\ULightComponent.cpp" />
     <ClCompile Include="Frameworks\LightComponents\UPointLightComponent.cpp" />
     <ClCompile Include="Frameworks\LightComponents\USpotLightComponent.cpp" />

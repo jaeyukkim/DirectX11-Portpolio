@@ -50,4 +50,29 @@ struct VertexShaderInput
     float4 blendIndicies : BLENDINDICES;
     float4 blendWeight : BLENDWEIGHTS;
 };
+
+int RaySphereIntersection(in float3 start, in float3 dir, in float3 center, in float radius,
+                            out float t1, out float t2)
+{
+    float3 p = start - center;
+    float pdotv = dot(p, dir);
+    float p2 = dot(p, p);
+    float r2 = radius * radius;
+    float m = pdotv * pdotv - (p2 - r2);
+    
+    if (m < 0.0)
+    {
+        t1 = 0;
+        t2 = 0;
+        return 0;
+    }
+    else
+    {
+        m = sqrt(m);
+        t1 = -pdotv - m;
+        t2 = -pdotv + m;
+        return 1;
+    }
+}
+
 #endif // __COMMON_HLSLI__
