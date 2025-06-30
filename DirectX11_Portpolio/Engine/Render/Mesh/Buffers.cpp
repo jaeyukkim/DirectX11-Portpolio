@@ -450,3 +450,111 @@ void TextureBuffer::CreateResult()
 
 	Check(D3D::Get()->GetDevice()->CreateShaderResourceView(texture, &srvDesc, OutputSRV.GetAddressOf()));
 }
+
+ComPtr<ID3D11Texture2D> TextureBuffer::CreateStagingTexture( const std::vector<uint8_t> &image,
+	const int width, const int height, const DXGI_FORMAT pixelFormat, const int mipLevels, const int arraySize)
+{
+	// 스테이징 텍스춰 만들기
+	D3D11_TEXTURE2D_DESC txtDesc;
+	ZeroMemory(&txtDesc, sizeof(txtDesc));
+	txtDesc.Width = width;
+	txtDesc.Height = height;
+	txtDesc.MipLevels = mipLevels;
+	txtDesc.ArraySize = arraySize;
+	txtDesc.Format = pixelFormat;
+	txtDesc.SampleDesc.Count = 1;
+	txtDesc.Usage = D3D11_USAGE_STAGING;
+	txtDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+
+	ComPtr<ID3D11Texture2D> stagingTexture;
+	if (FAILED(D3D::Get()->GetDevice()->CreateTexture2D(&txtDesc, NULL, stagingTexture.GetAddressOf())))
+	{
+		cout << "Failed()" << endl;
+	}
+	
+	size_t pixelSize = GetPixelSize(pixelFormat);
+
+	D3D11_MAPPED_SUBRESOURCE ms;
+	D3D::Get()->GetDeviceContext()->Map(stagingTexture.Get(), NULL, D3D11_MAP_WRITE, NULL, &ms);
+	uint8_t *pData = (uint8_t *)ms.pData;
+	for (UINT h = 0; h < UINT(height); h++) { // 가로줄 한 줄씩 복사
+		memcpy(&pData[h * ms.RowPitch], &image[h * width * pixelSize],
+			   width * pixelSize);
+	}
+	D3D::Get()->GetDeviceContext()->Unmap(stagingTexture.Get(), NULL);
+
+	return stagingTexture;
+}
+
+void TextureBuffer::CreateUAVTexture(const int width, const int height, const DXGI_FORMAT pixelFormat,
+	ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11RenderTargetView>& rtv, ComPtr<ID3D11ShaderResourceView>& srv,
+	ComPtr<ID3D11UnorderedAccessView>& uav)
+{
+	D3D11_TEXTURE2D_DESC txtDesc;
+	ZeroMemory(&txtDesc, sizeof(txtDesc));
+	txtDesc.Width = width;
+	txtDesc.Height = height;
+	txtDesc.MipLevels = 1;
+	txtDesc.ArraySize = 1;
+	txtDesc.Format = pixelFormat; // 주로 FLOAT 사용
+	txtDesc.SampleDesc.Count = 1;
+	txtDesc.Usage = D3D11_USAGE_DEFAULT;
+	txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET | D3D11_BIND_UNORDERED_ACCESS;
+	txtDesc.MiscFlags = 0;
+	txtDesc.CPUAccessFlags = 0;
+
+	
+	FAILED(D3D::Get()->GetDevice()->CreateTexture2D(&txtDesc, NULL, texture.GetAddressOf()));
+	FAILED(D3D::Get()->GetDevice()->CreateRenderTargetView(texture.Get(), NULL, rtv.GetAddressOf()));
+	FAILED(D3D::Get()->GetDevice()->CreateShaderResourceView(texture.Get(), NULL, srv.GetAddressOf()));
+	FAILED(D3D::Get()->GetDevice()->CreateUnorderedAccessView(texture.Get(), NULL, uav.GetAddressOf()));
+}
+
+
+void TextureBuffer::CreateBuffer(ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& srv,
+	ComPtr<ID3D11RenderTargetView>& rtv, int width, int height)
+{
+	D3D11_TEXTURE2D_DESC txtDesc;
+	ZeroMemory(&txtDesc, sizeof(txtDesc));
+	txtDesc.Width = width;
+	txtDesc.Height = height;
+	txtDesc.MipLevels = txtDesc.ArraySize = 1;
+	txtDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; //  이미지 처리용도
+	txtDesc.SampleDesc.Count = 1;
+	txtDesc.Usage = D3D11_USAGE_DEFAULT;
+	txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET | D3D11_BIND_UNORDERED_ACCESS;
+	txtDesc.MiscFlags = 0;
+	txtDesc.CPUAccessFlags = 0;
+
+
+	D3D::Get()->GetDevice()->CreateTexture2D(&txtDesc, NULL, texture.GetAddressOf());
+	D3D::Get()->GetDevice()->CreateRenderTargetView(texture.Get(), NULL, rtv.GetAddressOf());
+	D3D::Get()->GetDevice()->CreateShaderResourceView(texture.Get(), NULL, srv.GetAddressOf());
+}
+
+
+size_t CsResource::GetPixelSize(DXGI_FORMAT pixelFormat)
+{
+
+	switch (pixelFormat)
+	{
+	case DXGI_FORMAT_R16G16B16A16_FLOAT:
+		return sizeof(uint16_t) * 4;
+	case DXGI_FORMAT_R32G32B32A32_FLOAT:
+		return sizeof(uint32_t) * 4;
+	case DXGI_FORMAT_R32_FLOAT:
+		return sizeof(uint32_t) * 1;
+	case DXGI_FORMAT_R8G8B8A8_UNORM:
+		return sizeof(uint8_t) * 4;
+	case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+		return sizeof(uint8_t) * 4;
+	case DXGI_FORMAT_R32_SINT:
+		return sizeof(int32_t) * 1;
+	case DXGI_FORMAT_R16_FLOAT:
+		return sizeof(uint16_t) * 1;
+	}
+
+	cout << "PixelFormat not implemented " << pixelFormat << endl;
+
+	return sizeof(uint8_t) * 4;
+}

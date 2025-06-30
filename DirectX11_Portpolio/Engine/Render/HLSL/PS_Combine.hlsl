@@ -3,7 +3,7 @@ Texture2D g_texture0 : register(t0);
 Texture2D g_texture1 : register(t1);
 
 
-cbuffer ImageFilterConstData : register(b6)
+cbuffer ImageFilterConstData : register(b7)
 {
     float dx;
     float dy;
@@ -91,10 +91,44 @@ float4 PS_Main(SamplingPixelShaderInput input) : SV_TARGET
     float3 color0 = g_texture0.Sample(LinearClampSampler, input.texcoord).rgb;
     float3 color1 = g_texture1.Sample(LinearClampSampler, input.texcoord).rgb;
 
+    // Bloom 텍스처의 밝기 계산 (luminance)
+    float brightness = dot(color1, float3(0.2126, 0.7152, 0.0722)); // sRGB 기준 국제 색상 표준 가중 휘도 계수
+
+    // threshold 이하이면 bloom 영향 제거
+    float bloomFactor = (brightness > threshold) ? strength : 0.0;
+
+    // 선형 보간 방식으로 적용
+    float3 combined = lerp(color0, color1, bloomFactor);
+
+    // 톤매핑
+    combined = ACESFitted(combined);
+    return float4(combined, 1.0f);
+
+    
+    /*
+    float3 color0 = g_texture0.Sample(LinearClampSampler, input.texcoord).rgb;
+    float3 color1 = g_texture1.Sample(LinearClampSampler, input.texcoord).rgb;
+
     float3 combined = (1.0 - strength) * color0 + strength * color1;
 
     // Tone Mapping  
     combined = ACESFitted(combined);
 
     return float4(combined, 1.0f);
+    */
+
+    /*
+    float3 color0 = g_texture0.Sample(LinearClampSampler, input.texcoord).rgb;
+    float3 color1 = g_texture1.Sample(LinearClampSampler, input.texcoord).rgb;
+
+    float l = (color1.x + color1.y + color1.y) / 3;
+    
+    float3 combined = l>threshold ? (1.0 - strength) * color0 + strength * color1
+    : color0;
+
+    // Tone Mapping  
+    combined = ACESFitted(combined);
+
+    return float4(combined, 1.0f);
+     */
 }

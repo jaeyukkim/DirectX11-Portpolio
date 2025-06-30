@@ -33,6 +33,8 @@ void FGlobalPSO::InitShaderAndState()
     InitDomainShader();
     InitGeometryShader();
     InitPixelShader();
+    InitComputeShader();
+    
     
     InitRasterizeState();
     InitDepthStencilState();
@@ -49,14 +51,19 @@ void FGlobalPSO::BindPSO(const FPSO& pso)
     D3D::Get()->GetDeviceContext()->HSSetShader(pso.m_hullShader.Get(), 0, 0);
     D3D::Get()->GetDeviceContext()->DSSetShader(pso.m_domainShader.Get(), 0, 0);
     D3D::Get()->GetDeviceContext()->GSSetShader(pso.m_geometryShader.Get(), 0, 0);
+    D3D::Get()->GetDeviceContext()->CSSetShader(pso.m_computeShader.Get(), 0, 0);
+
     D3D::Get()->GetDeviceContext()->IASetInputLayout(pso.m_inputLayout.Get());
     D3D::Get()->GetDeviceContext()->RSSetState(pso.m_rasterizerState.Get());
+
     D3D::Get()->GetDeviceContext()->OMSetBlendState(pso.m_blendState.Get(), pso.m_blendFactor.data(),
                                0xffffffff);
     D3D::Get()->GetDeviceContext()->OMSetDepthStencilState(pso.m_depthStencilState.Get(),
                                       pso.m_stencilRef);
     D3D::Get()->GetDeviceContext()->IASetPrimitiveTopology(pso.m_primitiveTopology);
     D3D::Get()->GetDeviceContext()->PSSetSamplers(0, ESamplerSlot::MaxSamplerSlot, Samplers[0].GetAddressOf());
+    D3D::Get()->GetDeviceContext()->CSSetSamplers(0, ESamplerSlot::MaxSamplerSlot, Samplers[0].GetAddressOf());
+
 
 }
 
@@ -159,6 +166,13 @@ void FGlobalPSO::InitDomainShader()
 void FGlobalPSO::InitGeometryShader()
 {
     //CompileGS(NormalGSPath, NormalGS);
+}
+
+void FGlobalPSO::InitComputeShader()
+{
+    CompileCS(XGaussianCSPath, XGaussianCS);
+    CompileCS(YGaussianCSPath, YGaussianCS);
+
 }
 
 
@@ -474,7 +488,10 @@ void FGlobalPSO::InitPSO()
     DepthOnlyPSO = MeshSolidPSO;
     DepthOnlyPSO.m_vertexShader = DepthOnlyVS;
     DepthOnlyPSO.m_pixelShader = DepthOnlyPS;
-    
+
+    // GaussianPSO
+    XGaussianPSO.m_computeShader = XGaussianCS;
+    YGaussianPSO.m_computeShader = YGaussianCS;
 
 }
 
@@ -557,6 +574,21 @@ void FGlobalPSO::CompileGS(const wstring& path, ComPtr<ID3D11GeometryShader>& In
     hr = D3D::Get()->GetDevice()->CreateGeometryShader(Blob->GetBufferPointer(),
         Blob->GetBufferSize(), nullptr, InGeometryShader.GetAddressOf());
     AssertHR(hr, "GeometryShader Create 실패");
+}
+
+void FGlobalPSO::CompileCS(const wstring& path, ComPtr<ID3D11ComputeShader>& InComputeShader)
+{
+    ComPtr<ID3DBlob> Blob;
+    ComPtr<ID3DBlob> ErrorBlob;
+    
+    UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+    HRESULT hr = D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+        "CS_Main", "cs_5_0", flags, 0, Blob.GetAddressOf(), ErrorBlob.GetAddressOf());
+    Assert_IF_FailedCompile(hr, ErrorBlob);
+
+    hr = D3D::Get()->GetDevice()->CreateComputeShader(Blob->GetBufferPointer(),
+        Blob->GetBufferSize(), nullptr, InComputeShader.GetAddressOf());
+    AssertHR(hr, "ComputeShader Create 실패");
 }
 
 

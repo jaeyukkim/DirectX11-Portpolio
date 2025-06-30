@@ -113,6 +113,17 @@ void D3D::EndDraw()
 	DeviceContext->CopyResource(RenderTargetBuffer.Get(), backBuffer.Get());
 }
 
+/**
+ * ComputeShader의 작업이 다 끝날 때 까지 대기
+ */
+void D3D::ComputeShaderBarrier()
+{
+	ID3D11ShaderResourceView *nullSRV[6] = {0,};
+	DeviceContext->CSSetShaderResources(0, 6, nullSRV);
+	ID3D11UnorderedAccessView *nullUAV[6] = {0,};
+	DeviceContext->CSSetUnorderedAccessViews(0, 6, nullUAV, NULL);
+}
+
 void D3D::ResizeScreen(float InWidth, float InHeight)
 {
 	if (InWidth < 1 || InHeight < 1)
@@ -165,7 +176,7 @@ void D3D::CreateDevice()
 
 		swapChainDesc.BufferDesc = desc;
 		swapChainDesc.BufferCount = 2;
-		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
 		swapChainDesc.Windowed = true;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
@@ -212,7 +223,7 @@ void D3D::CreateRTV()
 	D3D11_TEXTURE2D_DESC desc;
 	backBuffer->GetDesc(&desc);
 	desc.MipLevels = desc.ArraySize = 1;
-	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;// | D3D11_BIND_UNORDERED_ACCESS;
 	desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	desc.Usage = D3D11_USAGE_DEFAULT; // 스테이징 텍스쳐로부터 복사 가능
 	desc.MiscFlags = 0;
@@ -242,14 +253,14 @@ void D3D::CreateRTV()
 	FAILED(Device->CreateTexture2D(&desc, NULL, ResolvedBuffer.GetAddressOf()));
 	FAILED(Device->CreateShaderResourceView(ResolvedBuffer.Get(), NULL, ResolvedSRV.GetAddressOf()));
 	FAILED(Device->CreateRenderTargetView(ResolvedBuffer.Get(), NULL, ResolvedRTV.GetAddressOf()));
-
+	
 	
 	//PostEffect용 SRV/RTV
 	FAILED(Device->CreateTexture2D(&desc, NULL, PostEffectsBuffer.GetAddressOf()));
 	FAILED(Device->CreateShaderResourceView(PostEffectsBuffer.Get(), NULL, PostEffectSRV.GetAddressOf()));
 	FAILED(Device->CreateRenderTargetView(PostEffectsBuffer.Get(), NULL, PostEffectRTV.GetAddressOf()));
 
-
+	
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	FAILED(Device->CreateTexture2D(&desc, NULL, RenderTargetBuffer.GetAddressOf()));

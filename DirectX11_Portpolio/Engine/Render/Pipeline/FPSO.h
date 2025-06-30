@@ -12,6 +12,7 @@ public:
     ComPtr<ID3D11HullShader> m_hullShader = nullptr;
     ComPtr<ID3D11DomainShader> m_domainShader = nullptr;
     ComPtr<ID3D11GeometryShader> m_geometryShader = nullptr;
+    ComPtr<ID3D11ComputeShader> m_computeShader = nullptr;
     ComPtr<ID3D11InputLayout> m_inputLayout = nullptr;
 
     ComPtr<ID3D11BlendState> m_blendState = nullptr;

@@ -109,7 +109,7 @@ public:
 
 	operator ID3D11ShaderResourceView* () { return SRV.Get(); }
 	operator const ID3D11ShaderResourceView* () { return SRV.Get(); }
-
+	static size_t GetPixelSize(DXGI_FORMAT pixelFormat);
 protected:
 	virtual void CreateInput() {}
 	virtual void CreateSRV() = 0;
@@ -165,12 +165,29 @@ class TextureBuffer : public CsResource
 public:
 	TextureBuffer(ID3D11Texture2D* InSource);
 	virtual ~TextureBuffer() override;
+	
+	static ComPtr<ID3D11Texture2D> CreateStagingTexture(const std::vector<uint8_t> &image,
+		const int width, const int height, const DXGI_FORMAT pixelFormat = DXGI_FORMAT_R8G8B8A8_UNORM,
+		const int mipLevels = 1, const int arraySize = 1);
 
+	static void CreateUAVTexture(const int width,
+								const int height,
+								const DXGI_FORMAT pixelFormat,
+								ComPtr<ID3D11Texture2D> &texture,
+								ComPtr<ID3D11RenderTargetView> &rtv,
+								ComPtr<ID3D11ShaderResourceView> &srv,
+								ComPtr<ID3D11UnorderedAccessView> &uav);
+
+	static void CreateBuffer(ComPtr<ID3D11Texture2D>& texture,
+		ComPtr<ID3D11ShaderResourceView>& srv, ComPtr<ID3D11RenderTargetView>& rtv,
+		int width, int height);
+	
 private:
 	void CreateSRV() override;
 	void CreateOuput() override;
 	void CreateUAV() override;
 	void CreateResult() override;
+	
 
 public:
 	UINT GetWidth() { return Width; }

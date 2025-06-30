@@ -32,7 +32,7 @@ using Microsoft::WRL::ComPtr;
 #include <dxgi.h>    // DXGIFactory
 #include <dxgi1_4.h> // DXGIFactory4
 #include <DirectXTex.h>
-
+#include <fp16.h>
 
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")

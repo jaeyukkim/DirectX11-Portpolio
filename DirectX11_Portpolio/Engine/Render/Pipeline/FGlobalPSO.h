@@ -33,6 +33,7 @@ private:
     void InitHullShader();
     void InitDomainShader();
     void InitGeometryShader();
+    void InitComputeShader();
     
    
     void InitRasterizeState();
@@ -47,6 +48,7 @@ private:
     void CompileHS(const wstring& path, ComPtr<ID3D11HullShader>& InHullShader);
     void CompileDS(const wstring& path, ComPtr<ID3D11DomainShader>& InDomainShader);
     void CompileGS(const wstring& path, ComPtr<ID3D11GeometryShader>& InGeometryShader);
+    void CompileCS(const wstring& path, ComPtr<ID3D11ComputeShader>& InComputeShader);
     void Assert_IF_FailedCompile(HRESULT hr, const ComPtr<ID3DBlob>& errorBlob);
 
 public:
@@ -77,6 +79,8 @@ public:
     FPSO PostProcessingPSO;
     FPSO BloomUpPSO;
     FPSO BloomDownPSO;
+    FPSO XGaussianPSO;
+    FPSO YGaussianPSO;
     FPSO CombinePSO;
 
     
@@ -111,6 +115,12 @@ private:
 
     // GeometryShader
     ComPtr<ID3D11GeometryShader> NormalGS;
+
+    
+    //ComputeShader
+    ComPtr<ID3D11ComputeShader> XGaussianCS;
+    ComPtr<ID3D11ComputeShader> YGaussianCS;
+
     
     // Rasterize States
     ComPtr<ID3D11RasterizerState> SolidRS;
@@ -118,6 +128,7 @@ private:
     ComPtr<ID3D11RasterizerState> WireRS;
     ComPtr<ID3D11RasterizerState> WireCCWRS;
     ComPtr<ID3D11RasterizerState> postProcessingRS;
+
     
     // Sampler States
     ComPtr<ID3D11SamplerState> Samplers[ESamplerSlot::MaxSamplerSlot];
@@ -164,6 +175,9 @@ private:
 
     const wstring BloomUpPSPath = HlslPath + L"PS_BloomUp.hlsl";
     const wstring BloomDownPSPath = HlslPath + L"PS_BloomDown.hlsl";
+
+    const wstring XGaussianCSPath = HlslPath + L"CS_GaussianX.hlsl";
+    const wstring YGaussianCSPath = HlslPath + L"CS_GaussianY.hlsl";
     
     const wstring CombinePSPath = HlslPath + L"PS_Combine.hlsl";
 

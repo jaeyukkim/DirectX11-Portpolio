@@ -60,9 +60,11 @@ enum class ECubeMapType : UINT8
 enum EPostProcessType : UINT8
 {
     None,
-    BloomDown,
-    BloomUp,
-    Combine
+    PPT_BloomDown,
+    PPT_BloomUp,
+    PPT_Combine,
+    PPT_GaussianX,
+    PPT_GaussianY
 };
 
 enum class EConstBufferSlot : UINT8

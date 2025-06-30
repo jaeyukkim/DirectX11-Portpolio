@@ -76,6 +76,7 @@ void DetailWindow::Run()
 
 		int flag = 0;
 		flag += ImGui::SliderFloat("Bloom Strength", &CombineFilter.FilterData.strength, 0.0f, 1.0f);
+		flag += ImGui::SliderFloat("threshold", &CombineFilter.FilterData.threshold, 0.0f, 3.0f);
 		flag += ImGui::SliderFloat("IBLStrength", &lightInfo->IBLStrength, 0.0f, 5.0f);
 		flag += ImGui::SliderFloat("FogStrength", &postEffectData.FogStrength, 0.0f, 25.0f);
 

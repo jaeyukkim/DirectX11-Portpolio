@@ -8,11 +8,14 @@ public:
     ImageFilter() = default;
     
     void Initialize(EPostProcessType type, int width, int height);
+
+
     void UpdateConstantBuffers();
     void DrawIndexed(UINT IndexCount) const;
     void SetShaderResources(const vector<ComPtr<ID3D11ShaderResourceView>>& resources);
+    void SetUAVResources(const ComPtr<ID3D11UnorderedAccessView>& resources);
     void SetRenderTargets(const vector<ComPtr<ID3D11RenderTargetView>>& targets);
-
+    void Dispatch();
 public:
     struct ImageFilterConstData 
     {
@@ -31,11 +34,14 @@ public:
 protected:
     shared_ptr<ConstantBuffer> CBuffer;
     D3D11_VIEWPORT m_viewport = {};
-
-    // Do not delete pointers
+    
     vector<ID3D11ShaderResourceView*> SRV;
     vector<ID3D11RenderTargetView*> RTV;
+    ComPtr<ID3D11UnorderedAccessView> UAV;
 
 private:
     EPostProcessType PostProcessType;
+    UINT ThreadGroupX;
+    UINT ThreadGroupY;
+
 };

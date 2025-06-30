@@ -18,7 +18,10 @@ void ImageFilter::Initialize(EPostProcessType type, int width, int height)
     FilterData.dy = 1.0f / m_viewport.Height;
 
     CBuffer = make_shared<ConstantBuffer>(&FilterData, sizeof(FilterData));
-   
+
+    ThreadGroupX = width;
+    ThreadGroupY = height;
+    
 }
 
 void ImageFilter::UpdateConstantBuffers() 
@@ -34,13 +37,13 @@ void ImageFilter::DrawIndexed(UINT IndexCount) const
 
     switch (PostProcessType)
     {
-    case EPostProcessType::Combine:
+    case EPostProcessType::PPT_Combine:
         FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->CombinePSO);
         break;
-    case EPostProcessType::BloomDown:
+    case EPostProcessType::PPT_BloomDown:
         FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->BloomDownPSO);
         break;
-    case EPostProcessType::BloomUp:
+    case EPostProcessType::PPT_BloomUp:
         FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->BloomDownPSO);
         break;
     }
@@ -63,6 +66,11 @@ void ImageFilter::SetShaderResources(const vector<ComPtr<ID3D11ShaderResourceVie
     }
 }
 
+void ImageFilter::SetUAVResources(const ComPtr<ID3D11UnorderedAccessView>& resources)
+{
+    UAV = resources;
+}
+
 void ImageFilter::SetRenderTargets(const vector<ComPtr<ID3D11RenderTargetView>>& targets) 
 {
 
@@ -72,4 +80,21 @@ void ImageFilter::SetRenderTargets(const vector<ComPtr<ID3D11RenderTargetView>>&
     {
         RTV.push_back(tar.Get());
     }
+}
+
+void ImageFilter::Dispatch()
+{
+    switch (PostProcessType)
+    {
+    case EPostProcessType::PPT_GaussianX:
+        FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->XGaussianPSO);
+        break;
+    case EPostProcessType::PPT_GaussianY:
+        FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->YGaussianPSO);
+        break;
+    }
+
+    D3D::Get()->GetDeviceContext()->CSSetShaderResources(0, 1, SRV.data());
+    D3D::Get()->GetDeviceContext()->CSSetUnorderedAccessViews(0, 1, UAV.GetAddressOf(), NULL);
+    D3D::Get()->GetDeviceContext()->Dispatch(ThreadGroupX, ThreadGroupY, 1);
 }

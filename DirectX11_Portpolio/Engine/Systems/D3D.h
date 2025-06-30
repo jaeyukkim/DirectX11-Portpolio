@@ -35,6 +35,8 @@ public:
 public:
 	ID3D11Device* GetDevice() { return Device.Get(); }
 	ID3D11DeviceContext* GetDeviceContext() { return DeviceContext.Get(); }
+	IDXGISwapChain* GetSwapChain() { return SwapChain.Get(); }
+
 	ID3D11ShaderResourceView* GetRenderTargetSRV() { return RenderTargetSRV.Get(); }
 	PostProcess* GetPostProcess() { return postProcess.get(); }
 	
@@ -50,6 +52,7 @@ public:
 	void ClearBlendState();
 	void Present();
 	void EndDraw();
+	void ComputeShaderBarrier();
 
 	void ResizeScreen(float InWidth, float InHeight);
 	
@@ -68,6 +71,8 @@ public:
 	ComPtr<ID3D11Texture2D> RenderTargetBuffer;
 	ComPtr<ID3D11RenderTargetView> RenderTargetView;
 	ComPtr<ID3D11ShaderResourceView> RenderTargetSRV;
+	
+	
 
 	//Resolved
 	ComPtr<ID3D11Texture2D> ResolvedBuffer;
