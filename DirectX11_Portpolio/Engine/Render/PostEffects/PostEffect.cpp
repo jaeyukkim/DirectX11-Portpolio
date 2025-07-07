@@ -23,7 +23,7 @@ void PostEffect::Render()
     FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->PostEffectsPSO);
 
     PostEffectsSRVs = { D3D::Get()->ResolvedSRV.Get(), D3D::Get()->DepthOnlySRV.Get() };
-    D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::PostEffect),
+    D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::ERS_PostEffect),
                                       UINT(PostEffectsSRVs.size()), PostEffectsSRVs.data());
     
     D3D::Get()->GetDeviceContext()->OMSetRenderTargets(1, D3D::Get()->PostEffectRTV.GetAddressOf(), NULL);

@@ -18,6 +18,6 @@ void LightSceneRenderProxy::Render(const FRenderOption& option)
     Data.LightInfoCBuffer->UpdateConstBuffer();
     Data.LightInfoCBuffer->PSSetConstantBuffer(EConstBufferSlot::CB_LightInfo, 1);
     
-    D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::CubeMapTexture),
+    D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::ERS_CubeMapTexture),
         static_cast<int>(ECubeMapType::MAX_CUBEMAP_TEXTURE_COUNT), Data.IBLSRVRef);
 }

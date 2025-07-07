@@ -16,9 +16,17 @@ USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, bool bOverwri
 	{
 		converter->ReadFile(objectName, EMeshType::SkeletalMeshType);
 	}
-	converter->ReadMeshInfo(InFileName, this);
 
-	FSceneRender::Get()->CreateRenderProxy<SkeletalMeshRenderProxy>(this);
+	MeshName = String::ToString(objectName);
+
+	converter->ReadMeshInfo(InFileName, this,
+		FSceneRender::Get()->SkeletalMeshHasCreated(MeshName));
+	
+	FSceneRender::Get()->CreateMeshRenderProxy<SkeletalMeshRenderProxy>(MeshName, this);
+}
+
+USkeletalMeshComponent::~USkeletalMeshComponent()
+{
 }
 
 
@@ -31,6 +39,8 @@ void USkeletalMeshComponent::TickComponent(float deltaTime)
 		meshPtr->SetWorld(GetWorldTransform());
 		meshPtr->Tick();
 	}
+
+	TransformChanged.Broadcast(InstanceID, WorldBufferData.World);
 }
 
 

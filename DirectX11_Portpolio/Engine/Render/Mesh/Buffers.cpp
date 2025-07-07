@@ -142,18 +142,36 @@ void ConstantBuffer::PSSetConstantBuffer(const EConstBufferSlot bufferSlot, cons
 //----------------------------------------------------------------------------
 
 StructuredBuffer::StructuredBuffer(void* inData, UINT inElementSize, UINT inElementCount)
-	: data(inData), elementSize(inElementSize), elementCount(inElementCount)
+	: Data(inData), elementSize(inElementSize), elementCount(inElementCount)
 {
+	if(elementSize <= 0) return;
+	
 	D3D11_BUFFER_DESC desc = {};
-	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.ByteWidth = elementSize * elementCount;
-	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS; // Compute Shader
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	desc.StructureByteStride = elementSize;
 
-	Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, nullptr, buffer.GetAddressOf()));
+	D3D11_SUBRESOURCE_DATA bufferData;
+	ZeroMemory(&bufferData, sizeof(bufferData));
+	bufferData.pSysMem = Data;
 
+	HRESULT hr = D3D::Get()->GetDevice()->CreateBuffer(&desc, &bufferData, buffer.GetAddressOf());
+	Check(hr);
+
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	ZeroMemory(&uavDesc, sizeof(uavDesc));
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.NumElements = elementCount;
+	uavDesc.Buffer.Flags =
+		D3D11_BUFFER_UAV_FLAG_APPEND; // <- AppendBuffer로 사용
+	Check(D3D::Get()->GetDevice()->CreateUnorderedAccessView(buffer.Get(), &uavDesc,
+									  uav.GetAddressOf()));
+	
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
@@ -169,9 +187,14 @@ void StructuredBuffer::UpdateBuffer()
 	D3D11_MAPPED_SUBRESOURCE mapped;
 	D3D::Get()->GetDeviceContext()->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
 	{
-		memcpy(mapped.pData, data, elementSize * elementCount);
+		memcpy(mapped.pData, Data, elementSize * elementCount);
 	}
 	D3D::Get()->GetDeviceContext()->Unmap(buffer.Get(), 0);
+}
+
+void StructuredBuffer::UpdateSubResource()
+{
+	D3D::Get()->GetDeviceContext()->UpdateSubresource(buffer.Get(), 0, nullptr, Data, 0, 0);
 }
 
 void StructuredBuffer::PSSetStructuredBuffer(const EShaderResourceSlot bufferSlot)
@@ -186,7 +209,43 @@ void StructuredBuffer::VSSetStructuredBuffer(const EShaderResourceSlot bufferSlo
 
 void StructuredBuffer::UpdateData(void* InData)
 {
-	data = InData;
+	Data = InData;
+}
+
+
+//------------------------------------
+
+IndirectBuffer::IndirectBuffer(void* Indata, UINT InelementSize, UINT InelementCount)
+	:Data(Indata), elementSize(InelementSize), elementCount(InelementCount)
+{
+	D3D11_BUFFER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.ByteWidth = elementCount * elementSize;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags =
+		D3D11_BIND_UNORDERED_ACCESS; // ComputeShader에서 업데이트 가능
+	desc.StructureByteStride = elementSize;
+	desc.MiscFlags = D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS; // <- IndirectArgs
+
+	D3D11_SUBRESOURCE_DATA bufferData;
+	ZeroMemory(&bufferData, sizeof(bufferData));
+	bufferData.pSysMem = Data;
+	Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, &bufferData, buffer.GetAddressOf()));
+}
+
+void IndirectBuffer::UpdateBuffer()
+{
+	D3D11_MAPPED_SUBRESOURCE mapped;
+	D3D::Get()->GetDeviceContext()->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+	{
+		memcpy(mapped.pData, Data, elementSize * elementCount);
+	}
+	D3D::Get()->GetDeviceContext()->Unmap(buffer.Get(), 0);
+}
+
+void IndirectBuffer::UpdateSubResource()
+{
+	D3D::Get()->GetDeviceContext()->UpdateSubresource(buffer.Get(), 0, nullptr, Data, 0, 0);
 }
 
 

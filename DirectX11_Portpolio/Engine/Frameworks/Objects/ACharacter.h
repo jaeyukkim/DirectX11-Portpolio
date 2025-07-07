@@ -14,6 +14,6 @@ public:
 	virtual void Tick(float deltaTime) override;
 
 
-	shared_ptr<USkeletalMeshComponent> Mesh;
+	vector<shared_ptr<USkeletalMeshComponent>> Mesh;
 	
 }; 

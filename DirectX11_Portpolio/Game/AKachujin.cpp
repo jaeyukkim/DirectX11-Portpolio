@@ -4,8 +4,22 @@
 
 AKachujin::AKachujin()
 {
-    Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Samurai");
-    SetRootComponent(Mesh.get());
+    //Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Samurai");
+
+    int cnt = 0;
+    for(int i = 0 ; i<15 ; i++)
+    {
+        for(int j = 0 ; j<15 ; j++)
+        {
+            Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Samurai"));
+            Mesh[cnt]->GetRelativeTransform()->SetPosition(Vector3(i*4, 0.5f, j*4));
+            cnt++;
+        }
+    }
+    
+    SetRootComponent(Mesh[0].get());
+
+    
 
     Camera = CreateComponent<UCameraComponent>(this);
    // Camera->SetUpAttachment(GetRootComponent());

@@ -82,6 +82,7 @@ public:
 	~StructuredBuffer() = default;
 
 	void UpdateBuffer();
+	void UpdateSubResource();
 	void PSSetStructuredBuffer(const EShaderResourceSlot bufferSlot);
 	void VSSetStructuredBuffer(const EShaderResourceSlot bufferSlot);
 	void UpdateData(void* InData);
@@ -89,8 +90,27 @@ public:
 private:
 	ComPtr<ID3D11Buffer> buffer;
 	ComPtr<ID3D11ShaderResourceView> srv;
+	ComPtr<ID3D11UnorderedAccessView> uav;
 
-	void* data = nullptr;
+	void* Data = nullptr;
+	UINT elementSize = 0;
+	UINT elementCount = 0;
+};
+
+//----------------------------------------------------------------------------
+
+class IndirectBuffer
+{
+public:
+	IndirectBuffer(void* Indata, UINT InelementSize, UINT InelementCount);
+	~IndirectBuffer() = default;
+
+	void UpdateBuffer();
+	void UpdateSubResource();
+	ComPtr<ID3D11Buffer> GetBuffer() {return buffer;}
+private:
+	ComPtr<ID3D11Buffer> buffer;
+	void* Data = nullptr;
 	UINT elementSize = 0;
 	UINT elementCount = 0;
 };

@@ -103,13 +103,13 @@ void FSceneRender::RenderShadowMap()
 
 void FSceneRender::RenderObjects(FRenderOption option)
 {
-    for(shared_ptr<StaticMeshRenderProxy> proxy: MeshProxies)
+    for(auto& proxy: MeshProxies)
     {
-        proxy->Render(option);
+        proxy.second->Render(option);
     }
-    for(shared_ptr<SkeletalMeshRenderProxy> proxy : SkeletalMeshProxies)
+    for(auto& proxy : SkeletalMeshProxies)
     {
-        proxy->Render(option);
+        proxy.second->Render(option);
     }
     SkyBoxProxy->Render(option);
 }
@@ -146,7 +146,7 @@ void FSceneRender::MainRender()
         }
     }
 
-    D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::ShadowMap), shadowSRV.size(), shadowSRV.data());
+    D3D::Get()->GetDeviceContext()->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::ERS_ShadowMap), shadowSRV.size(), shadowSRV.data());
     D3D::Get()->GetDeviceContext()->RSSetViewports(1, D3D::Get()->Viewport.get());  //다시복구
     ViewProxy->Render(GetDefaultRenderType());
     RenderObjects(GetDefaultRenderType());
@@ -208,4 +208,28 @@ FRenderOption FSceneRender::GetDepthOnlyRenderType()
 
     option.bDepthOnly = true;
     return option;
+}
+
+bool FSceneRender::StaticMeshHasCreated(const string& meshName)
+{
+    // 이미 존재함
+    if (MeshProxies.find(meshName) != MeshProxies.end())
+    {
+        return true;
+    }
+    
+    // 존재하지 않음
+    return false;
+    
+}
+
+bool FSceneRender::SkeletalMeshHasCreated(const string& meshName)
+{
+    
+    if (SkeletalMeshProxies.find(meshName) != SkeletalMeshProxies.end())
+    {
+        return true;
+    }
+
+    return false;
 }

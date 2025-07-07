@@ -1,5 +1,6 @@
 #include "HeaderCollection.h"
 #include "USceneComponent.h"
+#include "Render/RenderDefinition.h"
 
 USceneComponent::USceneComponent()
 {
@@ -29,7 +30,7 @@ void USceneComponent::TickComponent(float deltaTime)
 		WorldTransform->SetTransformFromMatrix(WorldMat);
 		WorldBufferData.World = WorldTransform->ToMatrix().Transpose();
 	}
-
+	
 }
 
 

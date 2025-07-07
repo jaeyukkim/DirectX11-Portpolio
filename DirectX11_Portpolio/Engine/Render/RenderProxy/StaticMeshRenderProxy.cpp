@@ -6,9 +6,9 @@
 
 
 StaticMeshRenderProxy::StaticMeshRenderProxy(UStaticMeshComponent* meshComp)
-    :RenderProxy(ERenderProxyType::RPT_StaticMesh)
+    :RenderProxy(ERenderProxyType::RPT_StaticMesh),
+    InstanceSBuffer(0, 0, 0)
 {
-    
     for(const shared_ptr<StaticMesh>& mesh : meshComp->GetAllMeshes())
     {
         FStaticMeshRenderData data;
@@ -17,8 +17,16 @@ StaticMeshRenderProxy::StaticMeshRenderProxy(UStaticMeshComponent* meshComp)
         data.MaterialData = mesh->GetMaterialData();
         data.IndexCount = mesh->Data.IndexCount;
         data.Transform = meshComp->GetWorldConstantBuffer();
-        Data.push_back(data);
+        RenderData.push_back(data);
     }
+    
+    AddInstance(meshComp);
+
+    meshComp->TransformChanged.Add([this](int id, Matrix mat)
+    {
+        InstanceDatas[id].Transform = mat;
+       //SetInstanceIndirectData();
+    });
 }
 
 
@@ -54,14 +62,61 @@ void StaticMeshRenderProxy::Render(const FRenderOption& option)
         FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->MirrorBlendSolidPSO);
     }
   
-    
-    for(FStaticMeshRenderData& data : Data)
+    InstanceSBuffer.UpdateSubResource();
+    InstanceSBuffer.VSSetStructuredBuffer(EShaderResourceSlot::ERS_World);
+    for(int i = 0 ; i<RenderData.size() ; i++)
     {
-        data.MaterialData->BindMaterial();
-        data.VBuffer->IASetVertexBuffer();
-        data.IBuffer->IASetIndexBuffer();
-        data.Transform->UpdateConstBuffer();
-        data.Transform->VSSetConstantBuffer(EConstBufferSlot::CB_World, 1);
-        D3D::Get()->GetDeviceContext()->DrawIndexed(data.IndexCount, 0, 0);
+        RenderData[i].MaterialData->BindMaterial();
+        RenderData[i].VBuffer->IASetVertexBuffer();
+        RenderData[i].IBuffer->IASetIndexBuffer();
+        RenderData[i].Transform->UpdateConstBuffer();
+        RenderData[i].Transform->VSSetConstantBuffer(EConstBufferSlot::CB_World, 1);
+        
+        
+        D3D::Get()->GetDeviceContext()->DrawIndexedInstancedIndirect(InstanceIndirectBuffer[i].GetBuffer().Get(), 0);
+
     }
+}
+
+void StaticMeshRenderProxy::AddInstance(UStaticMeshComponent* meshComp)
+{
+    FSM_InstDataCPU data;
+    data.Transform = meshComp->GetWorldBufferData()->World;
+    meshComp->SetInstanceID(InstanceDatas.size());
+    InstanceDatas.push_back(data);
+    
+    SetInstanceIndirectData();
+}
+
+
+/**
+ * @param InstanceID Instance¿« ID
+ */
+void StaticMeshRenderProxy::DeleteInstance(const int InstanceID)
+{
+    if (InstanceID < 0 || InstanceID >= InstanceDatas.size()) return;
+    InstanceDatas.erase(InstanceDatas.begin() + InstanceID);
+    
+    SetInstanceIndirectData();
+}
+
+void StaticMeshRenderProxy::SetInstanceIndirectData()
+{
+    InstanceIndirectBuffer.clear();
+    for(FStaticMeshRenderData& data : RenderData)
+    {
+        D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS args;
+        ZeroMemory(&args, sizeof(args));
+        args.InstanceCount = InstanceDatas.size();
+        args.IndexCountPerInstance = data.IndexCount;
+        args.BaseVertexLocation=0;
+        args.StartIndexLocation=0;
+        args.StartInstanceLocation=0;
+
+        InstanceIndirectBuffer.push_back(IndirectBuffer(&args,
+        sizeof(D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS), 1));
+    }
+
+    InstanceSBuffer = StructuredBuffer(InstanceDatas.data(),
+        sizeof(FSKM_InstDataCPU), InstanceDatas.size());
 }

@@ -5,7 +5,8 @@
 #include "Render/Mesh/Buffers.h"
 
 SkeletalMeshRenderProxy::SkeletalMeshRenderProxy(USkeletalMeshComponent* meshComp)
-    :RenderProxy(ERenderProxyType::RPT_SkeletalMesh)
+    :RenderProxy(ERenderProxyType::RPT_SkeletalMesh),
+    InstanceSBuffer(0, 0, 0)
 {
     for(const shared_ptr<SkeletalMesh>& mesh : meshComp->GetAllMeshes())
     {
@@ -15,9 +16,11 @@ SkeletalMeshRenderProxy::SkeletalMeshRenderProxy(USkeletalMeshComponent* meshCom
         data.BoneBuffer = mesh->BoneBuffer;
         data.MaterialData = mesh->GetMaterialData();
         data.IndexCount = mesh->Data.IndexCount;
-        data.Transform = meshComp->GetWorldConstantBuffer();
-        Data.push_back(data);
+        RenderData.push_back(data);
     }
+    
+    AddInstance(meshComp);
+
     
 }
 
@@ -46,17 +49,67 @@ void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
     }
     
     
-    for(FSkeletalMeshRenderData& data : Data)
+    InstanceSBuffer.UpdateSubResource();
+    InstanceSBuffer.VSSetStructuredBuffer(EShaderResourceSlot::ERS_World);
+    for(int i = 0 ; i<RenderData.size() ; i++)
     {
+        RenderData[i].BoneBuffer->UpdateConstBuffer();
+        RenderData[i].BoneBuffer->VSSetConstantBuffer(EConstBufferSlot::CB_Bone, 1);
+        RenderData[i].MaterialData->BindMaterial();
+        RenderData[i].VBuffer->IASetVertexBuffer();
+        RenderData[i].IBuffer->IASetIndexBuffer();
         
-        data.BoneBuffer->UpdateConstBuffer();
-        data.BoneBuffer->VSSetConstantBuffer(EConstBufferSlot::CB_Bone, 1);
-        data.MaterialData->BindMaterial();
-        data.VBuffer->IASetVertexBuffer();
-        data.IBuffer->IASetIndexBuffer();
-        data.Transform->VSSetConstantBuffer(EConstBufferSlot::CB_World, 1);
-        data.Transform->UpdateConstBuffer();
-        D3D::Get()->GetDeviceContext()->DrawIndexed(data.IndexCount, 0, 0);
+        //InstanceIndirectBuffer[i].UpdateSubResource();
+        D3D::Get()->GetDeviceContext()->DrawIndexedInstancedIndirect(InstanceIndirectBuffer[i].GetBuffer().Get(), 0);
     }
+}
+
+
+void SkeletalMeshRenderProxy::AddInstance(USkeletalMeshComponent* meshComp)
+{
+    FSKM_InstDataCPU data;
+    data.Transform = meshComp->GetWorldBufferData()->World;
+    meshComp->SetInstanceID(InstanceDatas.size());
+    InstanceDatas.push_back(data);
     
+    SetInstanceIndirectData();
+
+    meshComp->TransformChanged.Add([this](int id, Matrix& mat)
+    {
+        InstanceDatas[id].Transform = mat;
+       //SetInstanceIndirectData();
+    });
+}
+
+
+void SkeletalMeshRenderProxy::DeleteInstance(const int InstanceID)
+{
+    if (InstanceID < 0 || InstanceID >= InstanceDatas.size()) return;
+    InstanceDatas.erase(InstanceDatas.begin() + InstanceID);
+    
+    SetInstanceIndirectData();
+}
+
+
+void SkeletalMeshRenderProxy::SetInstanceIndirectData()
+{
+    
+    InstanceIndirectBuffer.clear();
+    for(FSkeletalMeshRenderData& data : RenderData)
+    {
+        D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS args;
+        ZeroMemory(&args, sizeof(args));
+        args.InstanceCount = InstanceDatas.size();
+        args.IndexCountPerInstance = data.IndexCount;
+        args.BaseVertexLocation=0;
+        args.StartIndexLocation=0;
+        args.StartInstanceLocation=0;
+        
+        InstanceIndirectBuffer.push_back(IndirectBuffer(&args,
+        sizeof(D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS), 1));
+    }
+
+    InstanceSBuffer = StructuredBuffer(InstanceDatas.data(),
+        sizeof(FSKM_InstDataCPU), InstanceDatas.size());
+
 }

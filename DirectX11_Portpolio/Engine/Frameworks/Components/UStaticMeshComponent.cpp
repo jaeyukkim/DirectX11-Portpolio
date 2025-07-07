@@ -22,10 +22,17 @@ UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, StaticMeshCreateI
 	{
 		converter->ReadFile(objectName, EMeshType::StaticMeshType);
 	}
-	converter->ReadMeshInfo(InFileName, this);
+
+	MeshName = String::ToString(objectName);
+	converter->ReadMeshInfo(InFileName, this,
+		FSceneRender::Get()->StaticMeshHasCreated(MeshName));
 
 	if(!info.bIsMirror && !info.bIsSkyBox)
-		FSceneRender::Get()->CreateRenderProxy<StaticMeshRenderProxy>(this);
+		FSceneRender::Get()->CreateMeshRenderProxy<StaticMeshRenderProxy>(MeshName, this);
+}
+
+UStaticMeshComponent::~UStaticMeshComponent()
+{
 }
 
 
@@ -68,5 +75,6 @@ void UStaticMeshComponent::TickComponent(float deltaTime)
 		meshPtr->SetWorld(GetWorldTransform());
 		meshPtr->Tick();
 	}
-	
+	TransformChanged.Broadcast(InstanceID, WorldBufferData.World);
+
 }

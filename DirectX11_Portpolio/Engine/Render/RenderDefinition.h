@@ -9,6 +9,7 @@ class IndexBuffer;
 
 #define MAX_LIGHT_COUNT 9
 #define MAX_SHADOW_COUNT 9
+#define MAX_INSTANCE_SIZE 1000
 
 enum ELightType : UINT
 {
@@ -83,10 +84,12 @@ enum class EConstBufferSlot : UINT8
 
 enum class EShaderResourceSlot : UINT8
 {
-    CubeMapTexture = 0,
-    MaterialTexture = 4,
-    ShadowMap = 11,
-    PostEffect = 20
+    ERS_CubeMapTexture = 0,
+    ERS_MaterialTexture = 4,
+    ERS_ShadowMap = 11,
+    ERS_PostEffect = 20,
+    ERS_World = 25
+    
 };
 
 
@@ -129,6 +132,16 @@ struct FLightSceneRenderData
 };
 
 
+struct WorldBufferDesc
+{
+    Matrix World;
+};
+
+struct FSM_InstDataCPU
+{
+    Matrix Transform;
+};
+
 struct FStaticMeshRenderData
 {
     UINT IndexCount;
@@ -138,10 +151,9 @@ struct FStaticMeshRenderData
     Material* MaterialData;
 };
 
-
 using FSkyBoxRenderData = FStaticMeshRenderData;
 
-//리플렉션 로우 설정하는거 mirror에서 설정하도록 바꾸기
+
 struct FMirrorRenderData
 {
     FStaticMeshRenderData MeshData;
@@ -156,9 +168,13 @@ struct FSkeletalMeshRenderData
     shared_ptr<VertexBuffer> VBuffer;
     shared_ptr<IndexBuffer> IBuffer;
     shared_ptr<ConstantBuffer> BoneBuffer;
-    shared_ptr<ConstantBuffer> Transform;
     Material* MaterialData;
 };
+struct FSKM_InstDataCPU
+{
+    Matrix Transform;
+};
+
 
 
 // 조명 정보

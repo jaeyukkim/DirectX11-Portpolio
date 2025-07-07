@@ -35,7 +35,7 @@ public:
 
 public:
 	template<typename MeshType>
-	void ReadMeshInfo(wstring InFileName, MeshType InMesh);
+	void ReadMeshInfo(wstring InFileName, MeshType InMesh, bool bHasCreated);
 
 public:
 	void ExportMesh(wstring InSaveFileName, EMeshType FileType);
@@ -87,7 +87,7 @@ private:
 
 
 template <typename MeshType>
-void Converter::ReadMeshInfo(wstring InFileName, MeshType InMesh)
+void Converter::ReadMeshInfo(wstring InFileName, MeshType InMesh, bool bHasCreated)
 {
     ifstream stream;
     stream.open(InFileName);
@@ -122,9 +122,14 @@ void Converter::ReadMeshInfo(wstring InFileName, MeshType InMesh)
     InMesh->GetRelativeTransform()->SetRotation(r.x, r.y, r.z);
 
     stream.close();
-	
-    InitMaterial(String::ToWString(materialName), InMesh);
-    InitMesh(String::ToWString(meshName), InMesh);
+
+	// Renderer에 RenderProxy가 아직 생성되지 않았을 경우. 생성되었다면 pass
+	if(!bHasCreated)
+	{
+		InitMaterial(String::ToWString(materialName), InMesh);
+		InitMesh(String::ToWString(meshName), InMesh);
+	}
+    
 }
 
 template <typename MeshType>

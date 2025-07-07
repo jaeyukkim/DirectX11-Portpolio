@@ -17,7 +17,7 @@ void ULevel::Initialize()
     SpawnActor<AKachujin>(this);
     SpawnActor<AFloor>(this);
     SpawnActor<ACubeMap>(this);
-    SpawnActor<AMirror>(this);
+    //SpawnActor<AMirror>(this);
 }
 
 void ULevel::Destroy()

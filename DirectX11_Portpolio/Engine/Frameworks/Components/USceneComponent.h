@@ -2,7 +2,10 @@
 #include "UActorComponent.h"
 
 
+struct WorldBufferDesc;
 struct FTransform;
+
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FWorldTransformChanged, int, Matrix&);
 
 class USceneComponent : public UActorComponent
 {
@@ -21,22 +24,22 @@ public:
 	FTransform* GetWorldTransform() const { return WorldTransform.get(); }
 	FTransform* GetRelativeTransform() const { return RelativeTransform.get(); }
 	shared_ptr<ConstantBuffer> GetWorldConstantBuffer() const {return WorldConstantBuffer; }
+	WorldBufferDesc* GetWorldBufferData() { return &WorldBufferData;}
+	
 public:
 	vector<USceneComponent*> AttachChildren;
 	USceneComponent* AttachParent = nullptr;
 	string AttachSocketName;
-
+	
 public:
+	FWorldTransformChanged TransformChanged;
 	bool bDirty = false;
 	int AttachDepth = 0;
 	
 
 protected:
-	struct WorldBufferDesc
-	{
-		Matrix World;
-	} WorldBufferData;
-
+	
+	WorldBufferDesc WorldBufferData;
 	shared_ptr<FTransform> WorldTransform;
 	shared_ptr<FTransform> RelativeTransform;
 	shared_ptr<ConstantBuffer> WorldConstantBuffer;
