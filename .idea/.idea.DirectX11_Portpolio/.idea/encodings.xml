@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/Engine/Frameworks/Camera/UCameraComponent.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Frameworks/Components/UStaticMeshComponent.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Frameworks/LightComponents/ULightComponent.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Frameworks/Objects/UObject.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Libraries/FileSystem/Converter.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Libraries/MathLibrary/FTransform.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Libraries/Utility/Delegate.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Render/HLSL/Material.hlsli" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Render/Pipeline/FGlobalPSO.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Render/PostProcess/ImageFilter.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Render/Resource/FSceneView.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Engine/Systems/D3D.cpp" charset="x-windows-949" />
+    <file url="PROJECT" charset="x-windows-949" />
+  </component>
+</project>

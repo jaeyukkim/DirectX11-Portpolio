@@ -1,10 +1,7 @@
 #include "Common.hlsli"
 
 
-struct SM_Instance
-{
-    matrix Inst_World;
-};
+
 
 StructuredBuffer<SM_Instance> InstanceData : register(t25);
 

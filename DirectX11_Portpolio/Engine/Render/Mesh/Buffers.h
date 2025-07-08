@@ -64,6 +64,8 @@ public:
 	void UpdateData(void* InData);
 	void VSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot);
 	void PSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot);
+	void CSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot);
+
 private:
 	ComPtr<ID3D11Buffer> Buffer;
 
@@ -225,4 +227,28 @@ private:
 	DXGI_FORMAT Format;
 
 	ComPtr<ID3D11ShaderResourceView> OutputSRV;
+};
+
+//--------------------------------------------------------------------------
+class AppendBuffer
+{
+public:
+	AppendBuffer(void* Indata, UINT InelementSize, UINT InelementCount);
+	~AppendBuffer() = default;
+
+	void CSSetUAV(const EUAV_Slot bufferSlot, UINT InitCount = 0);
+	void CSSetSRV(const EShaderResourceSlot bufferSlot);
+
+	void CSClearUAV(const EUAV_Slot bufferSlot);
+	void CSClearSRV(const EShaderResourceSlot bufferSlot);
+	
+	ComPtr<ID3D11Buffer> GetBuffer() {return buffer;}
+private:
+	ComPtr<ID3D11Buffer> buffer;
+	ComPtr<ID3D11ShaderResourceView> SRV;
+	ComPtr<ID3D11UnorderedAccessView> UAV;
+
+	void* Data = nullptr;
+	UINT elementSize = 0;
+	UINT elementCount = 0;
 };

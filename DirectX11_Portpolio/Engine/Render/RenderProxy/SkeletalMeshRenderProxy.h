@@ -14,16 +14,22 @@ class SkeletalMeshRenderProxy : public RenderProxy
 public:
     SkeletalMeshRenderProxy(USkeletalMeshComponent* meshComp);
     void Render(const FRenderOption& option) override;
+
+    void RunFrustumCulling();
     void AddInstance(USkeletalMeshComponent* meshComp);
     void DeleteInstance(const int InstanceID);
-    void SetInstanceIndirectData();
+    void SetInstanceIndirectData(int InSize);
+    void SetCSIndirectData();
     int GetNumOfInstance() const {return InstanceDatas.size();}
  
 private:
     vector<FSkeletalMeshRenderData> RenderData;
-    StructuredBuffer InstanceSBuffer;
     
     vector<FSKM_InstDataCPU> InstanceDatas;
     vector<IndirectBuffer> InstanceIndirectBuffer;
+    IndirectBuffer CSIndirectBuffer;
+
+    AppendBuffer Append;
+    AppendBuffer Consume;
     
 };

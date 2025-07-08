@@ -75,4 +75,30 @@ int RaySphereIntersection(in float3 start, in float3 dir, in float3 center, in f
     }
 }
 
+struct SM_Instance
+{
+    matrix Inst_World;
+    float3 AABB_Max;
+    float SMpadding0;
+    
+    float3 AABB_Min;
+    float SMpadding1;
+    
+    int SM_InstanceID;
+    float3 SMpadding2;
+};
+
+
+struct SKM_Instance
+{
+    matrix SK_Inst_World;
+    float3 SK_AABB_Max;
+    float SKM_padding0;
+    
+    float3 SK_AABB_Min;
+    float SKM_padding1;
+    
+    int SK_InstanceID;
+    float3 SKM_padding2;
+};
 #endif // __COMMON_HLSLI__

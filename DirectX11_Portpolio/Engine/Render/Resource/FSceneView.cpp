@@ -27,11 +27,11 @@ void FSceneView::Create()
     {
         Instance->Lights.Lights[i] = FLight();
         Instance->ShadowView[i] = FViewContext();
-        Instance->LightViewConstantBuffer[i] = make_shared<ConstantBuffer>(&Instance->ShadowView[i], sizeof(FViewContext));
+        Instance->LightViewCBuffer[i] = make_shared<ConstantBuffer>(&Instance->ShadowView[i], sizeof(FViewContext));
     }
     
-    Instance->ViewConstantBuffer = make_shared<ConstantBuffer>(&Instance->DefaultView, sizeof(FViewContext));
-    Instance->ReflactViewConstantBuffer = make_shared<ConstantBuffer>(&Instance->ReflactView, sizeof(FViewContext));
+    Instance->ViewCBuffer = make_shared<ConstantBuffer>(&Instance->DefaultView, sizeof(FViewContext));
+    Instance->ReflactViewCBuffer = make_shared<ConstantBuffer>(&Instance->ReflactView, sizeof(FViewContext));
     
     
 
@@ -46,6 +46,12 @@ void FSceneView::Create()
     {
         D3D::Get()->CreateShadowResources(i);
     }
+
+    Instance->Frustum.resize(6);
+    Instance->FrustumCBuffer = make_shared<ConstantBuffer>(nullptr, sizeof(Frustum));
+
+    Instance->ReflectFrustum.resize(6);
+    Instance->ReflectFrustumCBuffer = make_shared<ConstantBuffer>(nullptr, sizeof(ReflectFrustum));
 }
 
 
@@ -64,6 +70,7 @@ void FSceneView::UpdateSceneView(const FViewContext& InContext)
     DefaultView.ProjectionInverse = InContext.ProjectionInverse.Transpose();
     DefaultView.ViewProjection = InContext.ViewProjection.Transpose();
     DefaultView.EyePos = InContext.EyePos;
+    
 }
 
 void FSceneView::UpdateReflactView(const Matrix InReflactRow)
@@ -71,7 +78,13 @@ void FSceneView::UpdateReflactView(const Matrix InReflactRow)
     ReflactView = DefaultView;
     ReflactView.View = (InReflactRow * DefaultView.View.Transpose()).Transpose();
     ReflactView.ViewProjection = (InReflactRow * DefaultView.View.Transpose() * DefaultView.Projection.Transpose()).Transpose();
-    Instance->ReflactViewConstantBuffer->UpdateConstBuffer();
+    Instance->ReflactViewCBuffer->UpdateConstBuffer();
+
+    ReflactFrustumView = FrustumView;
+    ReflactView.View = InReflactRow * DefaultView.View;
+    ReflactView.ViewProjection = (InReflactRow * DefaultView.View * DefaultView.Projection);
+    CreateFrustum(ReflectFrustum, ReflactView.ViewProjection, ReflectFrustumCBuffer);
+    
 }
 
 void FSceneView::AddToLightMap(FLight* InLightInfo)
@@ -195,4 +208,30 @@ void FSceneView::UpdateLightView(FLight* InLightInfo)
         cout << light_frustum_width;*/
     }
     
+}
+
+void FSceneView::CreateFrustum(const FViewContext& InContext)
+{
+    FrustumView = InContext;
+    CreateFrustum(Frustum, FrustumView.ViewProjection, FrustumCBuffer);
+}
+
+void FSceneView::CreateFrustum(vector<XMVECTOR>& InFrustum, const Matrix& InViewProj,
+                               const shared_ptr<ConstantBuffer>& InFrustumCBuffer)
+{
+    XMMATRIX mat = InViewProj;
+    XMVECTOR row1 = mat.r[0]; 
+    XMVECTOR row2 = mat.r[1]; 
+    XMVECTOR row3 = mat.r[2];
+    XMVECTOR row4 = mat.r[3];
+
+    InFrustum[0] = XMPlaneNormalize(XMVectorAdd(row4, row1)); // Left
+    InFrustum[1] = XMPlaneNormalize(XMVectorSubtract(row4, row1)); // Right
+    InFrustum[2] = XMPlaneNormalize(XMVectorAdd(row4, row2)); // Bottom
+    InFrustum[3] = XMPlaneNormalize(XMVectorSubtract(row4, row2)); // Top
+    InFrustum[4] = XMPlaneNormalize(XMVectorAdd(row4, row3)); // Near
+    InFrustum[5] = XMPlaneNormalize(XMVectorSubtract(row4, row3)); // Far
+
+    InFrustumCBuffer->UpdateData(&Frustum[0]);
+    InFrustumCBuffer->UpdateConstBuffer();
 }

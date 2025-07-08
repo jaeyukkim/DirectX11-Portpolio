@@ -13,7 +13,7 @@
       "RoughnessMap" : "",
    },
    "LowSet1" : {
-      "Albedo" : "0.500000,1.000000,1.000000,1.000000",
+      "Albedo" : "1.00000,1.000000,1.000000,1.000000",
       "AlbedoMap" : "../../Contents/_Models/Samurai/textures/LowSet1_baseColor.png",
       "AmbientOcclusionMap" : "../../Contents/_Models/Samurai/textures/LowSet1_metallicRoughness.png",
       "Emissive" : "0.000000,0.000000,0.000000,0.000000",

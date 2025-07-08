@@ -20,7 +20,9 @@ struct StaticMeshInfo
     VertexObject* Vertices = nullptr;
 
     UINT IndexCount = 0;
-    UINT* Indices = nullptr;   
+    UINT* Indices = nullptr;
+
+    FAABB AABB;
 };
 
 class StaticMesh

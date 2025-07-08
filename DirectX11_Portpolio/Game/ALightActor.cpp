@@ -12,6 +12,7 @@
 
 ALightActor::ALightActor()
 {
+
 	
 	Mesh = CreateComponent<UStaticMeshComponent>(this, L"Lantern");
 	SetRootComponent(Mesh.get());

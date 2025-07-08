@@ -70,6 +70,13 @@ struct VertexNormal
 
 //------------------------------------------------------------------------------
 
+struct FAABB
+{
+    Vector3 Min;
+    Vector3 Max;
+};
+
+//------------------------------------------------------------------------------
 struct VertexModel
 {
     Vector3 Position;
@@ -132,6 +139,7 @@ struct SkeletalMeshData
 
     vector<VertexModel> Vertices;
     vector<UINT> Indices;
+    FAABB AABB;
 };
 
 struct StaticMeshData
@@ -141,6 +149,7 @@ struct StaticMeshData
 
     vector<VertexObject> Vertices;
     vector<UINT> Indices;
+    FAABB AABB;
 };
 
 struct VertexTextureData

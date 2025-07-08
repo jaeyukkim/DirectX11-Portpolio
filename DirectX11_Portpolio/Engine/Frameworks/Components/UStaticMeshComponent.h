@@ -25,14 +25,14 @@ public:
 public:
     void ReverseIndices();
     vector<Material*> GetAllMaterials();
-    int GetInstanceID() {return InstanceID;}
-    void SetInstanceID(const int& InInstanceId) {InstanceID = InInstanceId;}
+    int GetInstanceID() {return *InstanceID;}
+    void SetInstanceID(int* InInstanceId) {InstanceID = InInstanceId;}
 
 private:
     vector<shared_ptr<StaticMesh>> m_Mesh;
     map<string, shared_ptr<Material>> MaterialTable;
     mutable bool bInitRenderComplete = false;
-    int InstanceID;
+    int* InstanceID;
     string MeshName;
     friend class Converter;
 

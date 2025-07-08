@@ -41,6 +41,7 @@ void Converter::ReadFile(const wstring objectName, const EMeshType& meshType)
 		| aiProcess_GenNormals
 		| aiProcess_CalcTangentSpace
 		| aiProcess_GenBoundingBoxes
+		
 
 	);
 	Assert(Scene != nullptr, "모델 정상 로드 안됨");
@@ -347,11 +348,15 @@ void Converter::ReadSkeletalMeshData()
 			if (mesh->HasTangentsAndBitangents())
 				memcpy_s(&vertex.Tangent, sizeof(Vector3), &mesh->mTangents[v], sizeof(Vector3));
 
-			if (bIsGLTF)
-				ConvertToDXCoord(&vertex.Normal, &vertex.Tangent);
+		
 
 			data->Vertices.push_back(vertex);
 		}
+		
+		memcpy_s(&data->AABB.Max, sizeof(Vector3), &mesh->mAABB.mMax, sizeof(Vector3));
+		memcpy_s(&data->AABB.Min, sizeof(Vector3), &mesh->mAABB.mMin, sizeof(Vector3));
+
+		
 
 		for (UINT f = 0; f < mesh->mNumFaces; f++)
 		{
@@ -360,25 +365,11 @@ void Converter::ReadSkeletalMeshData()
 			for (UINT k = 0; k < face.mNumIndices; k++)
 				data->Indices.push_back(face.mIndices[k]);
 		}
-
+		
 		SkeletalMeshes.push_back(data);
 	}
 }
 
-void Converter::ConvertToDXCoord(Vector3* normal, Vector3* tangent)
-{
-	// Normal 변환
-	float temp= -normal->y;
-	normal->y = normal->z;
-	normal->z = temp;
-	normal->Normalize();
-	
-	// Tangent 변환
-	float tempT = -tangent->y;
-	tangent->y = tangent->z;
-	tangent->z = tempT;
-	tangent->Normalize();
-}
 
 
 void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
@@ -416,7 +407,9 @@ void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
 
 		w->ToUInt((UINT)data->Indices.size());
 		w->ToByte(&data->Indices[0], (UINT)(sizeof(UINT) * data->Indices.size()));
-
+		
+		w->ToByte(&data->AABB.Max, sizeof(Vector3));
+		w->ToByte(&data->AABB.Min, sizeof(Vector3));
 		Delete(data);
 	}
 	
@@ -460,9 +453,16 @@ void Converter::ReadStaticMeshData()
 			if (mesh->HasTangentsAndBitangents())
 				memcpy_s(&vertex.Tangent, sizeof(Vector3), &mesh->mTangents[v], sizeof(Vector3));
 
+		
 			data->Vertices.push_back(vertex);
 		}
 
+		
+		memcpy_s(&data->AABB.Max, sizeof(Vector3), &mesh->mAABB.mMax, sizeof(Vector3));
+		memcpy_s(&data->AABB.Min, sizeof(Vector3), &mesh->mAABB.mMin, sizeof(Vector3));
+
+		
+		
 		for (UINT f = 0; f < mesh->mNumFaces; f++)
 		{
 			aiFace& face = mesh->mFaces[f];
@@ -494,6 +494,8 @@ void Converter::WriteStaticMeshData(wstring InSaveFileName)
 
 		w->ToUInt((UINT)data->Indices.size());
 		w->ToByte(&data->Indices[0], (UINT)(sizeof(UINT) * data->Indices.size()));
+		w->ToByte(&data->AABB.Max, sizeof(Vector3));
+		w->ToByte(&data->AABB.Min, sizeof(Vector3));
 
 		Delete(data);
 	}

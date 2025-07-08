@@ -4,8 +4,9 @@
 
 AKachujin::AKachujin()
 {
-    //Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Samurai");
+    Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Samurai"));
 
+    /*
     int cnt = 0;
     for(int i = 0 ; i<15 ; i++)
     {
@@ -16,7 +17,7 @@ AKachujin::AKachujin()
             cnt++;
         }
     }
-    
+    */
     SetRootComponent(Mesh[0].get());
 
     

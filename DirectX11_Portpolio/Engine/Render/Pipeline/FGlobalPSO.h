@@ -82,6 +82,7 @@ public:
     FPSO XGaussianPSO;
     FPSO YGaussianPSO;
     FPSO CombinePSO;
+    FPSO FrustumCullingPSO;
 
     
 private:
@@ -120,7 +121,7 @@ private:
     //ComputeShader
     ComPtr<ID3D11ComputeShader> XGaussianCS;
     ComPtr<ID3D11ComputeShader> YGaussianCS;
-
+    ComPtr<ID3D11ComputeShader> FrustumCullingCS;
     
     // Rasterize States
     ComPtr<ID3D11RasterizerState> SolidRS;
@@ -178,7 +179,8 @@ private:
 
     const wstring XGaussianCSPath = HlslPath + L"CS_GaussianX.hlsl";
     const wstring YGaussianCSPath = HlslPath + L"CS_GaussianY.hlsl";
-    
+    const wstring FrustumCullingCSPath = HlslPath + L"CS_FrustumCulling.hlsl";
+
     const wstring CombinePSPath = HlslPath + L"PS_Combine.hlsl";
 
     

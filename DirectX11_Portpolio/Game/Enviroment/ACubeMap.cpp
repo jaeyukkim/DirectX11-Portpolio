@@ -10,6 +10,7 @@ ACubeMap::ACubeMap()
 {
     StaticMeshCreateInfo info;
     info.bIsSkyBox = true;
+
     
     Sphere = CreateComponent<UStaticMeshComponent>(this, L"SkySphere", info);
     FSceneRender::Get()->CreateRenderProxy<SkyBoxRenderProxy>(Sphere.get());

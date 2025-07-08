@@ -276,6 +276,8 @@ void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
 			mesh->Data.IndexCount = InReader->FromUInt();
 			mesh->Data.Indices = new UINT[mesh->Data.IndexCount];
 			InReader->FromByte(mesh->Data.Indices, sizeof(UINT) * mesh->Data.IndexCount);
+			InReader->FromByte(&mesh->Data.AABB.Max, sizeof(Vector3));
+			InReader->FromByte(&mesh->Data.AABB.Min, sizeof(Vector3));
 			staticMeshComp->m_Mesh.push_back(mesh);
 		}
 		for (shared_ptr<StaticMesh>& mesh : staticMeshComp->m_Mesh)
@@ -305,7 +307,10 @@ void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
 			meshData.IndexCount = InReader->FromUInt();
 			meshData.Indices = new UINT[meshData.IndexCount];
 			InReader->FromByte(meshData.Indices, sizeof(UINT) * meshData.IndexCount);
-
+			
+			InReader->FromByte(&mesh->Data.AABB.Max, sizeof(Vector3));
+			InReader->FromByte(&mesh->Data.AABB.Min, sizeof(Vector3));
+			cout << "Vector3의 사이즈:" << sizeof(Vector3) << endl;
 			skeletalMeshComp->m_Mesh.push_back(mesh);
 		}
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "Mesh/VertexData.h"
 
 
 class StructuredBuffer;
@@ -78,7 +79,8 @@ enum class EConstBufferSlot : UINT8
     CB_LightObjects = 5,
     CB_LightInfo = 6,
     CB_ImageFilterData = 7,
-    CB_PostEffectData = 8
+    CB_PostEffectData = 8,
+    CB_FrustumData = 9
 };
 
 
@@ -88,7 +90,7 @@ enum class EShaderResourceSlot : UINT8
     ERS_MaterialTexture = 4,
     ERS_ShadowMap = 11,
     ERS_PostEffect = 20,
-    ERS_World = 25
+    ERS_InstanceData = 25
     
 };
 
@@ -116,9 +118,11 @@ struct FRenderOption
 
 struct FViewRenderData
 {
-    shared_ptr<ConstantBuffer> ViewConstantBuffer;
-    shared_ptr<ConstantBuffer> ReflactViewConstantBuffer;
-    shared_ptr<ConstantBuffer> LightViewConstantBuffer[MAX_LIGHT_COUNT];
+    shared_ptr<ConstantBuffer> ViewCBuffer;
+    shared_ptr<ConstantBuffer> ReflectViewCBuffer;
+    shared_ptr<ConstantBuffer> LightViewCBuffer[MAX_LIGHT_COUNT];
+    shared_ptr<ConstantBuffer> FrustumCBuffer;
+    shared_ptr<ConstantBuffer> ReflectFrustumCBuffer;
 };
 
 
@@ -140,6 +144,15 @@ struct WorldBufferDesc
 struct FSM_InstDataCPU
 {
     Matrix Transform;
+
+    Vector3 AABB_Max;
+    float padding0 = 0;
+    
+    Vector3 AABB_Min;
+    float padding1 = 0;
+    
+    int InstanceID = 0;
+    float padding[3] {0};
 };
 
 struct FStaticMeshRenderData
@@ -170,9 +183,19 @@ struct FSkeletalMeshRenderData
     shared_ptr<ConstantBuffer> BoneBuffer;
     Material* MaterialData;
 };
+
 struct FSKM_InstDataCPU
 {
-    Matrix Transform;
+    Matrix ModelMat;
+    
+    Vector3 AABB_Max;
+    float padding0 = 0;
+    
+    Vector3 AABB_Min;
+    float padding1 = 0;
+    
+    int InstanceID = 0;
+    float padding[3] {0};
 };
 
 
@@ -244,4 +267,19 @@ struct FShadowMapResources
     ComPtr<ID3D11Texture2D> ShadowBuffer;
     ComPtr<ID3D11DepthStencilView> ShadowDSV;
     ComPtr<ID3D11ShaderResourceView> ShadowSRV;
+};
+
+
+enum class EUAV_Slot : UINT8
+{
+    USLOT_InstanceConsume = 0,
+    USLOT_InstanceAppend = 1
+};
+
+
+struct D3D11_DISPATCH_INDIRECT_ARGS
+{
+    UINT ThreadGroupCountX;
+    UINT ThreadGroupCountY;
+    UINT ThreadGroupCountZ;
 };

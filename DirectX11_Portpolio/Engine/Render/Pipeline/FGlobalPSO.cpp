@@ -172,6 +172,7 @@ void FGlobalPSO::InitComputeShader()
 {
     CompileCS(XGaussianCSPath, XGaussianCS);
     CompileCS(YGaussianCSPath, YGaussianCS);
+    CompileCS(FrustumCullingCSPath, FrustumCullingCS);
 
 }
 
@@ -492,7 +493,7 @@ void FGlobalPSO::InitPSO()
     // GaussianPSO
     XGaussianPSO.m_computeShader = XGaussianCS;
     YGaussianPSO.m_computeShader = YGaussianCS;
-
+    FrustumCullingPSO.m_computeShader = FrustumCullingCS;
 }
 
 

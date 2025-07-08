@@ -5,6 +5,7 @@
 
 /**
  * @param InFileName SkeletalMesh의 바이너리 파일 이름
+ * @param bOverwrite FBX 또는 gltf 파일을 읽어 다시 import할지 여부
  */
 USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, bool bOverwrite)
 {
@@ -40,7 +41,7 @@ void USkeletalMeshComponent::TickComponent(float deltaTime)
 		meshPtr->Tick();
 	}
 
-	TransformChanged.Broadcast(InstanceID, WorldBufferData.World);
+	TransformChanged.Broadcast(*InstanceID, WorldBufferData.World);
 }
 
 

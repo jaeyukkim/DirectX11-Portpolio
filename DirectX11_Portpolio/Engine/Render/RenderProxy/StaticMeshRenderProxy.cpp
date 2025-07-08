@@ -22,11 +22,7 @@ StaticMeshRenderProxy::StaticMeshRenderProxy(UStaticMeshComponent* meshComp)
     
     AddInstance(meshComp);
 
-    meshComp->TransformChanged.Add([this](int id, Matrix mat)
-    {
-        InstanceDatas[id].Transform = mat;
-       //SetInstanceIndirectData();
-    });
+    
 }
 
 
@@ -63,7 +59,7 @@ void StaticMeshRenderProxy::Render(const FRenderOption& option)
     }
   
     InstanceSBuffer.UpdateSubResource();
-    InstanceSBuffer.VSSetStructuredBuffer(EShaderResourceSlot::ERS_World);
+    InstanceSBuffer.VSSetStructuredBuffer(EShaderResourceSlot::ERS_InstanceData);
     for(int i = 0 ; i<RenderData.size() ; i++)
     {
         RenderData[i].MaterialData->BindMaterial();
@@ -80,12 +76,40 @@ void StaticMeshRenderProxy::Render(const FRenderOption& option)
 
 void StaticMeshRenderProxy::AddInstance(UStaticMeshComponent* meshComp)
 {
+    //여러개 메시들의 aabb를 통합된 aabb로 계산
+    Vector3 minAABB = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+    Vector3 maxAABB = Vector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+    for (const shared_ptr<StaticMesh>& mesh : meshComp->GetAllMeshes())
+    {
+        const Vector3& AABBMin = mesh->Data.AABB.Min;
+        const Vector3& AABBMax = mesh->Data.AABB.Max;
+
+        minAABB.x = std::min(minAABB.x, AABBMin.x);
+        minAABB.y = std::min(minAABB.y, AABBMin.y);
+        minAABB.z = std::min(minAABB.z, AABBMin.z);
+
+        maxAABB.x = max(maxAABB.x, AABBMax.x);
+        maxAABB.y = max(maxAABB.y, AABBMax.y);
+        maxAABB.z = max(maxAABB.z, AABBMax.z);
+    }
+
+    
     FSM_InstDataCPU data;
     data.Transform = meshComp->GetWorldBufferData()->World;
-    meshComp->SetInstanceID(InstanceDatas.size());
+    data.AABB_Max = maxAABB;
+    data.AABB_Min = minAABB;
+    data.InstanceID = InstanceDatas.size();
+    meshComp->SetInstanceID(&data.InstanceID);
     InstanceDatas.push_back(data);
     
     SetInstanceIndirectData();
+
+    meshComp->TransformChanged.Add([this](int id, Matrix mat)
+    {
+        InstanceDatas[id].Transform = mat;
+       //SetInstanceIndirectData();
+    });
 }
 
 
@@ -96,6 +120,12 @@ void StaticMeshRenderProxy::DeleteInstance(const int InstanceID)
 {
     if (InstanceID < 0 || InstanceID >= InstanceDatas.size()) return;
     InstanceDatas.erase(InstanceDatas.begin() + InstanceID);
+
+    //instanceID 초기화
+    for(int i = 0 ; i<InstanceDatas.size() ; i++)
+    {
+        InstanceDatas[i].InstanceID = i;
+    }
     
     SetInstanceIndirectData();
 }

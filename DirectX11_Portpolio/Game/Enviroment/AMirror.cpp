@@ -9,8 +9,9 @@ AMirror::AMirror()
 {
     StaticMeshCreateInfo info;
     info.bIsMirror = true;
+
     
-    mirror = CreateComponent<UStaticMeshComponent>(this, L"Floor", info);
+    mirror = CreateComponent<UStaticMeshComponent>(this, L"Floor");
     SetRootComponent(mirror.get());
     
     plane = SimpleMath::Plane(GetActorTransform()->Position, Vector3(-1.0f, 0.0f, 0.0f));

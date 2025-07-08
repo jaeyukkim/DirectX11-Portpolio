@@ -26,6 +26,8 @@ struct SkeletalMeshInfo
 
     UINT BoneIndex = 0;
     Skeletal* Bone = nullptr;
+    
+    FAABB AABB;
 };
 
 class SkeletalMesh

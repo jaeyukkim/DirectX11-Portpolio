@@ -19,6 +19,11 @@ public:
     void UpdateSceneView(const FViewContext& InContext);
     void UpdateReflactView(const Matrix InReflactRow);
     void UpdateLightView(FLight* InLightInfo);
+
+    void CreateFrustum(const FViewContext& InContext);
+    void CreateFrustum(vector<XMVECTOR>& InFrustum, const Matrix& InViewProj,
+    const shared_ptr<ConstantBuffer>& InFrustumCBuffer);
+    vector<XMVECTOR>& GetFrustum() {return Frustum;}
     
     FViewContext* GetSceneViewContext() { return &DefaultView; }
     void UpdateIBLStrength(float InIBLStrength) {LightInfo.IBLStrength = InIBLStrength;}
@@ -35,9 +40,18 @@ private:
     FViewContext DefaultView;
     FViewContext ReflactView;
     FViewContext ShadowView[MAX_LIGHT_COUNT];
-    shared_ptr<ConstantBuffer> ViewConstantBuffer;
-    shared_ptr<ConstantBuffer> ReflactViewConstantBuffer;
-    shared_ptr<ConstantBuffer> LightViewConstantBuffer[MAX_LIGHT_COUNT];
+    FViewContext FrustumView;
+    FViewContext ReflactFrustumView;
+    
+    vector<XMVECTOR> Frustum;
+    vector<XMVECTOR> ReflectFrustum;
+
+
+    shared_ptr<ConstantBuffer> ReflectFrustumCBuffer;
+    shared_ptr<ConstantBuffer> FrustumCBuffer;
+    shared_ptr<ConstantBuffer> ViewCBuffer;
+    shared_ptr<ConstantBuffer> ReflactViewCBuffer;
+    shared_ptr<ConstantBuffer> LightViewCBuffer[MAX_LIGHT_COUNT];
 
 
 private:

@@ -111,7 +111,10 @@ void FSceneRender::RenderObjects(FRenderOption option)
     {
         proxy.second->Render(option);
     }
-    SkyBoxProxy->Render(option);
+    if(SkyBoxProxy != nullptr)
+    {
+        SkyBoxProxy->Render(option);
+    }
 }
 
 

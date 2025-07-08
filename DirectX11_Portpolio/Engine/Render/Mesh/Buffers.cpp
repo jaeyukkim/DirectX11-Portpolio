@@ -107,7 +107,9 @@ ConstantBuffer::ConstantBuffer(void* InData, UINT InDataSize)
 	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
+	
 	Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, nullptr, Buffer.GetAddressOf()));
+	
 }
 
 
@@ -135,7 +137,11 @@ void ConstantBuffer::VSSetConstantBuffer(const EConstBufferSlot bufferSlot, cons
 void ConstantBuffer::PSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot)
 {
 	D3D::Get()->GetDeviceContext()->PSSetConstantBuffers(static_cast<UINT>(bufferSlot), numSlot, Buffer.GetAddressOf());
+}
 
+void ConstantBuffer::CSSetConstantBuffer(const EConstBufferSlot bufferSlot, const int numSlot)
+{
+	D3D::Get()->GetDeviceContext()->CSSetConstantBuffers(static_cast<UINT>(bufferSlot), numSlot, Buffer.GetAddressOf());
 }
 
 
@@ -230,7 +236,14 @@ IndirectBuffer::IndirectBuffer(void* Indata, UINT InelementSize, UINT InelementC
 	D3D11_SUBRESOURCE_DATA bufferData;
 	ZeroMemory(&bufferData, sizeof(bufferData));
 	bufferData.pSysMem = Data;
-	Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, &bufferData, buffer.GetAddressOf()));
+	if(InelementSize > 0)
+	{
+		Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, &bufferData, buffer.GetAddressOf()));
+	}
+	else
+	{
+		Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, NULL, buffer.GetAddressOf()));
+	}
 }
 
 void IndirectBuffer::UpdateBuffer()
@@ -510,8 +523,70 @@ void TextureBuffer::CreateResult()
 	Check(D3D::Get()->GetDevice()->CreateShaderResourceView(texture, &srvDesc, OutputSRV.GetAddressOf()));
 }
 
+AppendBuffer::AppendBuffer(void* Indata, UINT InelementSize, UINT InelementCount)
+{
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = InelementCount * InelementSize;
+	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | // Compute Shader
+						   D3D11_BIND_SHADER_RESOURCE;   // Vertex Shader
+	bufferDesc.StructureByteStride = InelementSize;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+	if (Indata)
+	{
+		D3D11_SUBRESOURCE_DATA bufferData;
+		ZeroMemory(&bufferData, sizeof(bufferData));
+		bufferData.pSysMem = Indata;
+		FAILED(D3D::Get()->GetDevice()->CreateBuffer(&bufferDesc, &bufferData,
+										   buffer.GetAddressOf()));
+	}
+	else
+	{
+		FAILED(D3D::Get()->GetDevice()->CreateBuffer(&bufferDesc, NULL, buffer.GetAddressOf()));
+	}
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	ZeroMemory(&uavDesc, sizeof(uavDesc));
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.NumElements = InelementCount;
+	uavDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND; // <- AppendBuffer로 사용
+	D3D::Get()->GetDevice()->CreateUnorderedAccessView(buffer.Get(), &uavDesc,
+									  UAV.GetAddressOf());
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	ZeroMemory(&srvDesc, sizeof(srvDesc));
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.BufferEx.NumElements = InelementCount;
+	D3D::Get()->GetDevice()->CreateShaderResourceView(buffer.Get(), &srvDesc,
+									 SRV.GetAddressOf());
+}
+
+void AppendBuffer::CSSetUAV(const EUAV_Slot bufferSlot, UINT InitCount)
+{
+	D3D::Get()->GetDeviceContext()->CSSetUnorderedAccessViews(static_cast<UINT>(bufferSlot), 1, UAV.GetAddressOf(), &InitCount);
+}
+
+void AppendBuffer::CSSetSRV(const EShaderResourceSlot bufferSlot)
+{
+	D3D::Get()->GetDeviceContext()->CSSetShaderResources(static_cast<UINT>(bufferSlot), 1, SRV.GetAddressOf());
+}
+
+void AppendBuffer::CSClearUAV(const EUAV_Slot bufferSlot)
+{
+	D3D::Get()->GetDeviceContext()->CSSetUnorderedAccessViews(static_cast<UINT>(bufferSlot), 1, nullptr, 0);
+}
+
+void AppendBuffer::CSClearSRV(const EShaderResourceSlot bufferSlot)
+{
+	D3D::Get()->GetDeviceContext()->CSSetShaderResources(static_cast<UINT>(bufferSlot), 0, nullptr);
+}
+
 ComPtr<ID3D11Texture2D> TextureBuffer::CreateStagingTexture( const std::vector<uint8_t> &image,
-	const int width, const int height, const DXGI_FORMAT pixelFormat, const int mipLevels, const int arraySize)
+                                                             const int width, const int height, const DXGI_FORMAT pixelFormat, const int mipLevels, const int arraySize)
 {
 	// 스테이징 텍스춰 만들기
 	D3D11_TEXTURE2D_DESC txtDesc;
