@@ -10,10 +10,7 @@ Mouse::Mouse() :
 	ZeroMemory(ButtonOldStatus, sizeof(BYTE) * (int)MouseButton::Max);
 	ZeroMemory(ButtonMaps, sizeof(MouseButtonState) * (int)MouseButton::Max);
 
-	D3D::Get()->WinSizeChanged.Add([this]()
-		{
-			UpdateScreenCenter();
-		});
+	D3D::Get()->WinSizeChanged.Add(this, &Mouse::UpdateScreenCenter);
 
 	UpdateScreenCenter();
 }

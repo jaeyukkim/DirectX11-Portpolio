@@ -3,6 +3,7 @@
 struct FShadowMapResources;
 class PostProcess;
 
+
 struct D3DDesc
 {
 	wstring AppName;

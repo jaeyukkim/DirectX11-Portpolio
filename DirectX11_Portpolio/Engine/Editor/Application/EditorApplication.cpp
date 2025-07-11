@@ -343,7 +343,7 @@ void EditorApplication::OnImGuiRender()
 			}
 			if(!isUsingGuizmo && mWasGuizmoUsingLastFrame)
 			{
-				transformWidget->UpdateTransform();
+				transformWidget->UpdateTransformWidget();
 			}
 
 			mWasGuizmoUsingLastFrame = isUsingGuizmo;

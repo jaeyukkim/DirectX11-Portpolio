@@ -1,7 +1,7 @@
 #pragma once
 #include "Libraries/Utility/Delegate.h"
 
-DECLARE_DYNAMIC_DELEGATE(FTransformChanged);
+
 
 struct FTransform
 {
@@ -46,7 +46,6 @@ public:
     void AddRotation(float yawDelta, float pitchDelta, float rollDelta);
 
 
-    FTransformChanged TransformChanged;
 
 private:
     static float NormalizeAngle(float angle);

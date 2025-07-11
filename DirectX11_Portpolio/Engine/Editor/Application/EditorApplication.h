@@ -6,6 +6,7 @@
 
 class EditorWindow;
 class Actor;
+class EditorApplication;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FSeletedActorChangedDelegate, Actor*);
 

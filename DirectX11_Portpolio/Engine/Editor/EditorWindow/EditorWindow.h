@@ -22,7 +22,7 @@ public:
 	virtual void OnEnable();
 	virtual void OnDisable();
 	virtual void OnDestroy();
-
+	virtual void SelectedActorChange(Actor* actor);
 
 	ImGuiWindowFlags GetFlag() const { return mFlag; }
 	EWindowState GetState() const { return mState; }

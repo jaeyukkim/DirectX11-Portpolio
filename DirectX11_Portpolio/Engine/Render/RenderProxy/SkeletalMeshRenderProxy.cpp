@@ -6,10 +6,14 @@
 
 SkeletalMeshRenderProxy::SkeletalMeshRenderProxy(USkeletalMeshComponent* meshComp)
     :RenderProxy(ERenderProxyType::RPT_SkeletalMesh),
-    Append(nullptr, 0, 0),
-    Consume(nullptr, 0, 0),
+    Append(nullptr, sizeof(FSKM_InstDataCPU), 0),
+    Consume(nullptr, sizeof(FSKM_InstDataCPU), 0),
     CSIndirectBuffer(nullptr, 0, 0)
 {
+    // 벡터의 요소를 다른곳에서 참조중이니 반드시 지정해줘야함.
+    // 지정하지 않으면 capacity 초과로 인한 reallocation으로 참조중인 포인터 값 무효화됨
+    InstanceDatas.reserve(MAX_INSTANCE_SIZE);
+
     for(const shared_ptr<SkeletalMesh>& mesh : meshComp->GetAllMeshes())
     {
         FSkeletalMeshRenderData data;
@@ -21,8 +25,8 @@ SkeletalMeshRenderProxy::SkeletalMeshRenderProxy(USkeletalMeshComponent* meshCom
         RenderData.push_back(data);
     }
     
+    CalcAABB(meshComp);
     AddInstance(meshComp);
-
     
 }
 
@@ -31,25 +35,30 @@ void SkeletalMeshRenderProxy::RunFrustumCulling()
 {
     FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->FrustumCullingPSO);
     
-    Consume = AppendBuffer(InstanceDatas.data(),
-        sizeof(FSKM_InstDataCPU), InstanceDatas.size());
+    Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), InstanceDatas.size());
+    //Consume = AppendBuffer(InstanceDatas.data(), sizeof(FSKM_InstDataCPU), InstanceDatas.size());
+    Consume.UpdateSubResource();
+  
     Consume.CSSetUAV(EUAV_Slot::USLOT_InstanceConsume, InstanceDatas.size());
-    
-   
     Append.CSSetUAV(EUAV_Slot::USLOT_InstanceAppend, 0);
-    SetCSIndirectData();
     
     D3D::Get()->GetDeviceContext()->DispatchIndirect(CSIndirectBuffer.GetBuffer().Get(), 0);
+    
+
     D3D::Get()->ComputeShaderBarrier();
     
+    CopyCntToIndirect();
 }
 
 
 void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
 {
 
-    RunFrustumCulling();
-   
+    if(!option.NoOption)
+    {
+        RunFrustumCulling();
+    }
+
     // Todo : Enum 만들어서 비트마스킹으로 여러 조합으로 가능하게 만들 예정
     if(option.bDefaultDraw)
     {
@@ -70,6 +79,8 @@ void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
         }
     }
     
+    CopyCntToIndirect();
+    Append.VSSetSRV(EShaderResourceSlot::ERS_InstanceData);
     
     
     for(int i = 0 ; i<RenderData.size() ; i++)
@@ -80,7 +91,7 @@ void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
         RenderData[i].VBuffer->IASetVertexBuffer();
         RenderData[i].IBuffer->IASetIndexBuffer();
         
-        //InstanceIndirectBuffer[i].UpdateSubResource();
+       
         D3D::Get()->GetDeviceContext()->DrawIndexedInstancedIndirect(InstanceIndirectBuffer[i].GetBuffer().Get(), 0);
     }
 }
@@ -90,10 +101,112 @@ void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
 
 void SkeletalMeshRenderProxy::AddInstance(USkeletalMeshComponent* meshComp)
 {
+    if (InstanceDatas.size() > MAX_INSTANCE_SIZE)
+    {
+        Assert(true, "최대 Instance 수를 초과하였습니다.");
+    }
 
+
+    FSKM_InstDataCPU data;
+    data.ModelMat = meshComp->GetWorldBufferData()->World;
+    data.AABB_Max = maxAABB;
+    data.AABB_Min = minAABB;
+    data.InstanceID = InstanceDatas.size();
+    InstanceDatas.push_back(data);
+
+    meshComp->SetInstanceID(&InstanceDatas.back().InstanceID);
+
+    Consume = AppendBuffer(InstanceDatas.data(),
+        sizeof(FSKM_InstDataCPU), InstanceDatas.size());
+
+    //초기 사이즈는 지정해줘야한다고??
+    Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), 1);
+
+    
+    meshComp->TransformChanged.Add(this, &SkeletalMeshRenderProxy::TransformChange);
+
+    CreateCSIndirectData();
+    CteateInstanceIndirectData();
+   
+}
+
+
+void SkeletalMeshRenderProxy::DeleteInstance(const int InstanceID)
+{
+    if (InstanceID < 0 || InstanceID >= InstanceDatas.size()) return;
+    InstanceDatas.erase(InstanceDatas.begin() + InstanceID);
+
+    //instanceID 초기화
+    for(int i = 0 ; i<InstanceDatas.size() ; i++)
+    {
+        InstanceDatas[i].InstanceID = i;
+    }
+    
+
+    Consume = AppendBuffer(InstanceDatas.data(),
+        sizeof(FSKM_InstDataCPU), InstanceDatas.size());
+    Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), 1);
+ 
+    CreateCSIndirectData();
+    CteateInstanceIndirectData();
+}
+
+
+void SkeletalMeshRenderProxy::CopyCntToIndirect()
+{
+    
+    for(IndirectBuffer& buffer : InstanceIndirectBuffer)
+    {
+        // Append의 카운터 값만 IndirectBuffer의 InstanceCount 위치에 GPU → GPU로 복사
+        // AppendUAV → IndirectBuffer 의 offset 4 바이트 위치 (InstanceCount)
+         D3D::Get()->GetDeviceContext()->CopyStructureCount(buffer.GetBuffer().Get(), 4, Append.GetUAV().Get());
+    }
+    
+}
+
+void SkeletalMeshRenderProxy::CteateInstanceIndirectData()
+{
+    InstanceIndirectBuffer.clear();
+    for(FSkeletalMeshRenderData& data : RenderData)
+    {
+        D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS args;
+        ZeroMemory(&args, sizeof(args));
+        args.InstanceCount = 0;
+        args.IndexCountPerInstance = data.IndexCount;
+        args.BaseVertexLocation=0;
+        args.StartIndexLocation=0;
+        args.StartInstanceLocation=0;
+        
+        InstanceIndirectBuffer.push_back(IndirectBuffer(&args,
+        sizeof(D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS), 1));
+    }
+}
+
+void SkeletalMeshRenderProxy::CreateCSIndirectData()
+{
+    D3D11_DISPATCH_INDIRECT_ARGS args;
+    args.ThreadGroupCountX = InstanceDatas.size();
+    args.ThreadGroupCountY = 1;
+    args.ThreadGroupCountZ = 1;
+
+    CSIndirectBuffer = IndirectBuffer(&args,
+        sizeof(D3D11_DISPATCH_INDIRECT_ARGS), 1);
+
+    CSIndirectBuffer.UpdateSubResource();
+}
+
+void SkeletalMeshRenderProxy::TransformChange(int id, Matrix& mat)
+{
+    if (id >= 0 && id <= InstanceDatas.size()-1)
+    {
+        InstanceDatas[id].ModelMat = mat;
+    }
+}
+
+void SkeletalMeshRenderProxy::CalcAABB(USkeletalMeshComponent* meshComp)
+{
     //여러개 메시들의 aabb를 통합된 aabb로 계산
-    Vector3 minAABB = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
-    Vector3 maxAABB = Vector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+    
 
     for (const shared_ptr<SkeletalMesh>& mesh : meshComp->GetAllMeshes())
     {
@@ -108,69 +221,4 @@ void SkeletalMeshRenderProxy::AddInstance(USkeletalMeshComponent* meshComp)
         maxAABB.y = max(maxAABB.y, AABBMax.y);
         maxAABB.z = max(maxAABB.z, AABBMax.z);
     }
-
-    
-    FSKM_InstDataCPU data;
-    data.ModelMat = meshComp->GetWorldBufferData()->World;
-    data.AABB_Max = maxAABB;
-    data.AABB_Min = minAABB;
-    data.InstanceID = InstanceDatas.size();
-    meshComp->SetInstanceID(&data.InstanceID);
-    InstanceDatas.push_back(data);
-    
-    
-    meshComp->TransformChanged.Add([this](int id, Matrix& mat)
-    {
-        InstanceDatas[id].ModelMat = mat;
-    });
-}
-
-
-void SkeletalMeshRenderProxy::DeleteInstance(const int InstanceID)
-{
-    if (InstanceID < 0 || InstanceID >= InstanceDatas.size()) return;
-    InstanceDatas.erase(InstanceDatas.begin() + InstanceID);
-
-    //instanceID 초기화
-    for(int i = 0 ; i<InstanceDatas.size() ; i++)
-    {
-        InstanceDatas[i].InstanceID = i;
-    }
-
-    Consume = AppendBuffer(InstanceDatas.data(),
-        sizeof(FSKM_InstDataCPU), InstanceDatas.size());
-}
-
-
-void SkeletalMeshRenderProxy::SetInstanceIndirectData(int InSize)
-{
-    
-    InstanceIndirectBuffer.clear();
-    for(FSkeletalMeshRenderData& data : RenderData)
-    {
-        D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS args;
-        ZeroMemory(&args, sizeof(args));
-        args.InstanceCount = InSize;
-        args.IndexCountPerInstance = data.IndexCount;
-        args.BaseVertexLocation=0;
-        args.StartIndexLocation=0;
-        args.StartInstanceLocation=0;
-        
-        InstanceIndirectBuffer.push_back(IndirectBuffer(&args,
-        sizeof(D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS), 1));
-    }
-
-    
-
-}
-
-void SkeletalMeshRenderProxy::SetCSIndirectData()
-{
-    D3D11_DISPATCH_INDIRECT_ARGS args;
-    args.ThreadGroupCountX = InstanceDatas.size();
-    args.ThreadGroupCountY = 1;
-    args.ThreadGroupCountZ = 1;
-
-    CSIndirectBuffer = IndirectBuffer(&args,
-        sizeof(D3D11_DISPATCH_INDIRECT_ARGS), 1);
 }

@@ -32,7 +32,7 @@ private:
     vector<shared_ptr<StaticMesh>> m_Mesh;
     map<string, shared_ptr<Material>> MaterialTable;
     mutable bool bInitRenderComplete = false;
-    int* InstanceID;
+    int* InstanceID = nullptr;
     string MeshName;
     friend class Converter;
 

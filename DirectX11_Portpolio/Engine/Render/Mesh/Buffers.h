@@ -241,8 +241,16 @@ public:
 
 	void CSClearUAV(const EUAV_Slot bufferSlot);
 	void CSClearSRV(const EShaderResourceSlot bufferSlot);
-	
+
+	void VSSetSRV(const EShaderResourceSlot bufferSlot);
+
+	void SwapBuffer(AppendBuffer& InBuffer);
+	void UpdateSubResource();
+
 	ComPtr<ID3D11Buffer> GetBuffer() {return buffer;}
+	ComPtr<ID3D11ShaderResourceView> GetSRV() {return SRV;}
+	ComPtr<ID3D11UnorderedAccessView> GetUAV() {return UAV;}
+	
 private:
 	ComPtr<ID3D11Buffer> buffer;
 	ComPtr<ID3D11ShaderResourceView> SRV;

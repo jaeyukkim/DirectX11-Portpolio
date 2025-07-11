@@ -18,8 +18,11 @@ public:
     void RunFrustumCulling();
     void AddInstance(USkeletalMeshComponent* meshComp);
     void DeleteInstance(const int InstanceID);
-    void SetInstanceIndirectData(int InSize);
-    void SetCSIndirectData();
+    void CopyCntToIndirect();
+    void CteateInstanceIndirectData();
+    void CreateCSIndirectData();
+    void TransformChange(int id, Matrix& mat);
+    void CalcAABB(USkeletalMeshComponent* meshComp);
     int GetNumOfInstance() const {return InstanceDatas.size();}
  
 private:
@@ -32,4 +35,7 @@ private:
     AppendBuffer Append;
     AppendBuffer Consume;
     
+    Vector3 minAABB = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+    Vector3 maxAABB = Vector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
 };

@@ -238,11 +238,11 @@ IndirectBuffer::IndirectBuffer(void* Indata, UINT InelementSize, UINT InelementC
 	bufferData.pSysMem = Data;
 	if(InelementSize > 0)
 	{
-		Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, &bufferData, buffer.GetAddressOf()));
+		D3D::Get()->GetDevice()->CreateBuffer(&desc, &bufferData, buffer.GetAddressOf());
 	}
 	else
 	{
-		Check(D3D::Get()->GetDevice()->CreateBuffer(&desc, NULL, buffer.GetAddressOf()));
+		D3D::Get()->GetDevice()->CreateBuffer(&desc, NULL, buffer.GetAddressOf());
 	}
 }
 
@@ -524,6 +524,7 @@ void TextureBuffer::CreateResult()
 }
 
 AppendBuffer::AppendBuffer(void* Indata, UINT InelementSize, UINT InelementCount)
+	:Data(Indata), elementSize(InelementSize), elementCount(InelementCount)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
@@ -544,7 +545,7 @@ AppendBuffer::AppendBuffer(void* Indata, UINT InelementSize, UINT InelementCount
 	}
 	else
 	{
-		FAILED(D3D::Get()->GetDevice()->CreateBuffer(&bufferDesc, NULL, buffer.GetAddressOf()));
+		FAILED(D3D::Get()->GetDevice()->CreateBuffer(&bufferDesc, nullptr, buffer.GetAddressOf()));
 	}
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
@@ -553,16 +554,16 @@ AppendBuffer::AppendBuffer(void* Indata, UINT InelementSize, UINT InelementCount
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.NumElements = InelementCount;
 	uavDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND; // <- AppendBuffer로 사용
-	D3D::Get()->GetDevice()->CreateUnorderedAccessView(buffer.Get(), &uavDesc,
-									  UAV.GetAddressOf());
+	FAILED(D3D::Get()->GetDevice()->CreateUnorderedAccessView(buffer.Get(), &uavDesc,
+									  UAV.GetAddressOf()));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	ZeroMemory(&srvDesc, sizeof(srvDesc));
 	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	srvDesc.BufferEx.NumElements = InelementCount;
-	D3D::Get()->GetDevice()->CreateShaderResourceView(buffer.Get(), &srvDesc,
-									 SRV.GetAddressOf());
+	FAILED(D3D::Get()->GetDevice()->CreateShaderResourceView(buffer.Get(), &srvDesc,
+									 SRV.GetAddressOf()));
 }
 
 void AppendBuffer::CSSetUAV(const EUAV_Slot bufferSlot, UINT InitCount)
@@ -583,6 +584,27 @@ void AppendBuffer::CSClearUAV(const EUAV_Slot bufferSlot)
 void AppendBuffer::CSClearSRV(const EShaderResourceSlot bufferSlot)
 {
 	D3D::Get()->GetDeviceContext()->CSSetShaderResources(static_cast<UINT>(bufferSlot), 0, nullptr);
+}
+
+void AppendBuffer::VSSetSRV(const EShaderResourceSlot bufferSlot)
+{
+	D3D::Get()->GetDeviceContext()->VSSetShaderResources(static_cast<UINT>(bufferSlot), 1, SRV.GetAddressOf());
+
+}
+
+void AppendBuffer::SwapBuffer(AppendBuffer& InBuffer)
+{
+	std::swap(buffer, InBuffer.buffer);
+    std::swap(SRV, InBuffer.SRV);
+    std::swap(UAV, InBuffer.UAV);
+    std::swap(Data, InBuffer.Data);
+    std::swap(elementSize, InBuffer.elementSize);
+    std::swap(elementCount, InBuffer.elementCount);
+}
+
+void AppendBuffer::UpdateSubResource()
+{
+	D3D::Get()->GetDeviceContext()->UpdateSubresource(buffer.Get(), 0, nullptr, Data, 0, 0);
 }
 
 ComPtr<ID3D11Texture2D> TextureBuffer::CreateStagingTexture( const std::vector<uint8_t> &image,

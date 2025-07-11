@@ -21,8 +21,8 @@ public:
     void UpdateLightView(FLight* InLightInfo);
 
     void CreateFrustum(const FViewContext& InContext);
-    void CreateFrustum(vector<XMVECTOR>& InFrustum, const Matrix& InViewProj,
-    const shared_ptr<ConstantBuffer>& InFrustumCBuffer);
+    void CreateFrustum(vector<XMVECTOR>& InFrustum, const Matrix& viewProj,
+        const shared_ptr<ConstantBuffer>& InFrustumCBuffer);
     vector<XMVECTOR>& GetFrustum() {return Frustum;}
     
     FViewContext* GetSceneViewContext() { return &DefaultView; }

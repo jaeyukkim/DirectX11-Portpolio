@@ -39,6 +39,12 @@ void FSceneView::Create()
     Instance->LightsInfoCBuffer = make_shared<ConstantBuffer>(&Instance->LightInfo, sizeof(FLightInfo));
     
 
+    Instance->Frustum.resize(6);
+    Instance->FrustumCBuffer = make_shared<ConstantBuffer>(nullptr, sizeof(XMVECTOR)*6);
+
+    Instance->ReflectFrustum.resize(6);
+    Instance->ReflectFrustumCBuffer = make_shared<ConstantBuffer>(nullptr, sizeof(XMVECTOR)*6);
+    
 
     FSceneRender::Get()->CreateRenderProxy<LightSceneRenderProxy>(Instance);
     FSceneRender::Get()->CreateRenderProxy<ViewRenderProxy>(Instance);
@@ -47,11 +53,7 @@ void FSceneView::Create()
         D3D::Get()->CreateShadowResources(i);
     }
 
-    Instance->Frustum.resize(6);
-    Instance->FrustumCBuffer = make_shared<ConstantBuffer>(nullptr, sizeof(Frustum));
-
-    Instance->ReflectFrustum.resize(6);
-    Instance->ReflectFrustumCBuffer = make_shared<ConstantBuffer>(nullptr, sizeof(ReflectFrustum));
+    
 }
 
 
@@ -81,9 +83,9 @@ void FSceneView::UpdateReflactView(const Matrix InReflactRow)
     Instance->ReflactViewCBuffer->UpdateConstBuffer();
 
     ReflactFrustumView = FrustumView;
-    ReflactView.View = InReflactRow * DefaultView.View;
-    ReflactView.ViewProjection = (InReflactRow * DefaultView.View * DefaultView.Projection);
-    CreateFrustum(ReflectFrustum, ReflactView.ViewProjection, ReflectFrustumCBuffer);
+    ReflactFrustumView.View = InReflactRow * ReflactFrustumView.View;
+    ReflactFrustumView.ViewProjection = (InReflactRow * ReflactFrustumView.View * ReflactFrustumView.Projection);
+    CreateFrustum(ReflectFrustum, ReflactFrustumView.ViewProjection, ReflectFrustumCBuffer);
     
 }
 
@@ -216,22 +218,44 @@ void FSceneView::CreateFrustum(const FViewContext& InContext)
     CreateFrustum(Frustum, FrustumView.ViewProjection, FrustumCBuffer);
 }
 
-void FSceneView::CreateFrustum(vector<XMVECTOR>& InFrustum, const Matrix& InViewProj,
-                               const shared_ptr<ConstantBuffer>& InFrustumCBuffer)
+void FSceneView::CreateFrustum(vector<XMVECTOR>& InFrustum, const Matrix& viewProj,
+                                const shared_ptr<ConstantBuffer>& InFrustumCBuffer)
 {
-    XMMATRIX mat = InViewProj;
-    XMVECTOR row1 = mat.r[0]; 
-    XMVECTOR row2 = mat.r[1]; 
-    XMVECTOR row3 = mat.r[2];
-    XMVECTOR row4 = mat.r[3];
+    // 1) NDC 공간에서 8개 꼭짓점 정의 (Direct3D: x,y in [-1,1], z in [0,1])
+    XMVECTOR ndcCorners[8] =
+    {
+        XMVectorSet(-1, -1, 0, 1), // near bottom left
+        XMVectorSet(1, -1, 0, 1), // near bottom right
+        XMVectorSet(-1,  1, 0, 1), // near top left
+        XMVectorSet(1,  1, 0, 1), // near top right
+        XMVectorSet(-1, -1, 1, 1), // far bottom left
+        XMVectorSet(1, -1, 1, 1), // far bottom right
+        XMVectorSet(-1,  1, 1, 1), // far top left
+        XMVectorSet(1,  1, 1, 1)  // far top right
+    };
 
-    InFrustum[0] = XMPlaneNormalize(XMVectorAdd(row4, row1)); // Left
-    InFrustum[1] = XMPlaneNormalize(XMVectorSubtract(row4, row1)); // Right
-    InFrustum[2] = XMPlaneNormalize(XMVectorAdd(row4, row2)); // Bottom
-    InFrustum[3] = XMPlaneNormalize(XMVectorSubtract(row4, row2)); // Top
-    InFrustum[4] = XMPlaneNormalize(XMVectorAdd(row4, row3)); // Near
-    InFrustum[5] = XMPlaneNormalize(XMVectorSubtract(row4, row3)); // Far
+    // 2) ViewProjection 행렬의 역행렬 계산
+    XMVECTOR det;
+    XMMATRIX invViewProj = XMMatrixInverse(&det, viewProj);
 
-    InFrustumCBuffer->UpdateData(&Frustum[0]);
+    // 3) NDC -> 월드 좌표로 변환 (투영나눗셈 포함)
+    XMVECTOR worldCorners[8];
+    for (int i = 0; i < 8; ++i)
+    {
+        worldCorners[i] = XMVector3TransformCoord(ndcCorners[i], invViewProj);
+    }
+
+    // 4) 각 평면은 세 점으로 결정: XMPlaneFromPoints 이용
+    // 순서에 따라 평면의 앞면 법선 방향이 결정될 수 있음에 유의
+    InFrustum[0] = XMPlaneFromPoints(worldCorners[0], worldCorners[2], worldCorners[6]); // Left plane (x = -1)
+    InFrustum[1] = XMPlaneFromPoints(worldCorners[1], worldCorners[5], worldCorners[7]); // Right plane (x =  1)
+    InFrustum[2] = XMPlaneFromPoints(worldCorners[2], worldCorners[3], worldCorners[7]); // Top plane   (y =  1)
+    InFrustum[3] = XMPlaneFromPoints(worldCorners[0], worldCorners[4], worldCorners[5]); // Bottom     (y = -1)
+    InFrustum[4] = XMPlaneFromPoints(worldCorners[0], worldCorners[1], worldCorners[3]); // Near      (z =  0)
+    InFrustum[5] = XMPlaneFromPoints(worldCorners[4], worldCorners[7], worldCorners[5]); // Far   
+    // 3. Constant buffer에 업로드
+    
+    
+    InFrustumCBuffer->UpdateData(InFrustum.data());
     InFrustumCBuffer->UpdateConstBuffer();
 }

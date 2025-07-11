@@ -9,7 +9,7 @@ class TransformWidget : public Editor
 public:
     TransformWidget(Actor* target);
     virtual void OnGUI() override;
-    virtual void UpdateTransform();
+    virtual void UpdateTransformWidget();
     
     FTransform* ActorTransform;
     Vector3 Position;

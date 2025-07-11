@@ -75,6 +75,9 @@ void UStaticMeshComponent::TickComponent(float deltaTime)
 		meshPtr->SetWorld(GetWorldTransform());
 		meshPtr->Tick();
 	}
-	TransformChanged.Broadcast(*InstanceID, WorldBufferData.World);
+	if(InstanceID != nullptr)
+	{
+		TransformChanged.Broadcast(*InstanceID, WorldBufferData.World);
+	}
 
 }

@@ -113,6 +113,7 @@ struct FRenderOption
     bool bBlendOn = false;
     bool bStencilOn = false;
     bool bDepthOnly = false;
+    bool NoOption = false;
 };
 
 
@@ -143,7 +144,7 @@ struct WorldBufferDesc
 
 struct FSM_InstDataCPU
 {
-    Matrix Transform;
+    Matrix ModelMat;
 
     Vector3 AABB_Max;
     float padding0 = 0;
@@ -273,7 +274,8 @@ struct FShadowMapResources
 enum class EUAV_Slot : UINT8
 {
     USLOT_InstanceConsume = 0,
-    USLOT_InstanceAppend = 1
+    USLOT_InstanceAppend = 1,
+    USLOT_InstanceCopyAppend = 2
 };
 
 

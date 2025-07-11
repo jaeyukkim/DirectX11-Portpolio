@@ -15,14 +15,14 @@ public:
 	DetailWindow();
 	~DetailWindow();
 
-	void Initialize() override;
-	void Update() override;
-	void OnGUI() override;
-	void Run() override;
-	void OnEnable() override;
-	void OnDisable() override;
-	void OnDestroy() override;
-
+	virtual void Initialize() override;
+	virtual void Update() override;
+	virtual void OnGUI() override;
+	virtual void Run() override;
+	virtual void OnEnable() override;
+	virtual void OnDisable() override;
+	virtual void OnDestroy() override;
+	virtual void SelectedActorChange(Actor* actor) override;
 
 	unordered_map<EDetailEditorType, unique_ptr<Editor>> mEditors;
 };

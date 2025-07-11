@@ -11,104 +11,105 @@
 using namespace std;
 
 
-// --------------------------------------------
-// ID는 델리게이트를 유일하게 식별 할 수 있게 하는 식별자임
-// uint64_t 자료형을 사용하여 ID는 약 18.4경의 범위를 가져 ID 충돌을 방어
-// --------------------------------------------
 class FDelegateHandle
 {
 public:
-    FDelegateHandle() : ID(++Counter) {}
+
+    FDelegateHandle()
+    {
+        static atomic<uint64_t> GlobalCounter{ 0 }; // thread-safe
+        ID = GlobalCounter++;
+    }
+
     uint64_t GetID() const { return ID; }
-    bool operator==(const FDelegateHandle& Other) const { return ID == Other.ID; }
-    
+
 private:
     uint64_t ID;
-    static atomic<uint64_t> Counter;
 };
 
-
-
-
-// --------------------------------------------
-// 스레드 안전한 Dynamic Delegate
-// unordered_map으로 함수 포인터 해싱하여 빠르게 접근할 수 있도록 시스템 구축
-// --------------------------------------------
+// 멤버 함수 바인딩을 지원하는 Delegate
 template<typename... Args>
 class FDynamicDelegate
 {
 public:
-    using HandlerType = function<void(Args...)>;
+    FDynamicDelegate() = default;
 
-    //예외가 발생하거나 스코프에서 벗어나도 안전하게 델리게이트 해제
-    FDelegateHandle Add(const HandlerType& handler, const string& debugName = "")
+    // 복사 금지
+    FDynamicDelegate(const FDynamicDelegate&) = delete;
+    FDynamicDelegate& operator=(const FDynamicDelegate&) = delete;
+
+    // 이동도 막거나 필요시 정의
+    FDynamicDelegate(FDynamicDelegate&&) = delete;
+    FDynamicDelegate& operator=(FDynamicDelegate&&) = delete;
+
+    class ICallable
     {
-        lock_guard<mutex> lock(Mutex);
+    public:
+        virtual ~ICallable() = default;
+        virtual void Invoke(Args... args) = 0;
+    };
+
+    template<typename T>
+    class TCallable final : public ICallable
+    {
+    public:
+        TCallable(T* instance, void (T::* method)(Args...))
+            : Instance(instance), Method(method) {}
+
+        void Invoke(Args... args) override
+        {
+            (Instance->*Method)(args...);
+        }
+
+    private:
+        T* Instance;
+        void (T::* Method)(Args...);
+    };
+
+    template<typename T>
+    FDelegateHandle Add(T* instance, void (T::* method)(Args...))
+    {
         FDelegateHandle handle;
-        Bindings[handle.GetID()] = { handler, debugName };
+        Bindings.emplace_back(handle.GetID(), new TCallable<T>(instance, method));
         return handle;
     }
 
     void Remove(const FDelegateHandle& handle)
     {
-        lock_guard<mutex> lock(Mutex);
-        Bindings.erase(handle.GetID());
+        for (auto it = Bindings.begin(); it != Bindings.end(); ++it)
+        {
+            if (it->first == handle.GetID())
+            {
+                delete it->second;
+                Bindings.erase(it);
+                break;
+            }
+        }
     }
 
     void Clear()
     {
-        lock_guard<mutex> lock(Mutex);
+        for (auto& pair : Bindings)
+            delete pair.second;
         Bindings.clear();
     }
 
     void Broadcast(Args... args)
     {
-        // Copy-safe strategy: 잠금 후 복사, 잠금 해제 후 호출
-        unordered_map<uint64_t, FBinding> snapshot;
-        {
-            lock_guard<mutex> lock(Mutex);
-            snapshot = Bindings;
-        }
+        for (auto& pair : Bindings)
+            pair.second->Invoke(args...);
+    }
 
-        for (auto& [id, binding] : snapshot)
-        {
-            if (binding.Handler)
-            {
-                binding.Handler(args...);
-            }
-        }
+    ~FDynamicDelegate()
+    {
+        Clear();
     }
 
 private:
-    struct FBinding
-    {
-        HandlerType Handler;
-        string DebugName;
-    };
-
-    unordered_map<uint64_t, FBinding> Bindings;
-    mutable mutex Mutex;
+    std::vector<std::pair<uint64_t, ICallable*>> Bindings;
 };
 
-// --------------------------------------------
-// Weak Lambda Binder
-// --------------------------------------------
-template<typename T, typename... Args>
-function<void(Args...)> BindWeakLambda(weak_ptr<T> weakObj, void (T::* func)(Args...))
-{
-    return [weakObj, func](Args... args)
-    {
-        if (auto shared = weakObj.lock())
-        {
-            (shared.get()->*func)(args...);
-        }
-    };
-}
-
-// --------------------------------------------
-// 델리게이트 이벤트 매크로
-// DECLARE_DYNAMIC_DELEGATE_OneParam( 델리게이트 이름, 파라미터 타입 ) 으로 선언
-// --------------------------------------------
+// 매크로 정의
 #define DECLARE_DYNAMIC_DELEGATE(DelegateName) \
     class DelegateName : public FDynamicDelegate<> {}
 
@@ -117,6 +118,3 @@ function<void(Args...)> BindWeakLambda(weak_ptr<T> weakObj, void (T::* func)(Arg
 
 #define DECLARE_DYNAMIC_DELEGATE_TwoParams(DelegateName, Param1Type, Param2Type) \
     class DelegateName : public FDynamicDelegate<Param1Type, Param2Type> {}
-
-#define DECLARE_EVENT(EventName, ...) \
-    class EventName : public FDynamicDelegate<__VA_ARGS__> {}

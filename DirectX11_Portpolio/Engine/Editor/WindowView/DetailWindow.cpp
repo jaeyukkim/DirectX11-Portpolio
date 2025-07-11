@@ -13,21 +13,7 @@ DetailWindow::DetailWindow()
 {
 	SetName("Detail");
 	SetSize(ImVec2(200, 600));
-	EditorApplication::Get()->SeletedActorChanged.Add([this](Actor* actor)
-		{
-			// 1. 기존 위젯 제거
-			auto it = mEditors.find(EDetailEditorType::TransformEditor);
-			if (it != mEditors.end()) 
-			{
-				mEditors.erase(it);
-			}
-		
-			// 2. 유효한 액터일 경우 Transform 위젯 추가
-			if (actor)
-			{
-				mEditors.insert({ EDetailEditorType::TransformEditor, make_unique<TransformWidget>(actor) });
-			}
-		});
+	EditorApplication::Get()->SeletedActorChanged.Add(this, &DetailWindow::SelectedActorChange);
 
 }
 
@@ -102,4 +88,19 @@ void DetailWindow::OnDisable()
 
 void DetailWindow::OnDestroy()
 {
+}
+
+void DetailWindow::SelectedActorChange(Actor* actor)
+{
+	auto it = mEditors.find(EDetailEditorType::TransformEditor);
+	if (it != mEditors.end()) 
+	{
+		mEditors.erase(it);
+	}
+		
+	// 2. 유효한 액터일 경우 Transform 위젯 추가
+	if (actor)
+	{
+		mEditors.insert({ EDetailEditorType::TransformEditor, make_unique<TransformWidget>(actor) });
+	}
 }

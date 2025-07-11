@@ -47,3 +47,7 @@ void EditorWindow::OnDestroy()
 {
 
 }
+
+void EditorWindow::SelectedActorChange(Actor* actor)
+{
+}

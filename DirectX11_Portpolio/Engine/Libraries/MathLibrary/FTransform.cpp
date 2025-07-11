@@ -79,13 +79,13 @@ Vector3 FTransform::GetRotation() const
 void FTransform::SetPosition(float x, float y, float z)
 {
     Position = XMVectorSet(x, y, z, 0);
-    TransformChanged.Broadcast();
+ 
 }
 
 void FTransform::SetPosition(Vector3 InPosition)
 {
     Position = InPosition;
-    TransformChanged.Broadcast();
+ 
 
 }
 
@@ -96,7 +96,7 @@ void FTransform::SetRotation(float Inpitch, float Inyaw, float Inroll)
         XMConvertToRadians(NormalizeAngle(Inyaw)),
         XMConvertToRadians(NormalizeAngle(Inroll))
     );
-    TransformChanged.Broadcast();
+ 
 
 }
 
@@ -112,19 +112,18 @@ void FTransform::SetRotation(Vector3 InRotation)
         XMConvertToRadians(InRotation.z)
     );
 
-    TransformChanged.Broadcast();
 }
 
 void FTransform::SetScale(float x, float y, float z)
 {
     Scale = XMVectorSet(x, y, z, 0);
-    TransformChanged.Broadcast();
+
 }
 
 void FTransform::SetScale(Vector3 InScale)
 {
     Scale = InScale;
-    TransformChanged.Broadcast();
+
 }
 
 Vector4 FTransform::operator*(const Vector4& vec) const
@@ -176,7 +175,7 @@ void FTransform::AddRotation(float yawDelta, float pitchDelta, float rollDelta)
 {
     Vector3 rot = GetRotation();
     SetRotation(rot.x + pitchDelta, rot.y + yawDelta, rot.z + rollDelta);
-    TransformChanged.Broadcast();
+
 }
 
 float FTransform::NormalizeAngle(float angle)

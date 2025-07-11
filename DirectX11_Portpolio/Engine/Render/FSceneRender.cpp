@@ -89,6 +89,8 @@ void FSceneRender::RenderShadowMap()
             }
 
             FRenderOption noOption = FRenderOption();
+            noOption.NoOption = true;
+            
             RenderObjects(noOption);
             for(shared_ptr<MirrorRenderProxy> mirror : MirrorProxy)
             {

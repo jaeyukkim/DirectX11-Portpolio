@@ -310,7 +310,6 @@ void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
 			
 			InReader->FromByte(&mesh->Data.AABB.Max, sizeof(Vector3));
 			InReader->FromByte(&mesh->Data.AABB.Min, sizeof(Vector3));
-			cout << "Vector3의 사이즈:" << sizeof(Vector3) << endl;
 			skeletalMeshComp->m_Mesh.push_back(mesh);
 		}
 

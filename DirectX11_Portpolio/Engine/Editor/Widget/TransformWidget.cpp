@@ -51,7 +51,7 @@ void TransformWidget::OnGUI()
     
 }
 
-void TransformWidget::UpdateTransform()
+void TransformWidget::UpdateTransformWidget()
 {
     Editor::Update();
 
