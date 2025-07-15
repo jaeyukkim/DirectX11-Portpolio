@@ -7,6 +7,7 @@
 AFloor::AFloor()
 {
 
+
 	floor = CreateComponent<UStaticMeshComponent>(this, L"MapFloor");
 	SetRootComponent(floor.get());
 	

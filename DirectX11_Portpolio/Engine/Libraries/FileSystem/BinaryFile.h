@@ -13,7 +13,8 @@ public:
 public:
     void ToInt(int InData);
     void ToUInt(UINT InData);
-
+    void ToFloat(float InData);
+    
     void ToMatrix(Matrix& InData);
 
     void ToString(const string& InData);

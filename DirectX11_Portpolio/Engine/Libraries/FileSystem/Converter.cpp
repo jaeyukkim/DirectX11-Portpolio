@@ -1,6 +1,8 @@
 #include <HeaderCollection.h>
 #include "Converter.h"
 
+#include "Render/Resource/AnimationData.h"
+
 Converter::Converter()
 {
 	Loader = make_shared<Assimp::Importer>();
@@ -41,8 +43,6 @@ void Converter::ReadFile(const wstring objectName, const EMeshType& meshType)
 		| aiProcess_GenNormals
 		| aiProcess_CalcTangentSpace
 		| aiProcess_GenBoundingBoxes
-		
-
 	);
 	Assert(Scene != nullptr, "모델 정상 로드 안됨");
 	ExportMaterial(objectName, true, meshType);
@@ -262,6 +262,104 @@ string Converter::SaveTexture(string InSaveFolder, string InFileName)
 	return InSaveFolder + Path::GetFileName(path);
 }
 
+void Converter::ExportAnimation(wstring objectName, wstring animationName, int InClipIndex)
+{
+	wstring fbxPath = L"../../Contents/_Assets/" + objectName + L"/" + animationName + L".fbx";
+
+	bIsGLTF = false;
+	wstring finalPath;
+	if (filesystem::exists(fbxPath))
+	{
+		finalPath = fbxPath;
+	}
+	else
+	{
+		wcout << L"모델 파일이 존재하지 않습니다: " << endl;
+		return;
+	}
+
+	Scene = Loader->ReadFile
+	(
+		String::ToString(finalPath).c_str(),
+		aiProcess_ConvertToLeftHanded
+		| aiProcess_Triangulate
+		| aiProcess_GenUVCoords
+		| aiProcess_GenNormals
+		| aiProcess_CalcTangentSpace
+		| aiProcess_GenBoundingBoxes
+	);
+
+	wstring exportFileName = L"../../Contents/_Models/" + objectName + L"/" + animationName + L".animation";
+	shared_ptr<FClipData> clipData = ReadAnimationData(Scene->mAnimations[InClipIndex]);
+	WriteAnimationData(exportFileName, clipData);
+	
+}
+
+shared_ptr<FClipData> Converter::ReadAnimationData(aiAnimation* InAnimation)
+{
+	shared_ptr<FClipData> clipData = make_shared<FClipData>();
+
+	clipData->Name = InAnimation->mName.C_Str();
+	clipData->Duration = (float)InAnimation->mDuration;
+	clipData->TickersPerSecond = (float)InAnimation->mTicksPerSecond;
+
+	for (UINT i = 0; i < InAnimation->mNumChannels; i++)
+	{
+		aiNodeAnim* nodeAnim = InAnimation->mChannels[i];
+
+		shared_ptr<FKeyFrameData> FrameData = make_shared<FKeyFrameData>();
+		FrameData->BoneName = nodeAnim->mNodeName.C_Str();
+
+
+		//PositionKeys
+		for (UINT keyIndex = 0; keyIndex < nodeAnim->mNumPositionKeys; keyIndex++)
+		{
+			const aiVectorKey& key = nodeAnim->mPositionKeys[keyIndex];
+
+			FFrameData<Vector3> PosData;
+			PosData.mTime = (float)key.mTime;
+			memcpy(&PosData.mValue, &key.mValue, sizeof(Vector3));
+
+			FrameData->Positions.push_back(PosData);
+		}
+
+		//ScalingKeys
+		for (UINT keyIndex = 0; keyIndex < nodeAnim->mNumScalingKeys; keyIndex++)
+		{
+			const aiVectorKey& key = nodeAnim->mScalingKeys[keyIndex];
+
+			FFrameData<Vector3> ScaleData;
+			ScaleData.mTime = (float)key.mTime;
+			memcpy(&ScaleData.mValue, &key.mValue, sizeof(Vector3));
+
+			FrameData->Scalings.push_back(ScaleData);
+		}
+
+		//RotationKeys
+		for (UINT keyIndex = 0; keyIndex < nodeAnim->mNumRotationKeys; keyIndex++)
+		{
+			const aiQuatKey& key = nodeAnim->mRotationKeys[keyIndex];
+
+			FFrameData<Quaternion> quatData;
+			quatData.mTime = (float)key.mTime;
+			
+			quatData.mValue.x = key.mValue.x;
+			quatData.mValue.y = key.mValue.y;
+			quatData.mValue.z = key.mValue.z;
+			quatData.mValue.w = key.mValue.w;
+
+			FrameData->Rotations.push_back(quatData);
+		}
+
+		
+		clipData->Keyframes.push_back(FrameData);
+		
+	}
+	
+
+	return clipData;
+}
+
 void Converter::ExportMesh(wstring InSaveFileName, EMeshType FileType)
 {
 	
@@ -415,6 +513,43 @@ void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
 	
 	w->Close();
 	
+}
+
+void Converter::WriteAnimationData(wstring InSaveFileName, shared_ptr<FClipData> InClipData)
+{
+	Path::CreateFolders(Path::GetDirectoryName(InSaveFileName));
+
+	shared_ptr<BinaryWriter> w = make_shared<BinaryWriter>();
+	w->Open(InSaveFileName);
+
+	w->ToString(InClipData->Name);
+
+	w->ToFloat(InClipData->Duration);
+	w->ToFloat(InClipData->TickersPerSecond);
+
+	w->ToUInt(InClipData->Keyframes.size());
+	for (shared_ptr<FKeyFrameData>& nodeData : InClipData->Keyframes)
+	{
+		w->ToString(nodeData->BoneName);
+
+
+		UINT count = 0;
+
+		count = nodeData->Positions.size();
+		w->ToUInt(count);
+		w->ToByte(&nodeData->Positions[0], sizeof(FFrameData<Vector3>) * count);
+
+		count = nodeData->Scalings.size();
+		w->ToUInt(count);
+		w->ToByte(&nodeData->Scalings[0], sizeof(FFrameData<Vector3>) * count);
+
+		count = nodeData->Rotations.size();
+		w->ToUInt(count);
+		w->ToByte(&nodeData->Rotations[0], sizeof(FFrameData<Quaternion>) * count);
+		
+	}
+	
+	w->Close();
 }
 
 void Converter::ReadStaticMeshData()

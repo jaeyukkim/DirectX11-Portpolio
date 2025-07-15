@@ -1,0 +1,12 @@
+{
+  "File": {
+    "Material": "hall/hall",
+    "Mesh": "hall/hall"
+  },
+  "Transform": {
+    "Position": "0,0,0",
+    "Rotation": "90.0,0,180",
+    "Scale": "0.01,0.01,0.01"
+  }
+  
+}

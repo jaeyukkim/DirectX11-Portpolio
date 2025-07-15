@@ -48,6 +48,12 @@ void BinaryWriter::ToUInt(UINT InData)
 	WriteFile(FileHandle, &InData, sizeof(UINT), &size, nullptr);
 }
 
+void BinaryWriter::ToFloat(float InData)
+{
+	DWORD size = 0;
+	WriteFile(FileHandle, &InData, sizeof(float), &size, nullptr);
+}
+
 void BinaryWriter::ToMatrix(Matrix& InData)
 {
 	DWORD size = 0;

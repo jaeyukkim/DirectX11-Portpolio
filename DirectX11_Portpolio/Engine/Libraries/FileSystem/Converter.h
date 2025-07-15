@@ -6,6 +6,7 @@
 #include "Render/Mesh/SkeletalMesh.h"
 #include "Render/Mesh/StaticMesh.h"
 
+class FClipData;
 class SkeletalMesh;
 struct aiScene;
 
@@ -36,10 +37,13 @@ public:
 public:
 	template<typename MeshType>
 	void ReadMeshInfo(wstring InFileName, MeshType InMesh, bool bHasCreated);
-
+	shared_ptr<FClipData> ReadAnimationData(aiAnimation* InAnimation);
+	
 public:
 	void ExportMesh(wstring InSaveFileName, EMeshType FileType);
 	void ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType);
+	void ExportAnimation(wstring objectName, wstring animationName, int InClipIndex = 0);
+	
 	string ColorToJson(const Color& InColor);
 	string FloatToJson(const float val);
 	Color JsonStringToColor(string InString);
@@ -57,6 +61,7 @@ private:
 	void ReadSkeletalMeshData();
 	void WriteSkeletalMeshData(wstring InSaveFileName);
 
+	void WriteAnimationData(wstring InSaveFileName, shared_ptr<FClipData> InClipData);
 private:
 	template<typename MeshType>
   void InitMaterial(wstring InFilePath, MeshType InMesh);

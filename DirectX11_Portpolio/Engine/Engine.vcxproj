@@ -199,6 +199,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Render\RenderProxy\ViewRenderProxy.h" />
     <ClInclude Include="HeaderCollection.h" />
     <ClInclude Include="Definition.h" />
+    <ClInclude Include="Render\Resource\AnimationData.h" />
     <ClInclude Include="Render\Resource\FSceneView.h" />
     <ClInclude Include="Render\Resource\Material.h" />
     <ClInclude Include="Render\Resource\Texture.h" />
@@ -1165,6 +1166,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="HeaderCollection.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Render\Resource\AnimationData.cpp" />
     <ClCompile Include="Render\Resource\FSceneView.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -1553,6 +1555,9 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Main</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Frameworks\Animation\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
