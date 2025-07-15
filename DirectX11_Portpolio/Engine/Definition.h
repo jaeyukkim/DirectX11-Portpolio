@@ -13,6 +13,16 @@
 	}\
 }
 
+#define DeleteArray(x)\
+{\
+	if (x != nullptr)\
+	{\
+		delete [] (x);\
+		(x) = nullptr;\
+	}\
+}
+
+
 #define CheckTrue(x) { if(x == true) return; }
 #define CheckTrueResult(x, y) { if(x == true) return y; }
 

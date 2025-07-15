@@ -1,0 +1,15 @@
+{
+   "Paladin_MAT" : {
+      "Albedo" : "1.000000,1.000000,1.000000,1.000000",
+      "AlbedoMap" : "../../Contents/_Models/Paladin/textures/Paladin_diffuse.png",
+      "AmbientOcclusionMap" : "",
+      "Emissive" : "0.000000,0.000000,0.000000,1.000000",
+      "EmissiveMap" : "",
+      "HeightMap" : "",
+      "Metallic" : "0.952786",
+      "MetallicMap" : "",
+      "NormalMap" : "../../Contents/_Models/Paladin/textures/Paladin_normal.png",
+      "Roughness" : "0.452786",
+      "RoughnessMap" : "../../Contents/_Models/Paladin/textures/Paladin_specular.png"
+   }
+}

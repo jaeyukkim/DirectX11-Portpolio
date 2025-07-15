@@ -2,6 +2,7 @@
 
 #include "UPrimitiveComponent.h"
 
+class FClipData;
 class Material;
 class SkeletalMesh;
 class Skeletal;
@@ -24,10 +25,15 @@ private:
     vector<shared_ptr<Skeletal>> Bones;
     vector<shared_ptr<SkeletalMesh>> m_Mesh;
     map<string, shared_ptr<Material>> MaterialTable;
-
+    unordered_map<string, shared_ptr<Skeletal>> ReadBoneTable;
+    vector<shared_ptr<FClipData>> Animations;
+    
     DirectX::SimpleMath::Matrix Transforms[MAX_MODEL_TRANSFORM];
     int* InstanceID;
     string MeshName;
+
+private:
     friend class Converter;
+    friend class AnimationTexture;
 };
  

@@ -1,6 +1,8 @@
 #include "HeaderCollection.h"
 #include "Buffers.h"
 
+#include "Render/Resource/AnimationData.h"
+
 VertexBuffer::VertexBuffer(void* InData, UINT InCount, UINT InStride, UINT InSlot, bool InCpuWrite, bool InGpuWrite)
 	: Data(InData), Count(InCount), Stride(InStride), Slot(InSlot)
 	, bCpuWrite(InCpuWrite), bGpuWrite(InGpuWrite)
@@ -606,6 +608,86 @@ void AppendBuffer::UpdateSubResource()
 {
 	D3D::Get()->GetDeviceContext()->UpdateSubresource(buffer.Get(), 0, nullptr, Data, 0, 0);
 }
+
+void AnimationTexture::CreateAnimationTexture(USkeletalMeshComponent* meshComp,
+	ComPtr<ID3D11Texture2D>& InClipTexture, ComPtr<ID3D11ShaderResourceView>& InClipSRV)
+{
+	vector<shared_ptr<FClipData::ClipTransform>> v;
+	
+	for (shared_ptr<FClipData>& anim : meshComp->Animations)
+		v.push_back(anim->CalcClipTransform(meshComp->Bones));
+
+	
+	//Create Texture
+	{
+		D3D11_TEXTURE2D_DESC desc;
+		ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
+		desc.Width = MAX_MODEL_TRANSFORM * 4; //Bone
+		desc.Height = MAX_MODEL_KEYFRAME; //Frame
+		desc.ArraySize = meshComp->Animations.size(); //Clip
+		desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; //16Byte * 4 = 64 Byte
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.MipLevels = 1;
+		desc.SampleDesc.Count = 1;
+
+		
+		UINT pageSize = MAX_MODEL_TRANSFORM * 4 * 16 * MAX_MODEL_KEYFRAME;
+		void* p = VirtualAlloc(nullptr, pageSize * meshComp->Animations.size(), MEM_RESERVE, PAGE_READWRITE);
+		
+
+		for (UINT c = 0; c < meshComp->Animations.size(); c++)
+		{
+			UINT start = c * pageSize;
+
+			for (UINT f = 0; f < MAX_MODEL_KEYFRAME; f++)
+			{
+				//if (f > Animations[c]->Duration)
+					//break;
+
+				void* temp = (BYTE*)p + MAX_MODEL_TRANSFORM * f * sizeof(Matrix) + start;
+
+				VirtualAlloc(temp, MAX_MODEL_TRANSFORM * sizeof(Matrix), MEM_COMMIT, PAGE_READWRITE);
+				memcpy(temp, v[c]->Transform[f], MAX_MODEL_TRANSFORM * sizeof(Matrix));
+			}
+		}
+
+		
+		//SSD -> VRAM
+		{
+			D3D11_SUBRESOURCE_DATA* subResource = new D3D11_SUBRESOURCE_DATA[meshComp->Animations.size()];
+			for (UINT c = 0; c < meshComp->Animations.size(); c++)
+			{
+				void* temp = (BYTE*)p + c * pageSize;
+
+				subResource[c].pSysMem = temp;
+				subResource[c].SysMemPitch = MAX_MODEL_TRANSFORM * sizeof(Matrix);
+				subResource[c].SysMemSlicePitch = pageSize;
+			}
+			Check(D3D::Get()->GetDevice()->CreateTexture2D(&desc, subResource, InClipTexture.GetAddressOf()));
+
+			DeleteArray(subResource);
+		}
+		
+		//Clear
+		{
+			VirtualFree(p, 0, MEM_RELEASE);
+		}
+
+		//Create SRV
+		{
+			D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+			ZeroMemory(&desc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+			desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.MipLevels = 1;
+			desc.Texture2DArray.ArraySize = meshComp->Animations.size();
+
+			Check(D3D::Get()->GetDevice()->CreateShaderResourceView(InClipTexture.Get(), &desc, InClipSRV.GetAddressOf()));
+		}
+	}
+}
+
 
 ComPtr<ID3D11Texture2D> TextureBuffer::CreateStagingTexture( const std::vector<uint8_t> &image,
                                                              const int width, const int height, const DXGI_FORMAT pixelFormat, const int mipLevels, const int arraySize)

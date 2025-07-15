@@ -1,5 +1,28 @@
 #pragma once
 
+struct AnimationFrameDesc
+{
+    int Clip = -1;
+    float TickersPerSeconds;
+    float Duration;
+    UINT CurrentFrame = 0;
+    UINT NextFrame = 0;
+    float CurrentTime = 0.0f;
+    float Speed = 1.0f;
+		
+    float Padding;
+};
+
+struct AnimationBlendingDesc
+{
+    float TakeTime = 1.0f;
+    float ChangingTime = 0.0f;
+    float Speed = 1.0f;
+    float Padding;
+
+    AnimationFrameDesc Current;
+    AnimationFrameDesc Next;
+};
 
 template<typename ValType>
 struct FFrameData
@@ -42,9 +65,32 @@ private:
 
     vector<shared_ptr<FKeyFrameData>> Keyframes;
 
+private:
+    struct ClipTransform
+    {
+        Matrix** Transform;
+
+        ClipTransform()
+        {
+            Transform = new Matrix*[MAX_MODEL_KEYFRAME];
+
+            for (UINT i = 0; i < MAX_MODEL_KEYFRAME; i++)
+                Transform[i] = new Matrix[MAX_MODEL_TRANSFORM];
+        }
+
+        ~ClipTransform()
+        {
+            for (UINT i = 0; i < MAX_MODEL_KEYFRAME; i++)
+                DeleteArray(Transform[i]);
+
+            DeleteArray(Transform);
+        }
+    };
+
+    shared_ptr<ClipTransform> CalcClipTransform(const vector<shared_ptr<Skeletal>>& InBones);
     
 private:
     friend class Converter;
-    
+    friend class AnimationTexture;
 };
 

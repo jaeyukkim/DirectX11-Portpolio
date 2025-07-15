@@ -13,7 +13,7 @@ Converter::~Converter()
 
 }
 
-void Converter::ReadFile(const wstring objectName, const EMeshType& meshType)
+void Converter::ExportFile(const wstring objectName, const EMeshType& meshType)
 {
 	wstring fbxPath = L"../../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
 	wstring gltfPath = L"../../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
@@ -515,6 +515,64 @@ void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
 	
 }
 
+void Converter::ReadAnimationFile(wstring InFilePath, USkeletalMeshComponent* meshComp)
+{
+	InFilePath = L"../../_Models/" + InFilePath + L".animation";
+
+	shared_ptr<BinaryReader> reader = make_shared<BinaryReader>();
+	reader->Open(InFilePath);
+
+	shared_ptr<FClipData> animation = make_shared<FClipData>();
+	{
+		animation->Name = reader->FromString();
+		animation->Duration = reader->FromFloat();
+		animation->TickersPerSecond = reader->FromFloat();
+
+		UINT count = reader->FromUInt();
+		animation->Keyframes.assign(count, nullptr);
+
+		for (UINT i = 0; i < count; i++)
+		{
+			shared_ptr<FKeyFrameData> data = make_shared<FKeyFrameData>();
+		
+			string name = reader->FromString();
+			auto iter = meshComp->ReadBoneTable.find(name);
+
+			if (iter != meshComp->ReadBoneTable.end())
+			{
+				data->BoneIndex = iter->second->Index;
+				data->BoneName = iter->second->Name;
+			}
+
+		
+			UINT frameCount = 0;
+
+			frameCount = reader->FromUInt();
+			FFrameData<Vector3>* position = new FFrameData<Vector3>[frameCount];
+			reader->FromByte(position, sizeof(FFrameData<Vector3>) * frameCount);
+			data->Positions.assign(position, position + frameCount);
+
+			frameCount = reader->FromUInt();
+			FFrameData<Vector3>* scaling = new FFrameData<Vector3>[frameCount];
+			reader->FromByte(scaling, sizeof(FFrameData<Vector3>) * frameCount);
+			data->Scalings.assign(scaling, scaling + frameCount);
+
+			frameCount = reader->FromUInt();
+			FFrameData<Quaternion>* rotation = new FFrameData<Quaternion>[frameCount];
+			reader->FromByte(rotation, sizeof(FFrameData<Quaternion>) * frameCount);
+			data->Rotations.assign(rotation, rotation + frameCount);
+
+		
+			if(iter != meshComp->ReadBoneTable.end())
+				animation->Keyframes[i] = data;
+		}
+		Animations.push_back(animation);
+
+		reader->Close();
+	
+	}
+}
+
 void Converter::WriteAnimationData(wstring InSaveFileName, shared_ptr<FClipData> InClipData)
 {
 	Path::CreateFolders(Path::GetDirectoryName(InSaveFileName));
@@ -639,7 +697,7 @@ void Converter::WriteStaticMeshData(wstring InSaveFileName)
 }
 
 
-void Converter::ReadBoneData(BinaryReader* InReader, USkeletalMeshComponent* meshComp)
+void Converter::ReadBoneFile(BinaryReader* InReader, USkeletalMeshComponent* meshComp)
 {
 	UINT count = InReader->FromUInt();
 

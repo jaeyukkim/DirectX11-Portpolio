@@ -38,7 +38,8 @@ public:
 public:
     int FromInt();
     UINT FromUInt();
-
+    float FromFloat();
+    
     Matrix FromMatrix();
     string FromString();
 	

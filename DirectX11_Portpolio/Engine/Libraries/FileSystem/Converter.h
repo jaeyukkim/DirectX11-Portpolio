@@ -32,7 +32,7 @@ class Converter
 public:
 	Converter();
 	~Converter();
-	void ReadFile(const wstring objectName, const EMeshType& meshType);
+	void ExportFile(const wstring objectName, const EMeshType& meshType);
 
 public:
 	template<typename MeshType>
@@ -61,7 +61,9 @@ private:
 	void ReadSkeletalMeshData();
 	void WriteSkeletalMeshData(wstring InSaveFileName);
 
+	void ReadAnimationFile(wstring InFilePath, USkeletalMeshComponent* meshComp);
 	void WriteAnimationData(wstring InSaveFileName, shared_ptr<FClipData> InClipData);
+	
 private:
 	template<typename MeshType>
   void InitMaterial(wstring InFilePath, MeshType InMesh);
@@ -71,7 +73,7 @@ private:
     
 	template<typename MeshType>
 	void ReadMeshData(BinaryReader* InReader, MeshType InMesh);
-	void ReadBoneData(BinaryReader* InReader, USkeletalMeshComponent* meshComp);
+	void ReadBoneFile(BinaryReader* InReader, USkeletalMeshComponent* meshComp);
 
 	void ConvertToDXCoord(Vector3* normal, Vector3* tangent);
 
@@ -85,7 +87,7 @@ private:
 	vector<struct BoneData*> Bones;
 	vector<struct SkeletalMeshData*> SkeletalMeshes;
 	vector<struct StaticMeshData*> StaticMeshes;
-
+	vector<shared_ptr<FClipData>> Animations;
 private:
 	bool bIsGLTF = false;;
 };
@@ -134,7 +136,29 @@ void Converter::ReadMeshInfo(wstring InFileName, MeshType InMesh, bool bHasCreat
 		InitMaterial(String::ToWString(materialName), InMesh);
 		InitMesh(String::ToWString(meshName), InMesh);
 	}
-    
+
+	USkeletalMeshComponent* meshComp = dynamic_cast<USkeletalMeshComponent*>(InMesh);
+	if (meshComp == nullptr || bHasCreated) return;
+
+	
+	Json::Value animations = root["Animations"];
+	for (UINT i = 0; i < animations.size(); i++)
+		ReadAnimationFile(String::ToWString(animations[i].asString()), meshComp);
+	
+	if (Animations.size() > 0)
+	{
+		ComPtr<ID3D11Texture2D> ClipTexture = nullptr;
+		ComPtr<ID3D11ShaderResourceView> ClipSRV = nullptr;
+		
+		AnimationTexture::CreateAnimationTexture(meshComp, ClipTexture, ClipSRV);
+
+		for (shared_ptr<SkeletalMesh>& mesh : meshComp->m_Mesh)
+		{
+			mesh->ClipsSRV = ClipSRV;
+			mesh->CreateAnimationBuffer();
+		}
+	}
+	
 }
 
 template <typename MeshType>
@@ -243,6 +267,7 @@ void Converter::InitMesh(wstring InFilePath, MeshType InMesh)
 			mesh[number]->Data.Bone = bone.get();
 			mesh[number]->Data.Transforms = skeletalMeshComp->Transforms;
 		}
+		skeletalMeshComp->ReadBoneTable[bone->Name] = bone;
 	}
 
 	for (UINT i = 0; i < SkeletalMeshes.size(); i++)
@@ -291,7 +316,7 @@ void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
 	
 	else if (auto skeletalMeshComp = dynamic_cast<USkeletalMeshComponent*>(InMesh))
 	{
-		ReadBoneData(InReader, skeletalMeshComp);
+		ReadBoneFile(InReader, skeletalMeshComp);
 		
 		UINT count = InReader->FromUInt();
 		for (UINT i = 0; i < count; i++)

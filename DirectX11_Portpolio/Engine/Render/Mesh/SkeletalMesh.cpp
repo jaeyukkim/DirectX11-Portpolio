@@ -28,3 +28,9 @@ void SkeletalMesh::CreateBuffer()
 	MeshWorld = make_shared<FTransform>();
 	BoneBuffer = make_shared<ConstantBuffer>(&BoneData, sizeof(BoneDesc));
 }
+
+void SkeletalMesh::CreateAnimationBuffer()
+{
+	BlendDataCBuffer = make_shared<ConstantBuffer>(&BlendingData, sizeof(AnimationBlendingDesc) * MAX_INSTANCE_SIZE);
+
+}

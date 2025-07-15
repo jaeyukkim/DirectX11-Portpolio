@@ -34,7 +34,9 @@ private:
     mutable bool bInitRenderComplete = false;
     int* InstanceID = nullptr;
     string MeshName;
-    friend class Converter;
 
+private:
+    friend class Converter;
+    
 };
 

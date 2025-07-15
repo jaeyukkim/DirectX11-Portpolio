@@ -20,7 +20,7 @@ UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, StaticMeshCreateI
 	shared_ptr<Converter> converter = make_shared<Converter>();
 	if (info.bOverWrite)
 	{
-		converter->ReadFile(objectName, EMeshType::StaticMeshType);
+		converter->ExportFile(objectName, EMeshType::StaticMeshType);
 	}
 
 	MeshName = String::ToString(objectName);

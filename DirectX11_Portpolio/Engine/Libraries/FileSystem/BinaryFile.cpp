@@ -142,6 +142,16 @@ UINT BinaryReader::FromUInt()
 	return temp;
 }
 
+float BinaryReader::FromFloat()
+{
+	float temp = 0.0f;
+
+	DWORD size = 0;
+	ReadFile(FileHandle, &temp, sizeof(float), &size, nullptr);
+
+	return temp;
+}
+
 Matrix BinaryReader::FromMatrix()
 {
 	float temp[16];

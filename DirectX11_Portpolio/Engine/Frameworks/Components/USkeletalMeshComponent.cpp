@@ -15,7 +15,7 @@ USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, bool bOverwri
 	shared_ptr<Converter> converter = make_shared<Converter>();
 	if (bOverwrite)
 	{
-		converter->ReadFile(objectName, EMeshType::SkeletalMeshType);
+		converter->ExportFile(objectName, EMeshType::SkeletalMeshType);
 	}
 
 	MeshName = String::ToString(objectName);

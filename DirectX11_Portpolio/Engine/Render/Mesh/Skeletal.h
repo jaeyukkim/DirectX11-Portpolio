@@ -21,4 +21,5 @@ private:
 private:
     friend class USkeletalMeshComponent;
     friend class Converter;
+    friend class FClipData;
 };

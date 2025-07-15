@@ -1,6 +1,9 @@
 #pragma once
 
 
+class USkeletalMeshComponent;
+class UStaticMeshComponent;
+
 class VertexBuffer
 {
 public:
@@ -259,4 +262,13 @@ private:
 	void* Data = nullptr;
 	UINT elementSize = 0;
 	UINT elementCount = 0;
+};
+
+//-----------------------------------------------
+
+class AnimationTexture
+{
+public:
+	static void CreateAnimationTexture(USkeletalMeshComponent* meshComp,
+		ComPtr<ID3D11Texture2D>& InClipTexture, ComPtr<ID3D11ShaderResourceView>& InClipSRV);
 };

@@ -4,7 +4,7 @@
 
 AKachujin::AKachujin()
 {
-    //Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Samurai"));
+    Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
     //Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Samurai"));
 
     //Mesh[1]->GetRelativeTransform()->SetPosition(Vector3(15.0f, 0.25f, 6.0f));
@@ -21,7 +21,7 @@ AKachujin::AKachujin()
         }
     }
     */
-    //SetRootComponent(Mesh[0].get());
+    SetRootComponent(Mesh[0].get());
 
     
 

@@ -11,6 +11,8 @@ class IndexBuffer;
 #define MAX_LIGHT_COUNT 9
 #define MAX_SHADOW_COUNT 9
 #define MAX_INSTANCE_SIZE 1000
+#define MAX_MODEL_KEYFRAME 500
+
 
 enum ELightType : UINT
 {

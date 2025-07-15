@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Render/Resource/AnimationData.h"
 
 
 class ConstantBuffer;
@@ -42,17 +42,16 @@ public:
     
 protected:
     void CreateBuffer();
-
+    void CreateAnimationBuffer();
+    
 private:
     void SetWorld(const FTransform* InTransform);
 
 private:
     SkeletalMeshInfo Data;
     shared_ptr<FTransform> MeshWorld;
-    shared_ptr<VertexBuffer> VBuffer = nullptr;
-    shared_ptr<IndexBuffer> IBuffer = nullptr;
-    shared_ptr<ConstantBuffer> BoneBuffer = nullptr;
-    
+    AnimationBlendingDesc BlendingData[MAX_INSTANCE_SIZE];
+
     struct BoneDesc
     {
         Matrix Transforms[MAX_MODEL_TRANSFORM];
@@ -60,6 +59,15 @@ private:
         float Padding[3];
     } BoneData;
     
+private:
+    shared_ptr<VertexBuffer> VBuffer = nullptr;
+    shared_ptr<IndexBuffer> IBuffer = nullptr;
+    shared_ptr<ConstantBuffer> BoneBuffer = nullptr;
+    ComPtr<ID3D11ShaderResourceView> ClipsSRV = nullptr;
+    shared_ptr<ConstantBuffer> BlendDataCBuffer;
+
+    
+private:
     friend class USkeletalMeshComponent;
     friend class Converter;
     friend class SkeletalMeshRenderProxy;
