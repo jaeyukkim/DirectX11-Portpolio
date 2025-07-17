@@ -289,10 +289,44 @@ void Converter::ExportAnimation(wstring objectName, wstring animationName, int I
 		| aiProcess_GenBoundingBoxes
 	);
 
-	wstring exportFileName = L"../../Contents/_Models/" + objectName + L"/" + animationName + L".animation";
+	wstring exportFileName = L"../../Contents/_Models/" + objectName +
+		L"/Animations/" + animationName + L".animation";
+	
 	shared_ptr<FClipData> clipData = ReadAnimationData(Scene->mAnimations[InClipIndex]);
 	WriteAnimationData(exportFileName, clipData);
 	
+}
+
+void Converter::ReadAnimInfo(wstring InFileName, USkeletalMeshComponent* meshComp, bool bHasCreated)
+{
+	if (meshComp == nullptr || bHasCreated) return;
+
+
+	ifstream stream;
+	stream.open(InFileName);
+	Json::Value root;
+	stream >> root;
+	
+	Json::Value animations = root["Animations"];
+	stream.close();
+
+	
+	for (UINT i = 0; i < animations.size(); i++)
+		ReadAnimationFile(String::ToWString(animations[i].asString()), meshComp);
+	
+	if (meshComp->Animations.size() > 0)
+	{
+		ComPtr<ID3D11Texture2D> ClipTexture = nullptr;
+		ComPtr<ID3D11ShaderResourceView> ClipSRV = nullptr;
+		
+		AnimationTexture::CreateAnimationTexture(meshComp, ClipTexture, ClipSRV);
+
+		for (shared_ptr<SkeletalMesh>& mesh : meshComp->m_Mesh)
+		{
+			mesh->ClipsSRV = ClipSRV;
+			mesh->CreateAnimationBuffer();
+		}
+	}
 }
 
 shared_ptr<FClipData> Converter::ReadAnimationData(aiAnimation* InAnimation)
@@ -381,19 +415,47 @@ void Converter::ExportMesh(wstring InSaveFileName, EMeshType FileType)
 	
 }
 
+bool Converter::IsAssimpFbxHelperNode(const string& name)
+{
+	return name.find("_$AssimpFbx$_") != std::string::npos;
+}
+
 void Converter::ReadBoneData(aiNode* InNode, int InIndex, int InParent)
 {
+	std::string nodeName = InNode->mName.C_Str();
+
+	// 보조 노드 패턴 감지
+	if (IsAssimpFbxHelperNode(nodeName))
+	{
+		// 부모 노드에게 현재 노드의 변환을 넘기고, 이 노드는 무시
+		if (InParent >= 0)
+		{
+			Matrix helperTransform;
+			memcpy(&helperTransform, InNode->mTransformation[0], sizeof(Matrix));
+			helperTransform = helperTransform.Transpose();
+
+			Bones[InParent]->Transform *= helperTransform;
+		}
+
+		// 자식들은 건너뛰지 않고 계속 처리
+		for (UINT i = 0; i < InNode->mNumChildren; i++)
+		{
+			ReadBoneData(InNode->mChildren[i], InIndex, InParent);
+		}
+
+		return; // 보조 노드는 추가하지 않음
+	}
+
+	// 일반 본 처리
 	BoneData* bone = new BoneData();
 	bone->Index = InIndex;
 	bone->Parent = InParent;
-	bone->Name = InNode->mName.C_Str();
+	bone->Name = nodeName;
 
 	memcpy(&bone->Transform, InNode->mTransformation[0], sizeof(Matrix));
 	bone->Transform = bone->Transform.Transpose();
 
-	
 	Matrix parent;
-
 	if (InParent < 0)
 		parent = Matrix::Identity;
 	else
@@ -517,8 +579,9 @@ void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
 
 void Converter::ReadAnimationFile(wstring InFilePath, USkeletalMeshComponent* meshComp)
 {
-	InFilePath = L"../../_Models/" + InFilePath + L".animation";
-
+	InFilePath = L"../../Contents/_Models/" + InFilePath + L".animation";
+	
+	
 	shared_ptr<BinaryReader> reader = make_shared<BinaryReader>();
 	reader->Open(InFilePath);
 
@@ -566,7 +629,7 @@ void Converter::ReadAnimationFile(wstring InFilePath, USkeletalMeshComponent* me
 			if(iter != meshComp->ReadBoneTable.end())
 				animation->Keyframes[i] = data;
 		}
-		Animations.push_back(animation);
+		meshComp->Animations.push_back(animation);
 
 		reader->Close();
 	

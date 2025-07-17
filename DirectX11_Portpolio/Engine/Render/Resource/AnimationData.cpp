@@ -40,23 +40,38 @@ shared_ptr<FClipData::ClipTransform> FClipData::CalcClipTransform(const vector<s
                 shared_ptr<FKeyFrameData> data = iter->second;
 
                 Vector3 position;
-                if (data->Positions.size() == 1)
-                    position = data->Positions[0].mValue;
-                else
+                if (data->Positions.size() - 1 >= f)
+                {
                     position = data->Positions[f].mValue;
+                }
+                else
+                {
+                    UINT last = data->Positions.size() - 1;
+                    position = data->Positions[last].mValue;
+                }
 
                 Vector3 scale;
-                if (data->Scalings.size() == 1)
-                    scale = data->Scalings[0].mValue;
-                else
+                if (data->Scalings.size() - 1 >= f)
+                {
                     scale = data->Scalings[f].mValue;
+                }
+                else
+                {
+                    UINT last = data->Scalings.size() - 1;
+                    scale = data->Scalings[last].mValue;
+                }
+
 
                 Quaternion rotation;
-                if (data->Rotations.size() == 1)
-                    rotation = data->Rotations[0].mValue;
-                else
+                if (data->Rotations.size() - 1 >= f)
+                {
                     rotation = data->Rotations[f].mValue;
-
+                }
+                else
+                {
+                    UINT last = data->Rotations.size() - 1;
+                    rotation = data->Rotations[last].mValue;
+                }
 
                 Matrix S = Matrix::CreateScale(scale);
                 Matrix R = Matrix::CreateFromQuaternion(rotation);

@@ -7,11 +7,19 @@ class Material;
 class SkeletalMesh;
 class Skeletal;
 
+struct SkeletalMeshCreateInfo
+{
+    vector<string> exportAnimName;
+    bool bReadAnimation = true;
+    bool bExportAnimation = false;
+    bool bOverWrite = false;
+};
+
 
 class USkeletalMeshComponent : public UPrimitiveComponent
 {
 public:
-    USkeletalMeshComponent(wstring InFileName, bool bOverwrite = false);
+    USkeletalMeshComponent(wstring InFileName, const SkeletalMeshCreateInfo info = SkeletalMeshCreateInfo());
     virtual ~USkeletalMeshComponent() override;
     virtual void TickComponent(float deltaTime) override;
     

@@ -37,6 +37,7 @@ public:
 public:
 	template<typename MeshType>
 	void ReadMeshInfo(wstring InFileName, MeshType InMesh, bool bHasCreated);
+	void ReadAnimInfo(wstring InFileName, USkeletalMeshComponent* meshComp, bool bHasCreated);
 	shared_ptr<FClipData> ReadAnimationData(aiAnimation* InAnimation);
 	
 public:
@@ -76,7 +77,7 @@ private:
 	void ReadBoneFile(BinaryReader* InReader, USkeletalMeshComponent* meshComp);
 
 	void ConvertToDXCoord(Vector3* normal, Vector3* tangent);
-
+	bool IsAssimpFbxHelperNode(const string& name);
 private:
 	wstring ReadFilePath;
 
@@ -87,7 +88,7 @@ private:
 	vector<struct BoneData*> Bones;
 	vector<struct SkeletalMeshData*> SkeletalMeshes;
 	vector<struct StaticMeshData*> StaticMeshes;
-	vector<shared_ptr<FClipData>> Animations;
+
 private:
 	bool bIsGLTF = false;;
 };
@@ -137,27 +138,7 @@ void Converter::ReadMeshInfo(wstring InFileName, MeshType InMesh, bool bHasCreat
 		InitMesh(String::ToWString(meshName), InMesh);
 	}
 
-	USkeletalMeshComponent* meshComp = dynamic_cast<USkeletalMeshComponent*>(InMesh);
-	if (meshComp == nullptr || bHasCreated) return;
 
-	
-	Json::Value animations = root["Animations"];
-	for (UINT i = 0; i < animations.size(); i++)
-		ReadAnimationFile(String::ToWString(animations[i].asString()), meshComp);
-	
-	if (Animations.size() > 0)
-	{
-		ComPtr<ID3D11Texture2D> ClipTexture = nullptr;
-		ComPtr<ID3D11ShaderResourceView> ClipSRV = nullptr;
-		
-		AnimationTexture::CreateAnimationTexture(meshComp, ClipTexture, ClipSRV);
-
-		for (shared_ptr<SkeletalMesh>& mesh : meshComp->m_Mesh)
-		{
-			mesh->ClipsSRV = ClipSRV;
-			mesh->CreateAnimationBuffer();
-		}
-	}
 	
 }
 

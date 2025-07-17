@@ -9,9 +9,9 @@
     "Scale": "0.01,0.01,0.01"
   },
   "Animations": [
-    "Paladin/Animations/sword and shield idle",
-    "Paladin/Animations/sword and shield walk",
-    "Paladin/Animations/sword and shield jump",
-    "Paladin/Animations/sheath sword 1"
+    "Paladin/Animations/sword_and_shield_idle",
+    "Paladin/Animations/sword_and_shield_walk",
+    "Paladin/Animations/sword_and_shield_jump",
+    "Paladin/Animations/sheath_sword_1"
   ]
 }
