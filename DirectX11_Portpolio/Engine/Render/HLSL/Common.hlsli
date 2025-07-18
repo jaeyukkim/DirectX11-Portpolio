@@ -1,6 +1,7 @@
 #ifndef __COMMON_HLSLI__
 #define __COMMON_HLSLI__
 
+#define MAX_MODEL_TRANSFORM 250
 #include "Material.hlsli"
 
 
@@ -40,6 +41,7 @@ struct StaticMeshInput
     float3 tangent : TANGENT;
 };
 
+
 struct VertexShaderInput
 {
     float3 posModel : POSITION; //¸ðµ¨ ÁÂÇ¥°èÀÇ À§Ä¡ position
@@ -47,8 +49,11 @@ struct VertexShaderInput
     float4 modelColor : COLOR;
     float3 modelNormal : NORMAL; // ¸ðµ¨ ÁÂÇ¥°èÀÇ normal    
     float3 tangent : TANGENT;
+
+#ifdef SKINNED
     float4 blendIndicies : BLENDINDICES;
     float4 blendWeight : BLENDWEIGHTS;
+#endif
 };
 
 int RaySphereIntersection(in float3 start, in float3 dir, in float3 center, in float radius,

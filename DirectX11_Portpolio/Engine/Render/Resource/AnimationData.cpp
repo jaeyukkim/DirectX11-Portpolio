@@ -1,5 +1,6 @@
 #include "HeaderCollection.h"
 #include "AnimationData.h"
+#include "Render/Mesh/Skeletal.h"
 
 shared_ptr<FClipData::ClipTransform> FClipData::CalcClipTransform(const vector<shared_ptr<Skeletal>>& InBones)
 {

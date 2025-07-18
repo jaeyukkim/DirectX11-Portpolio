@@ -1,6 +1,7 @@
 #include <HeaderCollection.h>
 #include "Converter.h"
 
+#include "Frameworks/Animation/UAnimInstance.h"
 #include "Render/Resource/AnimationData.h"
 
 Converter::Converter()
@@ -13,7 +14,7 @@ Converter::~Converter()
 
 }
 
-void Converter::ExportFile(const wstring objectName, const EMeshType& meshType)
+void Converter::ImportFBXFile(const wstring objectName, const EMeshType& meshType)
 {
 	wstring fbxPath = L"../../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
 	wstring gltfPath = L"../../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
@@ -45,13 +46,13 @@ void Converter::ExportFile(const wstring objectName, const EMeshType& meshType)
 		| aiProcess_GenBoundingBoxes
 	);
 	Assert(Scene != nullptr, "모델 정상 로드 안됨");
-	ExportMaterial(objectName, true, meshType);
-	ExportMesh(objectName, meshType);
+	ImportFBX_Material(objectName, true, meshType);
+	ImportFBX_Mesh(objectName, meshType);
 	
 }
 
 
-void Converter::ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType)
+void Converter::ImportFBX_Material(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType)
 {
 	switch (InMeshType)
 	{
@@ -67,11 +68,11 @@ void Converter::ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshTy
 		Assert(true, "ExportMaterial 실패");
 	}
 	
-	ReadMaterials(InMeshType);
-	WriteMaterial(InSaveFileName, InOverwrite);
+	ReadFBX_Material();
+	ConvertFBX_ToBinary_Material(InSaveFileName, InOverwrite);
 }
 
-void Converter::ReadMaterials(EMeshType InMeshType)
+void Converter::ReadFBX_Material()
 {
 	
 	for (UINT i = 0; i < Scene->mNumMaterials; i++)
@@ -125,7 +126,7 @@ void Converter::ReadMaterials(EMeshType InMeshType)
 	}
 }
 
-void Converter::WriteMaterial(wstring InSaveFileName, bool InOverwrite)
+void Converter::ConvertFBX_ToBinary_Material(wstring InSaveFileName, bool InOverwrite)
 {
 	if (InOverwrite == false)
 	{
@@ -262,7 +263,7 @@ string Converter::SaveTexture(string InSaveFolder, string InFileName)
 	return InSaveFolder + Path::GetFileName(path);
 }
 
-void Converter::ExportAnimation(wstring objectName, wstring animationName, int InClipIndex)
+void Converter::ImportFBX_Animation(wstring objectName, wstring animationName, int InClipIndex)
 {
 	wstring fbxPath = L"../../Contents/_Assets/" + objectName + L"/" + animationName + L".fbx";
 
@@ -293,11 +294,11 @@ void Converter::ExportAnimation(wstring objectName, wstring animationName, int I
 		L"/Animations/" + animationName + L".animation";
 	
 	shared_ptr<FClipData> clipData = ReadAnimationData(Scene->mAnimations[InClipIndex]);
-	WriteAnimationData(exportFileName, clipData);
+	ConvertFBX_ToBinary_Animation(exportFileName, clipData);
 	
 }
 
-void Converter::ReadAnimInfo(wstring InFileName, USkeletalMeshComponent* meshComp, bool bHasCreated)
+void Converter::ReadBinary_Anim(wstring InFileName, USkeletalMeshComponent* meshComp, bool bHasCreated)
 {
 	if (meshComp == nullptr || bHasCreated) return;
 
@@ -312,23 +313,23 @@ void Converter::ReadAnimInfo(wstring InFileName, USkeletalMeshComponent* meshCom
 
 	
 	for (UINT i = 0; i < animations.size(); i++)
-		ReadAnimationFile(String::ToWString(animations[i].asString()), meshComp);
+		ReadFBX_Animation(String::ToWString(animations[i].asString()), meshComp);
 	
-	if (meshComp->Animations.size() > 0)
+	if (animations.size() > 0)
 	{
 		ComPtr<ID3D11Texture2D> ClipTexture = nullptr;
 		ComPtr<ID3D11ShaderResourceView> ClipSRV = nullptr;
 		
 		AnimationTexture::CreateAnimationTexture(meshComp, ClipTexture, ClipSRV);
-
-		for (shared_ptr<SkeletalMesh>& mesh : meshComp->m_Mesh)
-		{
-			mesh->ClipsSRV = ClipSRV;
-			mesh->CreateAnimationBuffer();
-		}
+		meshComp->AnimInstance->ClipsSRV = ClipSRV;
 	}
 }
 
+
+
+/**
+ * mNumPositionKeys가 duration만큼 존재하지 않을 때 중간에 보간 데이터 삽입하는 과정
+ */
 shared_ptr<FClipData> Converter::ReadAnimationData(aiAnimation* InAnimation)
 {
 	shared_ptr<FClipData> clipData = make_shared<FClipData>();
@@ -339,77 +340,208 @@ shared_ptr<FClipData> Converter::ReadAnimationData(aiAnimation* InAnimation)
 
 	for (UINT i = 0; i < InAnimation->mNumChannels; i++)
 	{
-		aiNodeAnim* nodeAnim = InAnimation->mChannels[i];
+	    aiNodeAnim* nodeAnim = InAnimation->mChannels[i];
 
-		shared_ptr<FKeyFrameData> FrameData = make_shared<FKeyFrameData>();
-		FrameData->BoneName = nodeAnim->mNodeName.C_Str();
+	    shared_ptr<FKeyFrameData> FrameData = make_shared<FKeyFrameData>();
+	    FrameData->BoneName = nodeAnim->mNodeName.C_Str();
+
+	    // 키 프레임을 임시로 rawPosKeys에 저장
+	    std::vector<FFrameData<Vector3>> rawPosKeys;
+	    for (UINT keyIndex = 0; keyIndex < nodeAnim->mNumPositionKeys; keyIndex++)
+	    {
+	        const aiVectorKey& key = nodeAnim->mPositionKeys[keyIndex];
+
+	        FFrameData<Vector3> PosData;
+	        PosData.mTime = (float)key.mTime;
+	        memcpy(&PosData.mValue, &key.mValue, sizeof(Vector3));
+
+	        rawPosKeys.push_back(PosData);
+	    }
+
+	    // 프레임 데이터의 Positon의 키를 duration만큼 할당
+	    FrameData->Positions.resize((UINT)clipData->Duration);
+
+	    for (UINT f = 0; f < (UINT)clipData->Duration; f++)
+	    {
+	        float currentTime = (float)f;
+
+	    	//해당 키 프레임이 없을 경우 identity 삽입
+	        if (rawPosKeys.size() == 0)
+	        {
+	            FrameData->Positions[f].mValue = Vector3(0, 0, 0);
+	        }
+	    	// 키 프레임에 데이터가 1개일 경우 마지막 틱에 동일한 데이터 삽입
+	        else if (rawPosKeys.size() == 1)
+	        {
+	            FrameData->Positions[f].mValue = rawPosKeys[0].mValue;
+	        }
+	        else
+	        {
+	            Vector3 value = rawPosKeys.back().mValue;
+
+	            // Find the key interval (i, i+1) where key[i].mTime <= time < key[i+1].mTime
+	            for (size_t k = 0; k < rawPosKeys.size() - 1; ++k)
+	            {
+	                float t1 = rawPosKeys[k].mTime;
+	                float t2 = rawPosKeys[k + 1].mTime;
+
+	                if (currentTime < t1)
+	                {
+	                    value = rawPosKeys[0].mValue;
+	                    break;
+	                }
+	                else if (currentTime >= t1 && currentTime < t2)
+	                {
+	                    float alpha = (currentTime - t1) / (t2 - t1);
+	                    Vector3 a = rawPosKeys[k].mValue;
+	                    Vector3 b = rawPosKeys[k + 1].mValue;
+	                    value = Vector3::Lerp(a, b, alpha);
+	                    break;
+	                }
+	            }
+
+	            FrameData->Positions[f].mValue = value;
+	        }
+
+	        FrameData->Positions[f].mTime = currentTime;
+	    }
 
 
-		//PositionKeys
-		for (UINT keyIndex = 0; keyIndex < nodeAnim->mNumPositionKeys; keyIndex++)
+		std::vector<FFrameData<Vector3>> rawScaleKeys;
+		for (UINT k = 0; k < nodeAnim->mNumScalingKeys; k++)
 		{
-			const aiVectorKey& key = nodeAnim->mPositionKeys[keyIndex];
+			const aiVectorKey& key = nodeAnim->mScalingKeys[k];
 
-			FFrameData<Vector3> PosData;
-			PosData.mTime = (float)key.mTime;
-			memcpy(&PosData.mValue, &key.mValue, sizeof(Vector3));
-
-			FrameData->Positions.push_back(PosData);
+			FFrameData<Vector3> s;
+			s.mTime = (float)key.mTime;
+			memcpy(&s.mValue, &key.mValue, sizeof(Vector3));
+			rawScaleKeys.push_back(s);
 		}
 
-		//ScalingKeys
-		for (UINT keyIndex = 0; keyIndex < nodeAnim->mNumScalingKeys; keyIndex++)
+		FrameData->Scalings.resize((UINT)clipData->Duration);
+
+		for (UINT f = 0; f < (UINT)clipData->Duration; f++)
 		{
-			const aiVectorKey& key = nodeAnim->mScalingKeys[keyIndex];
+			float currentTime = (float)f;
 
-			FFrameData<Vector3> ScaleData;
-			ScaleData.mTime = (float)key.mTime;
-			memcpy(&ScaleData.mValue, &key.mValue, sizeof(Vector3));
+			if (rawScaleKeys.size() == 0)
+			{
+				FrameData->Scalings[f].mValue = Vector3(1, 1, 1); // Identity scale
+			}
+			else if (rawScaleKeys.size() == 1)
+			{
+				FrameData->Scalings[f].mValue = rawScaleKeys[0].mValue;
+			}
+			else
+			{
+				Vector3 value = rawScaleKeys.back().mValue;
 
-			FrameData->Scalings.push_back(ScaleData);
-		}
+				for (size_t k = 0; k < rawScaleKeys.size() - 1; ++k)
+				{
+					float t1 = rawScaleKeys[k].mTime;
+					float t2 = rawScaleKeys[k + 1].mTime;
 
-		//RotationKeys
-		for (UINT keyIndex = 0; keyIndex < nodeAnim->mNumRotationKeys; keyIndex++)
-		{
-			const aiQuatKey& key = nodeAnim->mRotationKeys[keyIndex];
+					if (currentTime < t1)
+					{
+						value = rawScaleKeys[0].mValue;
+						break;
+					}
+					else if (currentTime >= t1 && currentTime < t2)
+					{
+						float alpha = (currentTime - t1) / (t2 - t1);
+						value = Vector3::Lerp(rawScaleKeys[k].mValue, rawScaleKeys[k + 1].mValue, alpha);
+						break;
+					}
+				}
 
-			FFrameData<Quaternion> quatData;
-			quatData.mTime = (float)key.mTime;
-			
-			quatData.mValue.x = key.mValue.x;
-			quatData.mValue.y = key.mValue.y;
-			quatData.mValue.z = key.mValue.z;
-			quatData.mValue.w = key.mValue.w;
+				FrameData->Scalings[f].mValue = value;
+			}
 
-			FrameData->Rotations.push_back(quatData);
+			FrameData->Scalings[f].mTime = currentTime;
 		}
 
 		
-		clipData->Keyframes.push_back(FrameData);
-		
+	    // ⏱ Rotation 처리 (Slerp)
+	    {
+	        std::vector<FFrameData<Quaternion>> rawRotKeys;
+	        for (UINT k = 0; k < nodeAnim->mNumRotationKeys; k++)
+	        {
+	            const aiQuatKey& key = nodeAnim->mRotationKeys[k];
+
+	            FFrameData<Quaternion> q;
+	            q.mTime = (float)key.mTime;
+	            q.mValue = Quaternion(key.mValue.x, key.mValue.y, key.mValue.z, key.mValue.w);
+	            rawRotKeys.push_back(q);
+	        }
+
+	        FrameData->Rotations.resize((UINT)clipData->Duration);
+
+	        for (UINT f = 0; f < (UINT)clipData->Duration; f++)
+	        {
+	            float currentTime = (float)f;
+
+	            if (rawRotKeys.size() == 0)
+	            {
+	                FrameData->Rotations[f].mValue = Quaternion();
+	            }
+	            else if (rawRotKeys.size() == 1)
+	            {
+	                FrameData->Rotations[f].mValue = rawRotKeys[0].mValue;
+	            }
+	            else
+	            {
+	                Quaternion value = rawRotKeys.back().mValue;
+
+	                for (size_t k = 0; k < rawRotKeys.size() - 1; ++k)
+	                {
+	                    float t1 = rawRotKeys[k].mTime;
+	                    float t2 = rawRotKeys[k + 1].mTime;
+
+	                    if (currentTime < t1)
+	                    {
+	                        value = rawRotKeys[0].mValue;
+	                        break;
+	                    }
+	                    else if (currentTime >= t1 && currentTime < t2)
+	                    {
+	                        float alpha = (currentTime - t1) / (t2 - t1);
+	                        value = Quaternion::Slerp(rawRotKeys[k].mValue, rawRotKeys[k + 1].mValue, alpha);
+	                        break;
+	                    }
+	                }
+
+	                FrameData->Rotations[f].mValue = value;
+	            }
+
+	            FrameData->Rotations[f].mTime = currentTime;
+	        }
+	    }
+
+	    // 🟨 Scale 처리도 동일 방식으로 rawScaleKeys 처리하면 됩니다
+
+	    clipData->Keyframes.push_back(FrameData);
 	}
 	
 
 	return clipData;
 }
 
-void Converter::ExportMesh(wstring InSaveFileName, EMeshType FileType)
+void Converter::ImportFBX_Mesh(wstring InSaveFileName, EMeshType FileType)
 {
 	
 	switch (FileType)
 	{
 	case EMeshType::StaticMeshType:
 		InSaveFileName = L"../../Contents/_Objects/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
-		ReadStaticMeshData();
-		WriteStaticMeshData(InSaveFileName);
+		ReadFBX_StaticMesh();
+		ConvertFBX_ToBinary_Mesh(InSaveFileName);
 		break;
 
 	case EMeshType::SkeletalMeshType:
 		InSaveFileName = L"../../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
-		ReadBoneData(Scene->mRootNode, 0, -1);
-		ReadSkeletalMeshData();
-		WriteSkeletalMeshData(InSaveFileName);
+		ReadFBX_Bone(Scene->mRootNode, 0, -1);
+		ReadFBX_SkeletalMesh();
+		ConvertFBX_ToBinary_SkeletalMesh(InSaveFileName);
 		break;
 	}
 	
@@ -420,7 +552,7 @@ bool Converter::IsAssimpFbxHelperNode(const string& name)
 	return name.find("_$AssimpFbx$_") != std::string::npos;
 }
 
-void Converter::ReadBoneData(aiNode* InNode, int InIndex, int InParent)
+void Converter::ReadFBX_Bone(aiNode* InNode, int InIndex, int InParent)
 {
 	std::string nodeName = InNode->mName.C_Str();
 
@@ -440,7 +572,7 @@ void Converter::ReadBoneData(aiNode* InNode, int InIndex, int InParent)
 		// 자식들은 건너뛰지 않고 계속 처리
 		for (UINT i = 0; i < InNode->mNumChildren; i++)
 		{
-			ReadBoneData(InNode->mChildren[i], InIndex, InParent);
+			ReadFBX_Bone(InNode->mChildren[i], InIndex, InParent);
 		}
 
 		return; // 보조 노드는 추가하지 않음
@@ -469,10 +601,10 @@ void Converter::ReadBoneData(aiNode* InNode, int InIndex, int InParent)
 	Bones.push_back(bone);
 
 	for (UINT i = 0; i < InNode->mNumChildren; i++)
-		ReadBoneData(InNode->mChildren[i], (int)Bones.size(), InIndex);
+		ReadFBX_Bone(InNode->mChildren[i], (int)Bones.size(), InIndex);
 }
 
-void Converter::ReadSkeletalMeshData()
+void Converter::ReadFBX_SkeletalMesh()
 {
 	for (UINT i = 0; i < Scene->mNumMeshes; i++)
 	{
@@ -532,7 +664,7 @@ void Converter::ReadSkeletalMeshData()
 
 
 
-void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
+void Converter::ConvertFBX_ToBinary_SkeletalMesh(wstring InSaveFileName)
 {
 	Path::CreateFolders(Path::GetDirectoryName(InSaveFileName));
 
@@ -577,7 +709,7 @@ void Converter::WriteSkeletalMeshData(wstring InSaveFileName)
 	
 }
 
-void Converter::ReadAnimationFile(wstring InFilePath, USkeletalMeshComponent* meshComp)
+void Converter::ReadFBX_Animation(wstring InFilePath, USkeletalMeshComponent* meshComp)
 {
 	InFilePath = L"../../Contents/_Models/" + InFilePath + L".animation";
 	
@@ -629,14 +761,14 @@ void Converter::ReadAnimationFile(wstring InFilePath, USkeletalMeshComponent* me
 			if(iter != meshComp->ReadBoneTable.end())
 				animation->Keyframes[i] = data;
 		}
-		meshComp->Animations.push_back(animation);
+		meshComp->AnimInstance->Animations.push_back(animation);
 
 		reader->Close();
 	
 	}
 }
 
-void Converter::WriteAnimationData(wstring InSaveFileName, shared_ptr<FClipData> InClipData)
+void Converter::ConvertFBX_ToBinary_Animation(wstring InSaveFileName, shared_ptr<FClipData> InClipData)
 {
 	Path::CreateFolders(Path::GetDirectoryName(InSaveFileName));
 
@@ -673,7 +805,7 @@ void Converter::WriteAnimationData(wstring InSaveFileName, shared_ptr<FClipData>
 	w->Close();
 }
 
-void Converter::ReadStaticMeshData()
+void Converter::ReadFBX_StaticMesh()
 {
 	for (UINT i = 0; i < Scene->mNumMeshes; i++)
 	{
@@ -732,7 +864,7 @@ void Converter::ReadStaticMeshData()
 }
 
 
-void Converter::WriteStaticMeshData(wstring InSaveFileName)
+void Converter::ConvertFBX_ToBinary_Mesh(wstring InSaveFileName)
 {
 	Path::CreateFolders(Path::GetDirectoryName(InSaveFileName));
 
@@ -760,7 +892,7 @@ void Converter::WriteStaticMeshData(wstring InSaveFileName)
 }
 
 
-void Converter::ReadBoneFile(BinaryReader* InReader, USkeletalMeshComponent* meshComp)
+void Converter::ReadBinary_Bone(BinaryReader* InReader, USkeletalMeshComponent* meshComp)
 {
 	UINT count = InReader->FromUInt();
 

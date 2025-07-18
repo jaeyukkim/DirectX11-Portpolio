@@ -52,7 +52,11 @@ void StaticMeshRenderProxy::RunFrustumCulling()
 
 void StaticMeshRenderProxy::Render(const FRenderOption& option)
 {
-    if(!option.NoOption)
+    if(option.bDepthOnly)
+    {
+        FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->DepthOnlyPSO);
+    }
+    else
     {
         RunFrustumCulling();
     }
@@ -96,9 +100,12 @@ void StaticMeshRenderProxy::Render(const FRenderOption& option)
         RenderData[i].Transform->UpdateConstBuffer();
         RenderData[i].Transform->VSSetConstantBuffer(EConstBufferSlot::CB_World, 1);
         
-        
-        D3D::Get()->GetDeviceContext()->DrawIndexedInstancedIndirect(InstanceIndirectBuffer[i].GetBuffer().Get(), 0);
-
+        if(!option.bDepthOnly)
+            D3D::Get()->GetDeviceContext()->DrawIndexedInstancedIndirect(InstanceIndirectBuffer[i].GetBuffer().Get(), 0);
+        else
+        {
+            D3D::Get()->GetDeviceContext()->DrawIndexed(RenderData[i].IndexCount, 0, 0);
+        }
     }
 }
 

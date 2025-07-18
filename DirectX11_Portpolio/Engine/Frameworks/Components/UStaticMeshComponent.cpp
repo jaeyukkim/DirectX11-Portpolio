@@ -12,21 +12,17 @@
  */
 
 
-UStaticMeshComponent::UStaticMeshComponent(wstring InFileName, StaticMeshCreateInfo info)
+UStaticMeshComponent::UStaticMeshComponent(wstring InMeshName, StaticMeshCreateInfo info)
+	:MeshName(String::ToString(InMeshName))
 {
-	wstring objectName = InFileName;
-	InFileName = L"../../Contents/_Objects/" + objectName + L".model";
+	
+	InMeshName = L"../../Contents/_Objects/" + InMeshName + L".model";
 
 	shared_ptr<Converter> converter = make_shared<Converter>();
-	if (info.bOverWrite)
-	{
-		converter->ExportFile(objectName, EMeshType::StaticMeshType);
-	}
-
-	MeshName = String::ToString(objectName);
-	converter->ReadMeshInfo(InFileName, this,
+	converter->ReadBinary_ModelFile(InMeshName, this,
 		FSceneRender::Get()->StaticMeshHasCreated(MeshName));
 
+	
 	if(!info.bIsMirror && !info.bIsSkyBox)
 		FSceneRender::Get()->CreateMeshRenderProxy<StaticMeshRenderProxy>(MeshName, this);
 }

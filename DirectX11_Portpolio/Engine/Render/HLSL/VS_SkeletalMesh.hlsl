@@ -1,6 +1,6 @@
 #include "Common.hlsli"
 
-#define MAX_MODEL_TRANSFORM 250
+
 
 
 cbuffer CB_ModelBones : register(b3)

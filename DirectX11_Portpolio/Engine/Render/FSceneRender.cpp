@@ -49,9 +49,9 @@ void FSceneRender::BeginRender()
 
 void FSceneRender::RenderDepthOnly()
 {
-   // D3D::Get()->GetDeviceContext()->OMSetRenderTargets(1, D3D::Get()->ResolvedRTV.GetAddressOf(),
-   //                               D3D::Get()->DepthOnlyDSV.Get());
-    D3D::Get()->GetDeviceContext()->OMSetRenderTargets(0, NULL, D3D::Get()->DepthOnlyDSV.Get());
+    //D3D::Get()->GetDeviceContext()->OMSetRenderTargets(1, D3D::Get()->ResolvedRTV.GetAddressOf(),
+    //                              D3D::Get()->DepthOnlyDSV.Get());
+    D3D::Get()->GetDeviceContext()->OMSetRenderTargets(0, nullptr, D3D::Get()->DepthOnlyDSV.Get());
     D3D::Get()->GetDeviceContext()->ClearDepthStencilView(D3D::Get()->DepthOnlyDSV.Get(), D3D11_CLEAR_DEPTH,
                                      1.0f, 0);
     
@@ -83,18 +83,18 @@ void FSceneRender::RenderShadowMap()
             if (it != D3D::Get()->ShadowResources.end())
             {
                 auto& shadow = it->second;
-                D3D::Get()->GetDeviceContext()->OMSetRenderTargets(0, NULL, shadow.ShadowDSV.Get());
+                D3D::Get()->GetDeviceContext()->OMSetRenderTargets(0, nullptr, shadow.ShadowDSV.Get());
                 D3D::Get()->GetDeviceContext()->ClearDepthStencilView(shadow.ShadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
                 ViewProxy->SetLightViewMode(id);
             }
 
-            FRenderOption noOption = FRenderOption();
-            noOption.NoOption = true;
+            FRenderOption depthOnly = FRenderOption();
+            depthOnly.bDepthOnly = true;
             
-            RenderObjects(noOption);
+            RenderObjects(depthOnly);
             for(shared_ptr<MirrorRenderProxy> mirror : MirrorProxy)
             {
-                mirror->Render(noOption);
+                mirror->Render(depthOnly);
             }
          
         }
@@ -232,6 +232,16 @@ bool FSceneRender::SkeletalMeshHasCreated(const string& meshName)
 {
     
     if (SkeletalMeshProxies.find(meshName) != SkeletalMeshProxies.end())
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool FSceneRender::AnimProxyHasCreated(const string& meshName)
+{
+    if (AnimProxies.find(meshName) != AnimProxies.end())
     {
         return true;
     }

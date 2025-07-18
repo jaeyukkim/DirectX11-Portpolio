@@ -32,52 +32,51 @@ class Converter
 public:
 	Converter();
 	~Converter();
-	void ExportFile(const wstring objectName, const EMeshType& meshType);
 
-public:
 	template<typename MeshType>
-	void ReadMeshInfo(wstring InFileName, MeshType InMesh, bool bHasCreated);
-	void ReadAnimInfo(wstring InFileName, USkeletalMeshComponent* meshComp, bool bHasCreated);
+	void ReadBinary_ModelFile(wstring InFileName, MeshType InMesh, bool bHasCreated);
+	void ReadBinary_Anim(wstring InFileName, USkeletalMeshComponent* meshComp, bool bHasCreated);
 	shared_ptr<FClipData> ReadAnimationData(aiAnimation* InAnimation);
 	
-public:
-	void ExportMesh(wstring InSaveFileName, EMeshType FileType);
-	void ExportMaterial(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType);
-	void ExportAnimation(wstring objectName, wstring animationName, int InClipIndex = 0);
-	
-	string ColorToJson(const Color& InColor);
-	string FloatToJson(const float val);
-	Color JsonStringToColor(string InString);
-    
+	void ImportFBXFile(const wstring objectName, const EMeshType& meshType);
+	void ImportFBX_Animation(wstring objectName, wstring animationName, int InClipIndex = 0);
+	void ImportFBX_Mesh(wstring InSaveFileName, EMeshType FileType);
+	void ImportFBX_Material(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType);
 
+	
 private:
-	void ReadMaterials(EMeshType InMeshType);
-	void WriteMaterial(wstring InSaveFileName, bool InOverwrite);
-	string SaveTexture(string InSaveFolder, string InFileName);
-
-	void ReadStaticMeshData();
-	void WriteStaticMeshData(wstring InSaveFileName);
-    
-	void ReadBoneData(aiNode* InNode, int InIndex, int InParent);
-	void ReadSkeletalMeshData();
-	void WriteSkeletalMeshData(wstring InSaveFileName);
-
-	void ReadAnimationFile(wstring InFilePath, USkeletalMeshComponent* meshComp);
-	void WriteAnimationData(wstring InSaveFileName, shared_ptr<FClipData> InClipData);
+	void ReadFBX_StaticMesh();
+	void ReadFBX_SkeletalMesh();
+	void ReadFBX_Bone(aiNode* InNode, int InIndex, int InParent);
+	void ReadFBX_Material();
+	void ReadFBX_Animation(wstring InFilePath, USkeletalMeshComponent* meshComp);
 	
+	void ConvertFBX_ToBinary_Material(wstring InSaveFileName, bool InOverwrite);
+	void ConvertFBX_ToBinary_Mesh(wstring InSaveFileName);
+	void ConvertFBX_ToBinary_SkeletalMesh(wstring InSaveFileName);
+	void ConvertFBX_ToBinary_Animation(wstring InSaveFileName, shared_ptr<FClipData> InClipData);
+
 private:
 	template<typename MeshType>
-  void InitMaterial(wstring InFilePath, MeshType InMesh);
-    
+	void InitMaterial(wstring InFilePath, MeshType InMesh);
+	
 	template<typename MeshType>
 	void InitMesh(wstring InFilePath, MeshType InMesh);
     
 	template<typename MeshType>
-	void ReadMeshData(BinaryReader* InReader, MeshType InMesh);
-	void ReadBoneFile(BinaryReader* InReader, USkeletalMeshComponent* meshComp);
+	void ReadBinary_Mesh(BinaryReader* InReader, MeshType InMesh);
+	void ReadBinary_Bone(BinaryReader* InReader, USkeletalMeshComponent* meshComp);
 
+
+private:
+	string SaveTexture(string InSaveFolder, string InFileName);
+	string ColorToJson(const Color& InColor);
+	string FloatToJson(const float val);
+	Color JsonStringToColor(string InString);
 	void ConvertToDXCoord(Vector3* normal, Vector3* tangent);
 	bool IsAssimpFbxHelperNode(const string& name);
+
+	
 private:
 	wstring ReadFilePath;
 
@@ -95,7 +94,7 @@ private:
 
 
 template <typename MeshType>
-void Converter::ReadMeshInfo(wstring InFileName, MeshType InMesh, bool bHasCreated)
+void Converter::ReadBinary_ModelFile(wstring InFileName, MeshType InMesh, bool bHasCreated)
 {
     ifstream stream;
     stream.open(InFileName);
@@ -137,8 +136,6 @@ void Converter::ReadMeshInfo(wstring InFileName, MeshType InMesh, bool bHasCreat
 		InitMaterial(String::ToWString(materialName), InMesh);
 		InitMesh(String::ToWString(meshName), InMesh);
 	}
-
-
 	
 }
 
@@ -228,7 +225,7 @@ void Converter::InitMesh(wstring InFilePath, MeshType InMesh)
 	
 	unique_ptr<BinaryReader> reader = make_unique<BinaryReader>();
 	reader->Open(InFilePath);
-	ReadMeshData(reader.get(), InMesh);
+	ReadBinary_Mesh(reader.get(), InMesh);
 	reader->Close();
 
 	//스켈레탈 메시 타입이 아니라면 종료
@@ -264,7 +261,7 @@ void Converter::InitMesh(wstring InFilePath, MeshType InMesh)
 }
 
 template <typename MeshType>
-void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
+void Converter::ReadBinary_Mesh(BinaryReader* InReader, MeshType InMesh)
 {
 	
 
@@ -297,7 +294,7 @@ void Converter::ReadMeshData(BinaryReader* InReader, MeshType InMesh)
 	
 	else if (auto skeletalMeshComp = dynamic_cast<USkeletalMeshComponent*>(InMesh))
 	{
-		ReadBoneFile(InReader, skeletalMeshComp);
+		ReadBinary_Bone(InReader, skeletalMeshComp);
 		
 		UINT count = InReader->FromUInt();
 		for (UINT i = 0; i < count; i++)

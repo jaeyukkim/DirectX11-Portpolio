@@ -43,7 +43,8 @@ private:
     void InitPSO();
     
     void CompileVSAndInputLayout(const wstring& path, ComPtr<ID3D11VertexShader>& InVertexShader,
-        const vector<D3D11_INPUT_ELEMENT_DESC>& InIE, ComPtr<ID3D11InputLayout>& InIL);
+        const vector<D3D11_INPUT_ELEMENT_DESC>& InIE, ComPtr<ID3D11InputLayout>& InIL,
+        const vector<D3D_SHADER_MACRO> shaderMacros = {/* Empty default */});
     void CompilePS(const wstring& path, ComPtr<ID3D11PixelShader>& InPixelShader);
     void CompileHS(const wstring& path, ComPtr<ID3D11HullShader>& InHullShader);
     void CompileDS(const wstring& path, ComPtr<ID3D11DomainShader>& InDomainShader);
@@ -75,6 +76,7 @@ public:
     FPSO ReflectSkyboxWirePSO;
     FPSO NormalsPSO;
     FPSO DepthOnlyPSO;
+    FPSO DepthOnlySkinnedPSO;
     FPSO PostEffectsPSO;
     FPSO PostProcessingPSO;
     FPSO BloomUpPSO;
@@ -99,6 +101,7 @@ private:
     ComPtr<ID3D11VertexShader> MeshVS;
     ComPtr<ID3D11VertexShader> SkeletalMeshVS;
     ComPtr<ID3D11VertexShader> DepthOnlyVS;
+    ComPtr<ID3D11VertexShader> DepthOnlySkeletalVS;
     ComPtr<ID3D11VertexShader> NormalVS;
     ComPtr<ID3D11VertexShader> SkyboxVS;
     ComPtr<ID3D11VertexShader> SamplingVS;

@@ -1,5 +1,6 @@
 #pragma once
 //#include "Render/RenderDefinition.h"
+#include "RenderProxy/AnimationRenderProxy.h"
 #include "RenderProxy/LightSceneRenderProxy.h"
 #include "RenderProxy/MirrorRenderProxy.h"
 #include "RenderProxy/SkeletalMeshRenderProxy.h"
@@ -26,6 +27,8 @@ public:
     void CreateRenderProxy(Args&&... args);
     template <typename ProxyType, typename... Args>
     void CreateMeshRenderProxy(const string& meshName, Args&&... args);
+    template <typename ProxyType, typename... Args>
+    void CreateAnimRenderProxy(const string& meshName, Args&&... args);
     template <typename ProxyType>
     void DestroyMeshProxy(const string& meshName, const int instanceID);
  
@@ -55,6 +58,7 @@ public:
     PostEffect* GetPostEffect() { return PostEffectEntity.get(); }
     bool StaticMeshHasCreated(const string& meshName);
     bool SkeletalMeshHasCreated(const string& meshName);
+    bool AnimProxyHasCreated(const string& meshName);
 
 private:
     FSceneRender() = default;
@@ -68,6 +72,8 @@ private:
     static FSceneRender* Instance;
     unordered_map<string, shared_ptr<StaticMeshRenderProxy>> MeshProxies;
     unordered_map<string, shared_ptr<SkeletalMeshRenderProxy>> SkeletalMeshProxies;
+    unordered_map<string, shared_ptr<AnimationRenderProxy>> AnimProxies;
+
     shared_ptr<LightSceneRenderProxy> LightSceneProxy;
     shared_ptr<ViewRenderProxy> ViewProxy;
     vector<shared_ptr<MirrorRenderProxy>> MirrorProxy;
@@ -140,6 +146,22 @@ void FSceneRender::CreateMeshRenderProxy(const string& meshName, Args&&... args)
    
 }
 
+template <typename ProxyType, typename ... Args>
+void FSceneRender::CreateAnimRenderProxy(const string& meshName, Args&&... args)
+{
+    if constexpr (std::is_same_v<ProxyType, AnimationRenderProxy>)
+    {
+        if(AnimProxyHasCreated(meshName))
+        {
+            AnimProxies[meshName]->AddInstance(std::forward<Args>(args)...);
+        }
+        else
+        {
+            AnimProxies[meshName] = std::make_shared<AnimationRenderProxy>(std::forward<Args>(args)...);
+        }
+    }
+}
+
 template <typename ProxyType>
 void FSceneRender::DestroyMeshProxy(const string& meshName, const int instanceID)
 {
@@ -175,10 +197,20 @@ void FSceneRender::DestroyMeshProxy(const string& meshName, const int instanceID
             if(mesh->GetNumOfInstance() == 1)
             {
                 SkeletalMeshProxies.erase(meshName);
+
+                if (AnimProxies.find(meshName) != AnimProxies.end())
+                {
+                    AnimProxies.erase(meshName);
+                }
+              
             }
             else
             {
                 mesh->DeleteInstance(instanceID);
+                if(AnimProxies.size() > 0)
+                {
+                    AnimProxies[meshName]->DeleteInstance(instanceID);
+                }
             }
         }
         catch (exception& e)

@@ -58,6 +58,10 @@ void MirrorRenderProxy::Render(const FRenderOption& option)
         BlendPSO.SetBlendFactor(*Data.BlendFactor);
         FGlobalPSO::Get()->BindPSO(BlendPSO);
     }
+    else if(option.bDepthOnly)
+    {
+        FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->DepthOnlyPSO);
+    }
   
     
     Data.MeshData.MaterialData->BindMaterial();

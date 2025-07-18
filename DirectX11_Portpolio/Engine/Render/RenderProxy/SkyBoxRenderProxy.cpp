@@ -42,6 +42,10 @@ void SkyBoxRenderProxy::Render(const FRenderOption& option)
             FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->ReflectSkyboxWirePSO);
         }
     }
+    else if(option.bDepthOnly)
+    {
+        FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->DepthOnlyPSO);
+    }
     
     Data.MaterialData->BindMaterial();
     Data.VBuffer->IASetVertexBuffer();

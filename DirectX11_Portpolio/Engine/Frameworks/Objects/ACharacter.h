@@ -15,5 +15,5 @@ public:
 
 
 	vector<shared_ptr<USkeletalMeshComponent>> Mesh;
-	
+
 }; 

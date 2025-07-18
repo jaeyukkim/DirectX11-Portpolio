@@ -1,5 +1,6 @@
 #pragma once
 #include "Mesh/VertexData.h"
+#include "Resource/AnimationData.h"
 
 
 class StructuredBuffer;
@@ -11,7 +12,7 @@ class IndexBuffer;
 #define MAX_LIGHT_COUNT 9
 #define MAX_SHADOW_COUNT 9
 #define MAX_INSTANCE_SIZE 1000
-#define MAX_MODEL_KEYFRAME 500
+
 
 
 enum ELightType : UINT
@@ -34,7 +35,8 @@ enum ERenderProxyType : UINT8
     RPT_SkeletalMesh,
     RPT_StaticMesh,
     RPT_SkyBox,
-    RPT_Mirror
+    RPT_Mirror,
+    PRT_Anim
 };
 
 
@@ -189,6 +191,8 @@ struct FSkeletalMeshRenderData
 
 struct FSKM_InstDataCPU
 {
+    FAnimBlendingData AnimBlendData;
+    
     Matrix ModelMat;
     
     Vector3 AABB_Max;

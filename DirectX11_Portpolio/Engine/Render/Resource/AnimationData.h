@@ -1,27 +1,31 @@
 #pragma once
 
-struct AnimationFrameDesc
+#define MAX_MODEL_KEYFRAME 500
+
+class Skeletal;
+
+struct FAnimaFrameData
 {
     int Clip = -1;
     float TickersPerSeconds;
     float Duration;
     UINT CurrentFrame = 0;
+    
     UINT NextFrame = 0;
     float CurrentTime = 0.0f;
     float Speed = 1.0f;
-		
-    float Padding;
+    float Padding = 0.0f;;
 };
 
-struct AnimationBlendingDesc
+struct FAnimBlendingData
 {
     float TakeTime = 1.0f;
     float ChangingTime = 0.0f;
     float Speed = 1.0f;
-    float Padding;
+    float Padding = 0.0f;
 
-    AnimationFrameDesc Current;
-    AnimationFrameDesc Next;
+    FAnimaFrameData Current;
+    FAnimaFrameData Next;
 };
 
 template<typename ValType>

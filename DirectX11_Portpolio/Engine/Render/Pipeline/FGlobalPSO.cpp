@@ -135,8 +135,13 @@ void FGlobalPSO::InitVSAndIL()
     
     
     CompileVSAndInputLayout(MeshVSPath, MeshVS, meshIED, MeshIL);
-    CompileVSAndInputLayout(SkeletalMeshVSPath, SkeletalMeshVS, skeletalMeshIED, SkeletalMeshIL);
+    CompileVSAndInputLayout(SkeletalMeshVSPath, SkeletalMeshVS, skeletalMeshIED, SkeletalMeshIL,
+        vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, {NULL, NULL}});
+    
     CompileVSAndInputLayout(DepthOnlyVSPath, DepthOnlyVS, meshIED, MeshIL);
+    CompileVSAndInputLayout(DepthOnlyVSPath, DepthOnlySkeletalVS, skeletalMeshIED, MeshIL,
+        vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, {NULL, NULL}});
+    
     CompileVSAndInputLayout(SkyBoxVSPath, SkyboxVS, meshIED, MeshIL);
     CompileVSAndInputLayout(SamplingVSPath, SamplingVS, samplingIED, SamplingIL);
     //CompileVS(NormalVSPath, NormalVS);
@@ -490,6 +495,9 @@ void FGlobalPSO::InitPSO()
     DepthOnlyPSO.m_vertexShader = DepthOnlyVS;
     DepthOnlyPSO.m_pixelShader = DepthOnlyPS;
 
+    DepthOnlySkinnedPSO = DepthOnlyPSO;
+    DepthOnlySkinnedPSO.m_vertexShader = DepthOnlySkeletalVS;
+
     // GaussianPSO
     XGaussianPSO.m_computeShader = XGaussianCS;
     YGaussianPSO.m_computeShader = YGaussianCS;
@@ -498,13 +506,14 @@ void FGlobalPSO::InitPSO()
 
 
 void FGlobalPSO::CompileVSAndInputLayout(const wstring& path, ComPtr<ID3D11VertexShader>& InVertexShader,
-    const vector<D3D11_INPUT_ELEMENT_DESC> &InIE, ComPtr<ID3D11InputLayout>& InIL)
+    const vector<D3D11_INPUT_ELEMENT_DESC> &InIE, ComPtr<ID3D11InputLayout>& InIL,
+    const vector<D3D_SHADER_MACRO> shaderMacros)
 {
     ComPtr<ID3DBlob> Blob;
     ComPtr<ID3DBlob> ErrorBlob;
     
     UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-    HRESULT hr = D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+    HRESULT hr = D3DCompileFromFile(path.c_str(), shaderMacros.empty() ? nullptr : shaderMacros.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE,
         "VS_Main", "vs_5_0", flags, 0, Blob.GetAddressOf(), ErrorBlob.GetAddressOf());
     Assert_IF_FailedCompile(hr, ErrorBlob);
 

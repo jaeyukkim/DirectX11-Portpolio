@@ -8,13 +8,12 @@ struct StaticMeshCreateInfo
 {
     bool bIsSkyBox = false;
     bool bIsMirror = false;
-    bool bOverWrite = false;
 };
 
 class UStaticMeshComponent : public UPrimitiveComponent
 {
 public:
-    UStaticMeshComponent(wstring InFileName, StaticMeshCreateInfo info = StaticMeshCreateInfo());
+    UStaticMeshComponent(wstring InMeshName, StaticMeshCreateInfo info = StaticMeshCreateInfo());
     
     virtual ~UStaticMeshComponent();
 

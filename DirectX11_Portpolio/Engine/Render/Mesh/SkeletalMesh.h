@@ -42,7 +42,7 @@ public:
     
 protected:
     void CreateBuffer();
-    void CreateAnimationBuffer();
+    
     
 private:
     void SetWorld(const FTransform* InTransform);
@@ -50,7 +50,7 @@ private:
 private:
     SkeletalMeshInfo Data;
     shared_ptr<FTransform> MeshWorld;
-    AnimationBlendingDesc BlendingData[MAX_INSTANCE_SIZE];
+    
 
     struct BoneDesc
     {
@@ -63,8 +63,7 @@ private:
     shared_ptr<VertexBuffer> VBuffer = nullptr;
     shared_ptr<IndexBuffer> IBuffer = nullptr;
     shared_ptr<ConstantBuffer> BoneBuffer = nullptr;
-    ComPtr<ID3D11ShaderResourceView> ClipsSRV = nullptr;
-    shared_ptr<ConstantBuffer> BlendDataCBuffer;
+  
 
     
 private:

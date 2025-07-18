@@ -7,14 +7,14 @@ struct SkyboxPSInput
 };
 
 
-SkyboxPSInput VS_Main(StaticMeshInput input)
+SkyboxPSInput VS_Main(VertexShaderInput input)
 {
 
     SkyboxPSInput output;
 
 
     
-    output.posProj = mul(float4(input.posObject.xyz, 0.0f), World);
+    output.posProj = mul(float4(input.posModel.xyz, 0.0f), World);
     output.posModel = output.posProj.xyz;
     output.posProj = mul(float4(output.posProj.xyz, 0.0f), View);
     output.posProj = mul(float4(output.posProj.xyz, 1.0f), Projection);

@@ -7,35 +7,16 @@
  * @param InFileName SkeletalMesh의 바이너리 파일 이름
  * @param bOverwrite FBX 또는 gltf 파일을 읽어 다시 import할지 여부
  */
-USkeletalMeshComponent::USkeletalMeshComponent(wstring InFileName, const SkeletalMeshCreateInfo info)
+USkeletalMeshComponent::USkeletalMeshComponent(wstring InMeshName)
+	:MeshName(String::ToString(InMeshName))
 {
-	wstring objectName = InFileName;
-	InFileName = L"../../Contents/_Models/" + objectName + L".model";
+	wstring objectName = InMeshName;
+	InMeshName = L"../../Contents/_Models/" + objectName + L".model";
+
 	
 	shared_ptr<Converter> converter = make_shared<Converter>();
-	if (info.bOverWrite)
-	{
-		converter->ExportFile(objectName, EMeshType::SkeletalMeshType);
-	}
-	if(info.bExportAnimation)
-	{
-		for(string animName : info.exportAnimName)
-		{
-			converter->ExportAnimation(objectName, String::ToWString(animName));
-		}
-	}
-
-	MeshName = String::ToString(objectName);
-
-	converter->ReadMeshInfo(InFileName, this,
+	converter->ReadBinary_ModelFile(InMeshName, this,
 		FSceneRender::Get()->SkeletalMeshHasCreated(MeshName));
-
-	
-	if(info.bReadAnimation)
-	{
-		converter->ReadAnimInfo(InFileName, this,
-		FSceneRender::Get()->SkeletalMeshHasCreated(MeshName));
-	}
 	
 	FSceneRender::Get()->CreateMeshRenderProxy<SkeletalMeshRenderProxy>(MeshName, this);
 }
@@ -56,6 +37,8 @@ void USkeletalMeshComponent::TickComponent(float deltaTime)
 	}
 
 	TransformChanged.Broadcast(*InstanceID, WorldBufferData.World);
+
+	AnimInstance->NativeUpdateAnimation(deltaTime);
 }
 
 

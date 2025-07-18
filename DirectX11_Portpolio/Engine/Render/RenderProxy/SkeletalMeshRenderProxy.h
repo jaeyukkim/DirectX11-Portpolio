@@ -1,6 +1,7 @@
 #pragma once
 #include "RenderProxy.h"
 
+struct FAnimBlendingData;
 class IndirectBuffer;
 class USkeletalMeshComponent;
 class SkeletalMesh;
@@ -18,8 +19,11 @@ public:
     void RunFrustumCulling();
     void AddInstance(USkeletalMeshComponent* meshComp);
     void DeleteInstance(const int InstanceID);
+    void UpdateAnimationData(const int InstanceID, FAnimBlendingData& blendData);
+    
+public:
     void CopyCntToIndirect();
-    void CteateInstanceIndirectData();
+    void CteateInstanceIndirectData(int instanceCnt = 0);
     void CreateCSIndirectData();
     void TransformChange(int id, Matrix& mat);
     void CalcAABB(USkeletalMeshComponent* meshComp);

@@ -152,6 +152,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Editor\WindowView\ContentWindow.h" />
     <ClInclude Include="Editor\WindowView\DetailWindow.h" />
     <ClInclude Include="Editor\WindowView\OutlinerWindow.h" />
+    <ClInclude Include="Frameworks\Animation\UAnimInstance.h" />
     <ClInclude Include="Frameworks\Camera\UCameraComponent.h" />
     <ClInclude Include="Frameworks\Components\UActorComponent.h" />
     <ClInclude Include="Frameworks\Components\UPrimitiveComponent.h" />
@@ -190,6 +191,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Render\PostProcess\ImageFilter.h" />
     <ClInclude Include="Render\PostProcess\PostProcess.h" />
     <ClInclude Include="Render\RenderDefinition.h" />
+    <ClInclude Include="Render\RenderProxy\AnimationRenderProxy.h" />
     <ClInclude Include="Render\RenderProxy\LightSceneRenderProxy.h" />
     <ClInclude Include="Render\RenderProxy\MirrorRenderProxy.h" />
     <ClInclude Include="Render\RenderProxy\RenderProxy.h" />
@@ -320,6 +322,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Editor\WindowView\ContentWindow.cpp" />
     <ClCompile Include="Editor\WindowView\DetailWindow.cpp" />
     <ClCompile Include="Editor\WindowView\OutlinerWindow.cpp" />
+    <ClCompile Include="Frameworks\Animation\UAnimInstance.cpp" />
     <ClCompile Include="Frameworks\Camera\UCameraComponent.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -1156,6 +1159,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Render\PostEffects\PostEffect.cpp" />
     <ClCompile Include="Render\PostProcess\ImageFilter.cpp" />
     <ClCompile Include="Render\PostProcess\PostProcess.cpp" />
+    <ClCompile Include="Render\RenderProxy\AnimationRenderProxy.cpp" />
     <ClCompile Include="Render\RenderProxy\LightSceneRenderProxy.cpp" />
     <ClCompile Include="Render\RenderProxy\MirrorRenderProxy.cpp" />
     <ClCompile Include="Render\RenderProxy\RenderProxy.cpp" />
@@ -1555,9 +1559,6 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Main</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Frameworks\Animation\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

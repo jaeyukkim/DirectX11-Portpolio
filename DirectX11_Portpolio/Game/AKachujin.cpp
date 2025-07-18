@@ -1,23 +1,15 @@
 #include "Pch.h"
-#include "Pch.h"
 #include "Frameworks/Camera/UCameraComponent.h"
+#include "Frameworks/Animation/UAnimInstance.h"
 #include "AKachujin.h"
 
 AKachujin::AKachujin()
 {
-    SkeletalMeshCreateInfo info;
-    info.bExportAnimation = true;
-    info.bReadAnimation = true;
-    info.bOverWrite = true;
-    info.exportAnimName.push_back("Idle_Kachujin");
-    info.exportAnimName.push_back("sword_and_shield_idle");
-    info.exportAnimName.push_back("sword_and_shield_walk");
-    info.exportAnimName.push_back("sword_and_shield_jump");
-    info.exportAnimName.push_back("sheath_sword_1");
-
     
     
-    Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin", info));
+    Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
+    Mesh[0]->CreateAnimInstance<UAnimInstance>();
+    
     //Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Samurai"));
 
     //Mesh[1]->GetRelativeTransform()->SetPosition(Vector3(15.0f, 0.25f, 6.0f));
