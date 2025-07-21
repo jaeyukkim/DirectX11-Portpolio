@@ -1,13 +1,16 @@
 #include "Common.hlsli"
 
 
+
 cbuffer CB_Frustum : register(b9)
 {
     float4 FrustumPlane[6];
 };
 
-ConsumeStructuredBuffer<SM_Instance> InInstances : register(u0);
-AppendStructuredBuffer<SM_Instance> OutInstances : register(u1);
+
+ConsumeStructuredBuffer<InstanceData> InInstances : register(u0);
+AppendStructuredBuffer<InstanceData> OutInstances : register(u1);
+
 
 
 
@@ -16,8 +19,8 @@ void CS_Main(uint3 DTid : SV_DispatchThreadID)
 {
     
     // 버퍼에서 한 인스턴스 가져옴 (ConsumeStructuredBuffer 사용)
-    SM_Instance inst = InInstances.Consume();  
-   
+    InstanceData inst = InInstances.Consume();  
+
     
     // AABB의 8개 코너를 월드 좌표로 변환
     float3 corners[8];

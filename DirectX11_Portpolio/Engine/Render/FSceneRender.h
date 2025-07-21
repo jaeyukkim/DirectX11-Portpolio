@@ -1,5 +1,6 @@
 #pragma once
 //#include "Render/RenderDefinition.h"
+#include "Libraries/Timer/Timer.h"
 #include "RenderProxy/AnimationRenderProxy.h"
 #include "RenderProxy/LightSceneRenderProxy.h"
 #include "RenderProxy/MirrorRenderProxy.h"
@@ -14,6 +15,8 @@ enum ERenderProxyType : UINT8;
 class RenderProxy;
 class LightSceneRenderProxy;
 class ViewRenderProxy;
+
+
 
 class FSceneRender
 {
@@ -80,6 +83,11 @@ private:
     shared_ptr<SkyBoxRenderProxy> SkyBoxProxy;
 
     shared_ptr<PostEffect> PostEffectEntity;
+
+private:
+    shared_ptr<ConstantBuffer> TimeCBuffer;
+    TimeDesc TimeData;
+
     bool bWireRender = false;
 };
 
@@ -146,21 +154,27 @@ void FSceneRender::CreateMeshRenderProxy(const string& meshName, Args&&... args)
    
 }
 
+
+
 template <typename ProxyType, typename ... Args>
 void FSceneRender::CreateAnimRenderProxy(const string& meshName, Args&&... args)
 {
-    if constexpr (std::is_same_v<ProxyType, AnimationRenderProxy>)
+    if constexpr (std::is_same_v<ProxyType, UAnimInstance>)
     {
         if(AnimProxyHasCreated(meshName))
         {
             AnimProxies[meshName]->AddInstance(std::forward<Args>(args)...);
+            SkeletalMeshProxies[meshName]->BindAnimInstance(AnimProxies[meshName].get());
         }
         else
         {
             AnimProxies[meshName] = std::make_shared<AnimationRenderProxy>(std::forward<Args>(args)...);
+            SkeletalMeshProxies[meshName]->BindAnimInstance(AnimProxies[meshName].get());
         }
     }
 }
+
+
 
 template <typename ProxyType>
 void FSceneRender::DestroyMeshProxy(const string& meshName, const int instanceID)

@@ -6,12 +6,50 @@
 AKachujin::AKachujin()
 {
     
+    shared_ptr<Converter> converter = make_shared<Converter>();
+    converter->ImportFBXFile(L"Paladin", EMeshType::SkeletalMeshType);
+
+    
+    string animName[4] =
+    {
+        "sword_and_shield_idle",
+        "sword_and_shield_walk",
+        "sword_and_shield_jump",
+        "sheath_sword_1"
+    };
+    for(string str : animName)
+    {
+        converter->ImportFBX_Animation(L"Paladin", String::ToWString(str));
+    }
     
     Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
     Mesh[0]->CreateAnimInstance<UAnimInstance>();
     
-    //Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Samurai"));
 
+    /*
+    shared_ptr<Converter> converter = make_shared<Converter>();
+    converter->ImportFBXFile(L"SunGlassGirl", EMeshType::SkeletalMeshType);
+    
+    
+    string animName[4] =
+    {
+        "CatwalkIdle",
+        "CatwalkIdleToWalkForward",
+        "CatwalkWalkForward",
+        "CatwalkWalkStop"
+    };
+    for(string str : animName)
+    {
+        converter->ImportFBX_Animation(L"SunGlassGirl", String::ToWString(str));
+    }
+    
+    
+    Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"SunGlassGirl"));
+    Mesh[0]->CreateAnimInstance<UAnimInstance>();
+    */
+    
+    //Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
+    //Mesh[1]->CreateAnimInstance<UAnimInstance>();
     //Mesh[1]->GetRelativeTransform()->SetPosition(Vector3(15.0f, 0.25f, 6.0f));
 
     /*
@@ -41,6 +79,20 @@ AKachujin::~AKachujin()
 void AKachujin::Tick(float deltaTime)
 {
     Super::Tick(deltaTime);
+
+    
+    if(Keyboard::Get()->Down('Q'))
+        Mesh[0]->GetAnimInstance()->ChangeAnimation("sword_and_shield_idle", 1);
+    if(Keyboard::Get()->Down('E'))
+        Mesh[0]->GetAnimInstance()->ChangeAnimation("sword_and_shield_walk", 1);
+    
+
+    /*
+    if(Keyboard::Get()->Down('Q'))
+        Mesh[0]->GetAnimInstance()->ChangeAnimation("CatwalkIdle", 1);
+    if(Keyboard::Get()->Down('E'))
+        Mesh[0]->GetAnimInstance()->ChangeAnimation("CatwalkWalkForward", 1);
+    */
     
     /*
     if (ImGui::TreeNode("ModelMaterial")) 

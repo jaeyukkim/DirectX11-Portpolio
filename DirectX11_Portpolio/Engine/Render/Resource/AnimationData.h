@@ -1,31 +1,31 @@
 #pragma once
 
-#define MAX_MODEL_KEYFRAME 500
+#define MAX_MODEL_KEYFRAME 800
 
 class Skeletal;
 
-struct FAnimaFrameData
+struct FAnimFrameData
 {
-    int Clip = -1;
-    float TickersPerSeconds;
-    float Duration;
-    UINT CurrentFrame = 0;
-    
-    UINT NextFrame = 0;
-    float CurrentTime = 0.0f;
-    float Speed = 1.0f;
-    float Padding = 0.0f;;
+    int ClipID = -1;
+
+    float Duration = 0.0f;
+    float TickPerSeconds = 0.0f;
+    float Padding = 0.0f;
+
+    float PlaySpeed = 0.0f;
+    float StartTime = 0.0f;
+
+    float Padding2[2] = {0.0f};
 };
 
 struct FAnimBlendingData
 {
     float TakeTime = 1.0f;
-    float ChangingTime = 0.0f;
-    float Speed = 1.0f;
-    float Padding = 0.0f;
+    float ChangeStartTime = 0.0f;
+    float Padding[2] = {0.0f};
 
-    FAnimaFrameData Current;
-    FAnimaFrameData Next;
+    FAnimFrameData Current;
+    FAnimFrameData Next;
 };
 
 template<typename ValType>
@@ -61,15 +61,17 @@ struct FKeyFrameData
 
 class FClipData
 {
-private:
-    string Name;
-
+public:
+    string AnimName;
+    
     float Duration;
-    float TickersPerSecond;
+    float TickPerSecond;
+    float PlaySpeed = 1.0f;
 
+private:
     vector<shared_ptr<FKeyFrameData>> Keyframes;
 
-private:
+    
     struct ClipTransform
     {
         Matrix** Transform;

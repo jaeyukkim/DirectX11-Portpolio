@@ -36,20 +36,20 @@ public:
 	template<typename MeshType>
 	void ReadBinary_ModelFile(wstring InFileName, MeshType InMesh, bool bHasCreated);
 	void ReadBinary_Anim(wstring InFileName, USkeletalMeshComponent* meshComp, bool bHasCreated);
-	shared_ptr<FClipData> ReadAnimationData(aiAnimation* InAnimation);
+	shared_ptr<FClipData> ReadAnimationData(aiAnimation* InAnimation, wstring InAnimName);
 	
-	void ImportFBXFile(const wstring objectName, const EMeshType& meshType);
+	void ImportFBXFile(const wstring objectName, const EMeshType meshType);
 	void ImportFBX_Animation(wstring objectName, wstring animationName, int InClipIndex = 0);
+
+private:
 	void ImportFBX_Mesh(wstring InSaveFileName, EMeshType FileType);
 	void ImportFBX_Material(wstring InSaveFileName, bool InOverwrite, EMeshType InMeshType);
 
-	
-private:
 	void ReadFBX_StaticMesh();
 	void ReadFBX_SkeletalMesh();
 	void ReadFBX_Bone(aiNode* InNode, int InIndex, int InParent);
+	void ReadFBX_Skin();
 	void ReadFBX_Material();
-	void ReadFBX_Animation(wstring InFilePath, USkeletalMeshComponent* meshComp);
 	
 	void ConvertFBX_ToBinary_Material(wstring InSaveFileName, bool InOverwrite);
 	void ConvertFBX_ToBinary_Mesh(wstring InSaveFileName);
@@ -66,6 +66,7 @@ private:
 	template<typename MeshType>
 	void ReadBinary_Mesh(BinaryReader* InReader, MeshType InMesh);
 	void ReadBinary_Bone(BinaryReader* InReader, USkeletalMeshComponent* meshComp);
+	void ReadBinary_Animation(wstring InFilePath, USkeletalMeshComponent* meshComp);
 
 
 private:
@@ -238,12 +239,14 @@ void Converter::InitMesh(wstring InFilePath, MeshType InMesh)
 	for (shared_ptr<Skeletal>& bone : skeletalMeshComp->Bones)
 	{
 		skeletalMeshComp->Transforms[count++] = bone->Transform;
-		
+		skeletalMeshComp->OffsetTransforms[count++] = bone->OffsetTransform;
+
 		for (UINT number : bone->MeshNumbers)
 		{
 			mesh[number]->Data.BoneIndex = bone->Index;
 			mesh[number]->Data.Bone = bone.get();
 			mesh[number]->Data.Transforms = skeletalMeshComp->Transforms;
+			mesh[number]->Data.OffsetTransforms = skeletalMeshComp->OffsetTransforms;
 		}
 		skeletalMeshComp->ReadBoneTable[bone->Name] = bone;
 	}
@@ -306,7 +309,7 @@ void Converter::ReadBinary_Mesh(BinaryReader* InReader, MeshType InMesh)
 			string materialName = InReader->FromString();
 			meshData.MaterialData = skeletalMeshComp->MaterialTable.at(materialName).get();
 
-			mesh->BoneData.BoneIndex = InReader->FromUInt();
+			mesh->BoneIdxData.BoneIndex = InReader->FromUInt();
 
 			meshData.VertexCount = InReader->FromUInt();
 			meshData.ModelVertices = new VertexModel[meshData.VertexCount];

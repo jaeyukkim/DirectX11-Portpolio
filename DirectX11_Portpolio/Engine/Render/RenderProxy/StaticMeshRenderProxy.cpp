@@ -19,11 +19,11 @@ StaticMeshRenderProxy::StaticMeshRenderProxy(UStaticMeshComponent* meshComp)
     for(const shared_ptr<StaticMesh>& mesh : meshComp->GetAllMeshes())
     {
         FStaticMeshRenderData data;
-        data.VBuffer = mesh->VBuffer;
-        data.IBuffer = mesh->IBuffer;
-        data.MaterialData = mesh->GetMaterialData();
-        data.IndexCount = mesh->Data.IndexCount;
-        data.Transform = meshComp->GetWorldConstantBuffer();
+        data.VBuffer = std::move(mesh->VBuffer);
+        data.IBuffer = std::move(mesh->IBuffer);
+        data.MaterialData = std::move(mesh->GetMaterialData());
+        data.IndexCount = std::move(mesh->Data.IndexCount);
+        data.Transform = std::move(meshComp->GetWorldConstantBuffer());
         RenderData.push_back(data);
     }
 
@@ -92,6 +92,7 @@ void StaticMeshRenderProxy::Render(const FRenderOption& option)
     
     CopyCntToIndirect();
     Append.VSSetSRV(EShaderResourceSlot::ERS_InstanceData);
+    
     for(int i = 0 ; i<RenderData.size() ; i++)
     {
         RenderData[i].MaterialData->BindMaterial();

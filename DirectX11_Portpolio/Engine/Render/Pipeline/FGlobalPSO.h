@@ -49,7 +49,8 @@ private:
     void CompileHS(const wstring& path, ComPtr<ID3D11HullShader>& InHullShader);
     void CompileDS(const wstring& path, ComPtr<ID3D11DomainShader>& InDomainShader);
     void CompileGS(const wstring& path, ComPtr<ID3D11GeometryShader>& InGeometryShader);
-    void CompileCS(const wstring& path, ComPtr<ID3D11ComputeShader>& InComputeShader);
+    void CompileCS(const wstring& path, ComPtr<ID3D11ComputeShader>& InComputeShader,
+        const vector<D3D_SHADER_MACRO> shaderMacros = {/* Empty default */});
     void Assert_IF_FailedCompile(HRESULT hr, const ComPtr<ID3DBlob>& errorBlob);
 
 public:
@@ -85,6 +86,7 @@ public:
     FPSO YGaussianPSO;
     FPSO CombinePSO;
     FPSO FrustumCullingPSO;
+    FPSO FrustumCullingSkinnedPSO;
 
     
 private:
@@ -125,7 +127,8 @@ private:
     ComPtr<ID3D11ComputeShader> XGaussianCS;
     ComPtr<ID3D11ComputeShader> YGaussianCS;
     ComPtr<ID3D11ComputeShader> FrustumCullingCS;
-    
+    ComPtr<ID3D11ComputeShader> FrustumCullingSkinnedCS;
+
     // Rasterize States
     ComPtr<ID3D11RasterizerState> SolidRS;
     ComPtr<ID3D11RasterizerState> SolidCCWRS;

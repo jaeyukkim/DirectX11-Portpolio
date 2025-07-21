@@ -11,6 +11,7 @@ void FSceneRender::Create()
     Instance = new FSceneRender();
     FGlobalPSO::Create();
     Instance->PostEffectEntity = make_shared<PostEffect>();
+    Instance->TimeCBuffer = make_shared<ConstantBuffer>(&Instance->TimeData, sizeof(TimeDesc));
 }
 
 void FSceneRender::Destroy()
@@ -44,7 +45,9 @@ void FSceneRender::BeginRender()
     D3D::Get()->ClearDSV();
     D3D::Get()->ClearBlendState();
     D3D::Get()->SetFloatRTV();
-
+    TimeData = Timer::Get()->GetTimeData();
+    TimeCBuffer->UpdateConstBuffer();
+    TimeCBuffer->VSSetConstantBuffer(EConstBufferSlot::CB_Time, 1);
 }
 
 void FSceneRender::RenderDepthOnly()
@@ -111,6 +114,10 @@ void FSceneRender::RenderObjects(FRenderOption option)
     }
     for(auto& proxy : SkeletalMeshProxies)
     {
+        if(AnimProxies.find(proxy.first) != AnimProxies.end())
+        {
+            AnimProxies[proxy.first]->Render(option);
+        }
         proxy.second->Render(option);
     }
     if(SkyBoxProxy != nullptr)

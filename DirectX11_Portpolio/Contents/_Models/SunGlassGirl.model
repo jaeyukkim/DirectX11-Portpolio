@@ -1,0 +1,17 @@
+{
+  "File": {
+    "Material": "SunGlassGirl/SunGlassGirl",
+    "Mesh": "SunGlassGirl/SunGlassGirl"
+  },
+  "Transform": {
+    "Position": "0,0.25,6",
+    "Rotation": "0,0,0",
+    "Scale": "0.01,0.01,0.01"
+  },
+  "Animations": [
+    "SunGlassGirl/Animations/CatwalkIdle",
+    "SunGlassGirl/Animations/CatwalkIdleToWalkForward",
+    "SunGlassGirl/Animations/CatwalkWalkForward",
+    "SunGlassGirl/Animations/CatwalkWalkStop"
+  ]
+}

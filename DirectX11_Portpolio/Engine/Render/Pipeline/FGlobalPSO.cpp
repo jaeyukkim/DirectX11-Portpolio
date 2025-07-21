@@ -178,6 +178,8 @@ void FGlobalPSO::InitComputeShader()
     CompileCS(XGaussianCSPath, XGaussianCS);
     CompileCS(YGaussianCSPath, YGaussianCS);
     CompileCS(FrustumCullingCSPath, FrustumCullingCS);
+    CompileCS(FrustumCullingCSPath, FrustumCullingSkinnedCS,
+         vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, {NULL, NULL}});
 
 }
 
@@ -502,6 +504,7 @@ void FGlobalPSO::InitPSO()
     XGaussianPSO.m_computeShader = XGaussianCS;
     YGaussianPSO.m_computeShader = YGaussianCS;
     FrustumCullingPSO.m_computeShader = FrustumCullingCS;
+    FrustumCullingSkinnedPSO.m_computeShader = FrustumCullingSkinnedCS;
 }
 
 
@@ -586,13 +589,14 @@ void FGlobalPSO::CompileGS(const wstring& path, ComPtr<ID3D11GeometryShader>& In
     AssertHR(hr, "GeometryShader Create 실패");
 }
 
-void FGlobalPSO::CompileCS(const wstring& path, ComPtr<ID3D11ComputeShader>& InComputeShader)
+void FGlobalPSO::CompileCS(const wstring& path, ComPtr<ID3D11ComputeShader>& InComputeShader,
+    const vector<D3D_SHADER_MACRO> shaderMacros)
 {
     ComPtr<ID3DBlob> Blob;
     ComPtr<ID3DBlob> ErrorBlob;
     
     UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-    HRESULT hr = D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+    HRESULT hr = D3DCompileFromFile(path.c_str(), shaderMacros.empty() ? nullptr : shaderMacros.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE,
         "CS_Main", "cs_5_0", flags, 0, Blob.GetAddressOf(), ErrorBlob.GetAddressOf());
     Assert_IF_FailedCompile(hr, ErrorBlob);
 

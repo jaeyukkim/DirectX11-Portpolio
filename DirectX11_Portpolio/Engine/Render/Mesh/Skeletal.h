@@ -14,6 +14,7 @@ private:
     shared_ptr<Skeletal> Parent = nullptr;
 
     Matrix Transform;
+    Matrix OffsetTransform;
     vector<shared_ptr<Skeletal>> Children;
 
     vector<UINT> MeshNumbers;

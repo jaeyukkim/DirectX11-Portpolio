@@ -14,7 +14,7 @@ Converter::~Converter()
 
 }
 
-void Converter::ImportFBXFile(const wstring objectName, const EMeshType& meshType)
+void Converter::ImportFBXFile(const wstring objectName, const EMeshType meshType)
 {
 	wstring fbxPath = L"../../Contents/_Assets/" + objectName + L"/" + objectName + L".fbx";
 	wstring gltfPath = L"../../Contents/_Assets/" + objectName + L"/" + objectName + L".gltf";
@@ -263,6 +263,16 @@ string Converter::SaveTexture(string InSaveFolder, string InFileName)
 	return InSaveFolder + Path::GetFileName(path);
 }
 
+/**
+ * <summary>
+ * "../../Contents/_Assets/objectName/animationName.fbx"
+ * 경로의 파일을 읽어
+* "../../Contents/_Models/objectName/Animations/ 에 animationName.animation로 바이너리 파일 변환 후 저장
+ * </summary>
+ * @param objectName 메시의 이름
+ * @param animationName 애니메이션 fbx 파일 이름
+ * @param InClipIndex 
+ */
 void Converter::ImportFBX_Animation(wstring objectName, wstring animationName, int InClipIndex)
 {
 	wstring fbxPath = L"../../Contents/_Assets/" + objectName + L"/" + animationName + L".fbx";
@@ -293,7 +303,7 @@ void Converter::ImportFBX_Animation(wstring objectName, wstring animationName, i
 	wstring exportFileName = L"../../Contents/_Models/" + objectName +
 		L"/Animations/" + animationName + L".animation";
 	
-	shared_ptr<FClipData> clipData = ReadAnimationData(Scene->mAnimations[InClipIndex]);
+	shared_ptr<FClipData> clipData = ReadAnimationData(Scene->mAnimations[InClipIndex], animationName);
 	ConvertFBX_ToBinary_Animation(exportFileName, clipData);
 	
 }
@@ -313,15 +323,11 @@ void Converter::ReadBinary_Anim(wstring InFileName, USkeletalMeshComponent* mesh
 
 	
 	for (UINT i = 0; i < animations.size(); i++)
-		ReadFBX_Animation(String::ToWString(animations[i].asString()), meshComp);
+		ReadBinary_Animation(String::ToWString(animations[i].asString()), meshComp);
 	
 	if (animations.size() > 0)
 	{
-		ComPtr<ID3D11Texture2D> ClipTexture = nullptr;
-		ComPtr<ID3D11ShaderResourceView> ClipSRV = nullptr;
-		
-		AnimationTexture::CreateAnimationTexture(meshComp, ClipTexture, ClipSRV);
-		meshComp->AnimInstance->ClipsSRV = ClipSRV;
+		AnimationTexture::CreateAnimationTexture(meshComp, meshComp->AnimInstance->ClipTexture, meshComp->AnimInstance->ClipsSRV);
 	}
 }
 
@@ -330,13 +336,13 @@ void Converter::ReadBinary_Anim(wstring InFileName, USkeletalMeshComponent* mesh
 /**
  * mNumPositionKeys가 duration만큼 존재하지 않을 때 중간에 보간 데이터 삽입하는 과정
  */
-shared_ptr<FClipData> Converter::ReadAnimationData(aiAnimation* InAnimation)
+shared_ptr<FClipData> Converter::ReadAnimationData(aiAnimation* InAnimation, wstring InAnimName)
 {
 	shared_ptr<FClipData> clipData = make_shared<FClipData>();
 
-	clipData->Name = InAnimation->mName.C_Str();
+	clipData->AnimName = String::ToString(InAnimName);
 	clipData->Duration = (float)InAnimation->mDuration;
-	clipData->TickersPerSecond = (float)InAnimation->mTicksPerSecond;
+	clipData->TickPerSecond = (float)InAnimation->mTicksPerSecond;
 
 	for (UINT i = 0; i < InAnimation->mNumChannels; i++)
 	{
@@ -541,6 +547,7 @@ void Converter::ImportFBX_Mesh(wstring InSaveFileName, EMeshType FileType)
 		InSaveFileName = L"../../Contents/_Models/" + InSaveFileName + L"/" + InSaveFileName + L".mesh";
 		ReadFBX_Bone(Scene->mRootNode, 0, -1);
 		ReadFBX_SkeletalMesh();
+		ReadFBX_Skin();
 		ConvertFBX_ToBinary_SkeletalMesh(InSaveFileName);
 		break;
 	}
@@ -556,9 +563,11 @@ void Converter::ReadFBX_Bone(aiNode* InNode, int InIndex, int InParent)
 {
 	std::string nodeName = InNode->mName.C_Str();
 
+	
 	// 보조 노드 패턴 감지
 	if (IsAssimpFbxHelperNode(nodeName))
 	{
+		/*
 		// 부모 노드에게 현재 노드의 변환을 넘기고, 이 노드는 무시
 		if (InParent >= 0)
 		{
@@ -568,16 +577,16 @@ void Converter::ReadFBX_Bone(aiNode* InNode, int InIndex, int InParent)
 
 			Bones[InParent]->Transform *= helperTransform;
 		}
-
+		*/
 		// 자식들은 건너뛰지 않고 계속 처리
 		for (UINT i = 0; i < InNode->mNumChildren; i++)
 		{
 			ReadFBX_Bone(InNode->mChildren[i], InIndex, InParent);
 		}
-
+		
 		return; // 보조 노드는 추가하지 않음
 	}
-
+	
 	// 일반 본 처리
 	BoneData* bone = new BoneData();
 	bone->Index = InIndex;
@@ -602,6 +611,70 @@ void Converter::ReadFBX_Bone(aiNode* InNode, int InIndex, int InParent)
 
 	for (UINT i = 0; i < InNode->mNumChildren; i++)
 		ReadFBX_Bone(InNode->mChildren[i], (int)Bones.size(), InIndex);
+}
+
+void Converter::ReadFBX_Skin()
+{
+	for (UINT i = 0; i < Scene->mNumMeshes; i++)
+	{
+		aiMesh* mesh = Scene->mMeshes[i];
+
+		if (mesh->HasBones() == false)
+			continue;
+
+
+		for (UINT b = 0; b < mesh->mNumBones; b++)
+		{
+			aiBone* bone = mesh->mBones[b];
+			string boneName = bone->mName.C_Str();
+
+			UINT index = 0;
+			for (UINT boneIndex = 0; boneIndex < Bones.size(); boneIndex++)
+			{
+				if (Bones[boneIndex]->Name == boneName)
+				{
+					index = (int)boneIndex;
+
+					break;
+				}
+			}
+
+			Matrix offset;
+			memcpy(&offset, bone->mOffsetMatrix[0], sizeof(Matrix));
+			Bones[index]->OffsetTransform = offset.Transpose();
+
+			
+			for (UINT w = 0; w < bone->mNumWeights; w++)
+			{
+				UINT id = bone->mWeights[w].mVertexId;
+				float weight = bone->mWeights[w].mWeight;
+
+
+				SkeletalMeshData* meshData = SkeletalMeshes[i];
+
+				Vector4& indices = meshData->Vertices[id].Indices;
+				Vector4& weights = meshData->Vertices[id].Weights;
+
+				float iArray[4] = { indices.x, indices.y, indices.z, indices.w };
+				float wArray[4] = { weights.x, weights.y, weights.z, weights.w };
+				
+				int v;
+				for (v = 0; v < 4; v++)
+				{
+					if (iArray[v] <= 0.0f)
+					{
+						iArray[v] = (float)index;
+						wArray[v] = weight;
+						break;
+					}
+				}
+				indices = Vector4(iArray[0], iArray[1], iArray[2], iArray[3]);
+				weights = Vector4(wArray[0], wArray[1], wArray[2], wArray[3]);
+			}//for(w)
+
+		}
+
+	}//for(i)
 }
 
 void Converter::ReadFBX_SkeletalMesh()
@@ -679,6 +752,7 @@ void Converter::ConvertFBX_ToBinary_SkeletalMesh(wstring InSaveFileName)
 
 		w->ToInt(data->Parent);
 		w->ToMatrix(data->Transform);
+		w->ToMatrix(data->OffsetTransform);
 		w->ToUInt((UINT)data->MeshNumbers.size());
 
 		if(data->MeshNumbers.size() > 0)
@@ -709,7 +783,7 @@ void Converter::ConvertFBX_ToBinary_SkeletalMesh(wstring InSaveFileName)
 	
 }
 
-void Converter::ReadFBX_Animation(wstring InFilePath, USkeletalMeshComponent* meshComp)
+void Converter::ReadBinary_Animation(wstring InFilePath, USkeletalMeshComponent* meshComp)
 {
 	InFilePath = L"../../Contents/_Models/" + InFilePath + L".animation";
 	
@@ -719,9 +793,9 @@ void Converter::ReadFBX_Animation(wstring InFilePath, USkeletalMeshComponent* me
 
 	shared_ptr<FClipData> animation = make_shared<FClipData>();
 	{
-		animation->Name = reader->FromString();
+		animation->AnimName = reader->FromString();
 		animation->Duration = reader->FromFloat();
-		animation->TickersPerSecond = reader->FromFloat();
+		animation->TickPerSecond = reader->FromFloat();
 
 		UINT count = reader->FromUInt();
 		animation->Keyframes.assign(count, nullptr);
@@ -775,10 +849,10 @@ void Converter::ConvertFBX_ToBinary_Animation(wstring InSaveFileName, shared_ptr
 	shared_ptr<BinaryWriter> w = make_shared<BinaryWriter>();
 	w->Open(InSaveFileName);
 
-	w->ToString(InClipData->Name);
+	w->ToString(InClipData->AnimName);
 
 	w->ToFloat(InClipData->Duration);
-	w->ToFloat(InClipData->TickersPerSecond);
+	w->ToFloat(InClipData->TickPerSecond);
 
 	w->ToUInt(InClipData->Keyframes.size());
 	for (shared_ptr<FKeyFrameData>& nodeData : InClipData->Keyframes)
@@ -905,6 +979,7 @@ void Converter::ReadBinary_Bone(BinaryReader* InReader, USkeletalMeshComponent* 
 
 		bone->ParentIndex = InReader->FromInt();
 		bone->Transform = InReader->FromMatrix();
+		bone->OffsetTransform = InReader->FromMatrix();
 
 		// Bone이 포함하는 Mesh 개수 읽기
 		UINT meshCount = InReader->FromUInt();

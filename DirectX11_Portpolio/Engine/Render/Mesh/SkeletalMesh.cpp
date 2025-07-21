@@ -4,8 +4,9 @@
 
 void SkeletalMesh::Tick()
 {
-	BoneData.BoneIndex = Data.BoneIndex;
+	BoneIdxData.BoneIndex = Data.BoneIndex;
 	memcpy(BoneData.Transforms, Data.Transforms, sizeof(Matrix) * MAX_MODEL_TRANSFORM);
+	memcpy(BoneData.OffsetTransforms, Data.OffsetTransforms, sizeof(Matrix) * MAX_MODEL_TRANSFORM);
 }
 
 void SkeletalMesh::Render()
@@ -27,4 +28,5 @@ void SkeletalMesh::CreateBuffer()
 	IBuffer = make_shared<IndexBuffer>(Data.Indices, Data.IndexCount);
 	MeshWorld = make_shared<FTransform>();
 	BoneBuffer = make_shared<ConstantBuffer>(&BoneData, sizeof(BoneDesc));
+	BoneIndexCBuffer = make_shared<ConstantBuffer>(&BoneIdxData, sizeof(BoneIDX));
 }

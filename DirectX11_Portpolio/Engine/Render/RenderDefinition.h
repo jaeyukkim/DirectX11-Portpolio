@@ -84,7 +84,9 @@ enum class EConstBufferSlot : UINT8
     CB_LightInfo = 6,
     CB_ImageFilterData = 7,
     CB_PostEffectData = 8,
-    CB_FrustumData = 9
+    CB_FrustumData = 9,
+    CB_Time = 10,
+    CB_BoneIdx = 11
 };
 
 
@@ -94,7 +96,8 @@ enum class EShaderResourceSlot : UINT8
     ERS_MaterialTexture = 4,
     ERS_ShadowMap = 11,
     ERS_PostEffect = 20,
-    ERS_InstanceData = 25
+    ERS_InstanceData = 25,
+    ERS_AnimationData = 26
     
 };
 
@@ -186,13 +189,13 @@ struct FSkeletalMeshRenderData
     shared_ptr<VertexBuffer> VBuffer;
     shared_ptr<IndexBuffer> IBuffer;
     shared_ptr<ConstantBuffer> BoneBuffer;
+    shared_ptr<ConstantBuffer> BoneIDXBuffer;
     Material* MaterialData;
 };
 
 struct FSKM_InstDataCPU
 {
-    FAnimBlendingData AnimBlendData;
-    
+
     Matrix ModelMat;
     
     Vector3 AABB_Max;
@@ -203,6 +206,9 @@ struct FSKM_InstDataCPU
     
     int InstanceID = 0;
     float padding[3] {0};
+    
+    FAnimBlendingData AnimBlendData;
+
 };
 
 

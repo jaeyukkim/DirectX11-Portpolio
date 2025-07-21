@@ -33,19 +33,19 @@ Timer::~Timer()
 
 void Timer::Tick()
 {
-	if (bPaused)
+	if (TimeData.bPaused)
 	{
-		DeltaTime = 0.0f;
+		TimeData.DeltaTime = 0.0f;
 		return;
 	}
 
 	steady_clock::time_point current = steady_clock::now();
 	duration<double> elapsed = current - PrevFrameTime;
 
-	DeltaTime = bUseFixedDeltaTime ? FixedDelta : static_cast<float>(elapsed.count());
+	TimeData.DeltaTime = bUseFixedDeltaTime ? FixedDelta : static_cast<float>(elapsed.count());
 
 	PrevFrameTime = current;
-	RunningTime += DeltaTime;
+	TimeData.RunningTime += TimeData.DeltaTime;
 	FrameCount++;
 }
 
@@ -53,23 +53,23 @@ void Timer::Reset()
 {
 	StartTime = steady_clock::now();
 	PrevFrameTime = StartTime;
-	RunningTime = 0.0f;
+	TimeData.RunningTime = 0.0f;
 	FrameCount = 0;
 }
 
 void Timer::Pause()
 {
-	bPaused = true;
+	TimeData.bPaused = true;
 }
 
 void Timer::Resume()
 {
-	bPaused = false;
+	TimeData.bPaused = false;
 }
 
 bool Timer::IsPaused() const
 {
-	return bPaused;
+	return TimeData.bPaused;
 }
 
 void Timer::SetFixedDeltaTime(float value)

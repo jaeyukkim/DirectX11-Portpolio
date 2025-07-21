@@ -17,6 +17,7 @@ struct SkeletalMeshInfo
 
     Material* MaterialData = nullptr;
     Matrix* Transforms;
+    Matrix* OffsetTransforms;
 
     UINT VertexCount = 0;
     VertexModel* ModelVertices = nullptr;
@@ -55,15 +56,21 @@ private:
     struct BoneDesc
     {
         Matrix Transforms[MAX_MODEL_TRANSFORM];
+        Matrix OffsetTransforms[MAX_MODEL_TRANSFORM];
+
+    } BoneData;
+    
+    struct BoneIDX
+    {
         UINT BoneIndex;
         float Padding[3];
-    } BoneData;
+    } BoneIdxData;
     
 private:
     shared_ptr<VertexBuffer> VBuffer = nullptr;
     shared_ptr<IndexBuffer> IBuffer = nullptr;
     shared_ptr<ConstantBuffer> BoneBuffer = nullptr;
-  
+    shared_ptr<ConstantBuffer> BoneIndexCBuffer = nullptr;
 
     
 private:

@@ -7,22 +7,25 @@ class FClipData;
 struct AnimInstanceCreateInfo
 {
     vector<string> exportAnimName;
-    bool bReadAnimation = true;
-    bool bExportAnimation = false;
+
 };
 
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnBlendDataChanged, int, FAnimBlendingData&);
 
 class UAnimInstance
 {
 public:
-    UAnimInstance(USkeletalMeshComponent* meshComp,
-        AnimInstanceCreateInfo info = AnimInstanceCreateInfo());
+    UAnimInstance(USkeletalMeshComponent* meshComp);
     virtual ~UAnimInstance() = default;
     
     virtual void NativeUpdateAnimation(float deltaTime);
-public:
-
-
+    virtual void ChangeAnimation(string InAnimName, float TakeTime);
+    virtual void InitInstance(AnimInstanceCreateInfo info = AnimInstanceCreateInfo());
+    
+    int GetAnimClipID(string InAnimName);
+    
+private:
+    void InitAnimTable();
     
 private:
     USkeletalMeshComponent* MeshComponent;
@@ -30,10 +33,15 @@ private:
 
     
 private:
+    ComPtr<ID3D11Texture2D> ClipTexture = nullptr;
     ComPtr<ID3D11ShaderResourceView> ClipsSRV = nullptr;
     FAnimBlendingData BlendingData;
+    unordered_map<string, int> AnimClipTable;
 
 
+private:
+    FOnBlendDataChanged BlendChanged;
+    bool bAnimStateChanged = false;
 
 private:
     friend class AnimationRenderProxy;

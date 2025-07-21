@@ -1,5 +1,7 @@
 #include "HeaderCollection.h"
 #include "SkeletalMeshRenderProxy.h"
+
+#include "AnimationRenderProxy.h"
 #include "Frameworks/Components/USkeletalMeshComponent.h"
 #include "Render/Mesh/SkeletalMesh.h"
 #include "Render/Mesh/Buffers.h"
@@ -18,11 +20,12 @@ SkeletalMeshRenderProxy::SkeletalMeshRenderProxy(USkeletalMeshComponent* meshCom
     for(const shared_ptr<SkeletalMesh>& mesh : meshComp->GetAllMeshes())
     {
         FSkeletalMeshRenderData data;
-        data.VBuffer = mesh->VBuffer;
-        data.IBuffer = mesh->IBuffer;
-        data.BoneBuffer = mesh->BoneBuffer;
-        data.MaterialData = mesh->GetMaterialData();
-        data.IndexCount = mesh->Data.IndexCount;
+        data.VBuffer = std::move(mesh->VBuffer);
+        data.IBuffer = std::move(mesh->IBuffer);
+        data.BoneBuffer = std::move(mesh->BoneBuffer);
+        data.BoneIDXBuffer = std::move(mesh->BoneIndexCBuffer);
+        data.MaterialData = std::move(mesh->GetMaterialData());
+        data.IndexCount = std::move(mesh->Data.IndexCount);
         RenderData.push_back(data);
     }
     
@@ -34,7 +37,7 @@ SkeletalMeshRenderProxy::SkeletalMeshRenderProxy(USkeletalMeshComponent* meshCom
 
 void SkeletalMeshRenderProxy::RunFrustumCulling()
 {
-    FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->FrustumCullingPSO);
+    FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->FrustumCullingSkinnedPSO);
     
     Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), InstanceDatas.size());
     //Consume = AppendBuffer(InstanceDatas.data(), sizeof(FSKM_InstDataCPU), InstanceDatas.size());
@@ -54,7 +57,7 @@ void SkeletalMeshRenderProxy::RunFrustumCulling()
 
 void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
 {
-
+    
     if(option.bDepthOnly)
     {
         FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->DepthOnlySkinnedPSO);
@@ -88,6 +91,7 @@ void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
 
     if(option.bDepthOnly)
     {
+        CteateInstanceIndirectData(InstanceDatas.size());
         Consume.UpdateSubResource();
         Consume.VSSetSRV(EShaderResourceSlot::ERS_InstanceData);
     }
@@ -104,13 +108,10 @@ void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
         RenderData[i].MaterialData->BindMaterial();
         RenderData[i].VBuffer->IASetVertexBuffer();
         RenderData[i].IBuffer->IASetIndexBuffer();
+        RenderData[i].BoneIDXBuffer->VSSetConstantBuffer(EConstBufferSlot::CB_BoneIdx, 1);
         
-        if(!option.bDepthOnly)
-            D3D::Get()->GetDeviceContext()->DrawIndexedInstancedIndirect(InstanceIndirectBuffer[i].GetBuffer().Get(), 0);
-        else
-        {
-            D3D::Get()->GetDeviceContext()->DrawIndexed(RenderData[i].IndexCount, 0, 0);
-        }
+        D3D::Get()->GetDeviceContext()->DrawIndexedInstancedIndirect(InstanceIndirectBuffer[i].GetBuffer().Get(), 0);
+        
     }
 }
 
@@ -167,7 +168,13 @@ void SkeletalMeshRenderProxy::DeleteInstance(const int InstanceID)
     CteateInstanceIndirectData();
 }
 
-void SkeletalMeshRenderProxy::UpdateAnimationData(const int InstanceID, FAnimBlendingData& blendData)
+void SkeletalMeshRenderProxy::BindAnimInstance(AnimationRenderProxy* InAnimProxy)
+{
+    Assert(InAnimProxy != nullptr, "InAnimProxy 가 nullptr입니다")
+    InAnimProxy->BlendDataUpdate.Add(this, &SkeletalMeshRenderProxy::UpdateAnimationData);
+}
+
+void SkeletalMeshRenderProxy::UpdateAnimationData(int InstanceID, FAnimBlendingData& blendData)
 {
     InstanceDatas[InstanceID].AnimBlendData = blendData;
 }
@@ -193,8 +200,8 @@ void SkeletalMeshRenderProxy::CteateInstanceIndirectData(int instanceCnt)
     {
         D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS args;
         ZeroMemory(&args, sizeof(args));
-        args.InstanceCount = instanceCnt;
         args.IndexCountPerInstance = data.IndexCount;
+        args.InstanceCount = instanceCnt;
         args.BaseVertexLocation=0;
         args.StartIndexLocation=0;
         args.StartInstanceLocation=0;

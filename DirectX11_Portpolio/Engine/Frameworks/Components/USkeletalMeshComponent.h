@@ -43,7 +43,9 @@ private:
     unordered_map<string, shared_ptr<Skeletal>> ReadBoneTable;
     
     
-    DirectX::SimpleMath::Matrix Transforms[MAX_MODEL_TRANSFORM];
+    Matrix Transforms[MAX_MODEL_TRANSFORM];
+    Matrix OffsetTransforms[MAX_MODEL_TRANSFORM];
+    
     int* InstanceID;
     string MeshName;
     shared_ptr<UAnimInstance> AnimInstance;
@@ -61,6 +63,7 @@ void USkeletalMeshComponent::CreateAnimInstance(AnimInstanceCreateInfo info)
     static_assert(is_base_of_v<UAnimInstance, ClassType>, 
                   "CreateAnimInstance의 ClassType UAnimInstance로 부터 파생된 클래스여야 합니다");
     
-    AnimInstance = make_shared<ClassType>(this, info);
+    AnimInstance = make_shared<ClassType>(this);
+    AnimInstance->InitInstance(info);
 }
  

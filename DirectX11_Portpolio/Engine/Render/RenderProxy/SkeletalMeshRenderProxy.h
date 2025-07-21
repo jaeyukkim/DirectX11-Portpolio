@@ -8,6 +8,7 @@ class SkeletalMesh;
 class ConstantBuffer;
 class VertexBuffer;
 class IndexBuffer;
+class AnimationRenderProxy;
 
 
 class SkeletalMeshRenderProxy : public RenderProxy
@@ -19,7 +20,9 @@ public:
     void RunFrustumCulling();
     void AddInstance(USkeletalMeshComponent* meshComp);
     void DeleteInstance(const int InstanceID);
-    void UpdateAnimationData(const int InstanceID, FAnimBlendingData& blendData);
+
+    void BindAnimInstance(AnimationRenderProxy* InAnimProxy);
+    void UpdateAnimationData(int InstanceID, FAnimBlendingData& blendData);
     
 public:
     void CopyCntToIndirect();
@@ -30,8 +33,8 @@ public:
     int GetNumOfInstance() const {return InstanceDatas.size();}
  
 private:
-    vector<FSkeletalMeshRenderData> RenderData;
     
+    vector<FSkeletalMeshRenderData> RenderData;
     vector<FSKM_InstDataCPU> InstanceDatas;
     vector<IndirectBuffer> InstanceIndirectBuffer;
     IndirectBuffer CSIndirectBuffer;

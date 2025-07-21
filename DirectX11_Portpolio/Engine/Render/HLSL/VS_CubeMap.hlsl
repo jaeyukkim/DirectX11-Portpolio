@@ -12,7 +12,6 @@ SkyboxPSInput VS_Main(VertexShaderInput input)
 
     SkyboxPSInput output;
 
-
     
     output.posProj = mul(float4(input.posModel.xyz, 0.0f), World);
     output.posModel = output.posProj.xyz;

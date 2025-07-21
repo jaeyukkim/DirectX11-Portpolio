@@ -5,3 +5,7 @@ RenderProxy::RenderProxy(ERenderProxyType InProxyType)
     :ProxyType(InProxyType)
 {
 }
+
+void RenderProxy::Update()
+{
+}

@@ -21,8 +21,8 @@ shared_ptr<FClipData::ClipTransform> FClipData::CalcClipTransform(const vector<s
         {
             shared_ptr<Skeletal> bone = InBones[b];
 
-            Matrix invGlobal = bone->Transform;
-            invGlobal = invGlobal.Invert();
+            Matrix meshSpace = bone->OffsetTransform;
+        
 
 			
             Matrix parent;
@@ -82,7 +82,7 @@ shared_ptr<FClipData::ClipTransform> FClipData::CalcClipTransform(const vector<s
             }
 			
             bones[b] = animation * parent;
-            transform->Transform[f][b] = invGlobal * bones[b];
+            transform->Transform[f][b] = meshSpace * bones[b];
         }//for(b)
     }//for(f)
 

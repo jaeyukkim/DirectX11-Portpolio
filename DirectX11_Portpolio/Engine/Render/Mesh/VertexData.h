@@ -127,7 +127,7 @@ struct BoneData
 
     int Parent;
     Matrix Transform;
-
+    Matrix OffsetTransform;
     vector<UINT> MeshNumbers;
 };
 
