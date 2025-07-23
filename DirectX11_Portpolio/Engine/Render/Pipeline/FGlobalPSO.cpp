@@ -139,7 +139,7 @@ void FGlobalPSO::InitVSAndIL()
         vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, {NULL, NULL}});
     
     CompileVSAndInputLayout(DepthOnlyVSPath, DepthOnlyVS, meshIED, MeshIL);
-    CompileVSAndInputLayout(DepthOnlyVSPath, DepthOnlySkeletalVS, skeletalMeshIED, MeshIL,
+    CompileVSAndInputLayout(DepthOnlyVSPath, DepthOnlySkeletalVS, skeletalMeshIED, SkeletalMeshIL,
         vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, {NULL, NULL}});
     
     CompileVSAndInputLayout(SkyBoxVSPath, SkyboxVS, meshIED, MeshIL);

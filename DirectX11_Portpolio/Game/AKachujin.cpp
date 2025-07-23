@@ -5,7 +5,7 @@
 
 AKachujin::AKachujin()
 {
-    
+    /*
     shared_ptr<Converter> converter = make_shared<Converter>();
     converter->ImportFBXFile(L"Paladin", EMeshType::SkeletalMeshType);
 
@@ -21,9 +21,10 @@ AKachujin::AKachujin()
     {
         converter->ImportFBX_Animation(L"Paladin", String::ToWString(str));
     }
+    */
     
-    Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
-    Mesh[0]->CreateAnimInstance<UAnimInstance>();
+    //Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
+    //Mesh[0]->CreateAnimInstance<UAnimInstance>();
     
 
     /*
@@ -50,20 +51,29 @@ AKachujin::AKachujin()
     
     //Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
     //Mesh[1]->CreateAnimInstance<UAnimInstance>();
-    //Mesh[1]->GetRelativeTransform()->SetPosition(Vector3(15.0f, 0.25f, 6.0f));
+    //Mesh[1]->GetRelativeTransform()->SetPosition(Vector3(15.0f, 0.75f, 6.0f));
 
-    /*
-    int cnt = 0;
-    for(int i = 0 ; i<15 ; i++)
+    string animName[4] =
     {
-        for(int j = 0 ; j<15 ; j++)
+        "sword_and_shield_idle",
+        "sword_and_shield_walk",
+        "sword_and_shield_jump",
+        "sheath_sword_1"
+    };
+    int cnt = 0;
+    for(int i = 0 ; i<30 ; i++)
+    {
+        for(int j = 0 ; j<30 ; j++)
         {
-            Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Samurai"));
-            Mesh[cnt]->GetRelativeTransform()->SetPosition(Vector3(i*4, 0.5f, j*4));
+            Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
+            Mesh[cnt]->CreateAnimInstance<UAnimInstance>();
+            Mesh[cnt]->GetRelativeTransform()->SetPosition(Vector3(i*4, 0.75f, j*4));
+            Mesh[cnt]->GetAnimInstance()->ChangeAnimation(animName[cnt%4], 0.15f);
+
             cnt++;
         }
     }
-    */
+    
     SetRootComponent(Mesh[0].get());
 
     
@@ -82,9 +92,9 @@ void AKachujin::Tick(float deltaTime)
 
     
     if(Keyboard::Get()->Down('Q'))
-        Mesh[0]->GetAnimInstance()->ChangeAnimation("sword_and_shield_idle", 1);
+        Mesh[0]->GetAnimInstance()->ChangeAnimation("sword_and_shield_idle", 0.15f);
     if(Keyboard::Get()->Down('E'))
-        Mesh[0]->GetAnimInstance()->ChangeAnimation("sword_and_shield_walk", 1);
+        Mesh[0]->GetAnimInstance()->ChangeAnimation("sword_and_shield_walk", 0.15f);
     
 
     /*

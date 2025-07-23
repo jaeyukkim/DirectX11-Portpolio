@@ -26,7 +26,7 @@ public:
     
 private:
     void InitAnimTable();
-    
+    void SetAnimInst(const vector<shared_ptr<FClipData>>& InAnimations) {Animations = InAnimations;}
 private:
     USkeletalMeshComponent* MeshComponent;
     vector<shared_ptr<FClipData>> Animations;

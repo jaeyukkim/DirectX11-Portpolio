@@ -20,6 +20,8 @@ public:
     
     ComPtr<ID3D11Texture2D> ClipTexture = nullptr;
     ComPtr<ID3D11ShaderResourceView> ClipsSRV = nullptr;
+    vector<shared_ptr<FClipData>> Animations;
+
 private:
     FOnBlendDataUpdate BlendDataUpdate;
     friend class SkeletalMeshRenderProxy;

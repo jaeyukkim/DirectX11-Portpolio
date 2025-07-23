@@ -613,13 +613,13 @@ void AppendBuffer::UpdateSubResource()
 void AnimationTexture::CreateAnimationTexture(USkeletalMeshComponent* meshComp,
 	ComPtr<ID3D11Texture2D>& InClipTexture, ComPtr<ID3D11ShaderResourceView>& InClipSRV)
 {
-	vector<shared_ptr<FClipData::ClipTransform>> v;
+	vector<shared_ptr<ClipTransform>> v;
 
-	vector<shared_ptr<FClipData>> animations = meshComp->GetAnimInstance()->Animations;
+	vector<shared_ptr<FClipData>>& animations = meshComp->GetAnimInstance()->Animations;
 	
 	for (shared_ptr<FClipData>& anim : animations)
 		v.push_back(anim->CalcClipTransform(meshComp->Bones));
-
+	
 	
 	//Create Texture
 	{
@@ -689,6 +689,12 @@ void AnimationTexture::CreateAnimationTexture(USkeletalMeshComponent* meshComp,
 			Check(D3D::Get()->GetDevice()->CreateShaderResourceView(InClipTexture.Get(), &desc, InClipSRV.GetAddressOf()));
 		}
 	}
+
+	for(shared_ptr<FClipData>& clip : meshComp->GetAnimInstance()->Animations)
+	{
+		clip->ClearKeyFrame();
+	}
+	
 }
 
 

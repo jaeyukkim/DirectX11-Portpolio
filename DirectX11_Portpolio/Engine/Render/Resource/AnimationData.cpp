@@ -2,7 +2,7 @@
 #include "AnimationData.h"
 #include "Render/Mesh/Skeletal.h"
 
-shared_ptr<FClipData::ClipTransform> FClipData::CalcClipTransform(const vector<shared_ptr<Skeletal>>& InBones)
+shared_ptr<ClipTransform> FClipData::CalcClipTransform(const vector<shared_ptr<Skeletal>>& InBones)
 {
     map<string, shared_ptr<FKeyFrameData>> keyframeNameTable;
 	
@@ -22,9 +22,7 @@ shared_ptr<FClipData::ClipTransform> FClipData::CalcClipTransform(const vector<s
             shared_ptr<Skeletal> bone = InBones[b];
 
             Matrix meshSpace = bone->OffsetTransform;
-        
-
-			
+            
             Matrix parent;
 			
             if (bone->ParentIndex < 0)
@@ -74,6 +72,15 @@ shared_ptr<FClipData::ClipTransform> FClipData::CalcClipTransform(const vector<s
                     rotation = data->Rotations[last].mValue;
                 }
 
+                // 루트 본이면 위치를 고정(-1번이 루트인데 fbx에
+                // mixamo 애니메이션 움직임은 보통 hip을 중심으로 하는경우가 많음)
+                if (bone->ParentIndex <= 0)
+                {
+                    position = Vector3::Zero;
+      
+                }
+                
+
                 Matrix S = Matrix::CreateScale(scale);
                 Matrix R = Matrix::CreateFromQuaternion(rotation);
                 Matrix T = Matrix::CreateTranslation(position);
@@ -87,4 +94,13 @@ shared_ptr<FClipData::ClipTransform> FClipData::CalcClipTransform(const vector<s
     }//for(f)
 
     return transform;
+}
+
+void FClipData::ClearKeyFrame()
+{
+    for(shared_ptr<FKeyFrameData>& frame : Keyframes)
+    {
+        frame.reset();
+    }
+    Keyframes.clear();
 }

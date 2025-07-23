@@ -58,6 +58,26 @@ struct FKeyFrameData
     vector<FFrameData<Vector3>> Scalings;
 };
 
+struct ClipTransform
+{
+    Matrix** Transform;
+
+    ClipTransform()
+    {
+        Transform = new Matrix*[MAX_MODEL_KEYFRAME];
+
+        for (UINT i = 0; i < MAX_MODEL_KEYFRAME; i++)
+            Transform[i] = new Matrix[MAX_MODEL_TRANSFORM];
+    }
+
+    ~ClipTransform()
+    {
+        for (UINT i = 0; i < MAX_MODEL_KEYFRAME; i++)
+            DeleteArray(Transform[i]);
+
+        DeleteArray(Transform);
+    }
+};
 
 class FClipData
 {
@@ -68,33 +88,11 @@ public:
     float TickPerSecond;
     float PlaySpeed = 1.0f;
 
+    void ClearKeyFrame();
+
 private:
     vector<shared_ptr<FKeyFrameData>> Keyframes;
-
-    
-    struct ClipTransform
-    {
-        Matrix** Transform;
-
-        ClipTransform()
-        {
-            Transform = new Matrix*[MAX_MODEL_KEYFRAME];
-
-            for (UINT i = 0; i < MAX_MODEL_KEYFRAME; i++)
-                Transform[i] = new Matrix[MAX_MODEL_TRANSFORM];
-        }
-
-        ~ClipTransform()
-        {
-            for (UINT i = 0; i < MAX_MODEL_KEYFRAME; i++)
-                DeleteArray(Transform[i]);
-
-            DeleteArray(Transform);
-        }
-    };
-
     shared_ptr<ClipTransform> CalcClipTransform(const vector<shared_ptr<Skeletal>>& InBones);
-    
 private:
     friend class Converter;
     friend class AnimationTexture;
