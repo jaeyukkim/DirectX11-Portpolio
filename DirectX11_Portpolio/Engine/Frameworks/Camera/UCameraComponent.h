@@ -26,7 +26,7 @@ private:
 	void CaptureCinematic(float deltaTime);
 
 private:
-	float MoveSpeed = 10.f;
+	float MoveSpeed = 800.f;
 	//float MoveSpeed = 2.f;
 
 	float RotationSpeed = 25.f;

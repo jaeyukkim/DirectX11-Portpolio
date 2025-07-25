@@ -1,6 +1,7 @@
 #include "HeaderCollection.h"
 #include "Actor.h"
 #include "Frameworks/Components/USceneComponent.h"
+#include "Frameworks/Components/UActorComponent.h"
 
 
 Actor::Actor()

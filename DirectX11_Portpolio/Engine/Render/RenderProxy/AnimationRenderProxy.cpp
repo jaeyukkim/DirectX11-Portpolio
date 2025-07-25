@@ -2,7 +2,7 @@
 #include "AnimationRenderProxy.h"
 
 AnimationRenderProxy::AnimationRenderProxy(UAnimInstance* animInst)
-    :RenderProxy(ERenderProxyType::PRT_Anim)
+    :RenderProxy(ERenderProxyType::RPT_Anim)
 {
     ClipsSRV = std::move(animInst->ClipsSRV);
     ClipTexture = std::move(animInst->ClipTexture);

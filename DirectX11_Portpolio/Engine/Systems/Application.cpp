@@ -26,6 +26,7 @@ void Application::InitApplication(IExecutable* InMain)
 	Mouse::Create();
 	FSceneRender::Create();
 	FSceneView::Create();
+	FPhysX::Create();
 	
 	Main = InMain;
 	Main->Initialize();
@@ -38,6 +39,7 @@ void Application::Destroy()
 {
 	
 	Main->Destroy();
+	FPhysX::Destroy();
 	FSceneView::Destroy();
 	FSceneRender::Destroy();
 	Mouse::Destroy();

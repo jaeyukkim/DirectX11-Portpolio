@@ -4,9 +4,9 @@
     "Mesh": "Floor/Floor"
   },
   "Transform": {
-    "Position": "3,2.5,6",
+    "Position": "300,250,600",
     "Rotation": "0,90,0",
-    "Scale": "0.005,0.005,0.005"
+    "Scale": "0.5,0.5,0.5"
   }
   
 }

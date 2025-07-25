@@ -23,8 +23,8 @@ AKachujin::AKachujin()
     }
     */
     
-    //Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
-    //Mesh[0]->CreateAnimInstance<UAnimInstance>();
+    Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
+    Mesh[0]->CreateAnimInstance<UAnimInstance>();
     
 
     /*
@@ -53,6 +53,9 @@ AKachujin::AKachujin()
     //Mesh[1]->CreateAnimInstance<UAnimInstance>();
     //Mesh[1]->GetRelativeTransform()->SetPosition(Vector3(15.0f, 0.75f, 6.0f));
 
+
+
+    /*
     string animName[4] =
     {
         "sword_and_shield_idle",
@@ -73,8 +76,8 @@ AKachujin::AKachujin()
             cnt++;
         }
     }
-    
-    SetRootComponent(Mesh[0].get());
+    */
+    Mesh[0]->SetUpAttachment(GetRootComponent());
 
     
 

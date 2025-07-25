@@ -36,7 +36,7 @@ void USkeletalMeshComponent::TickComponent(float deltaTime)
 		meshPtr->Tick();
 	}
 
-	TransformChanged.Broadcast(*InstanceID, WorldBufferData.World);
+	
 
 	AnimInstance->NativeUpdateAnimation(deltaTime);
 }

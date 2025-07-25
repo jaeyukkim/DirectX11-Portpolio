@@ -36,7 +36,8 @@ enum ERenderProxyType : UINT8
     RPT_StaticMesh,
     RPT_SkyBox,
     RPT_Mirror,
-    PRT_Anim
+    RPT_Anim,
+    RPT_Primitive
 };
 
 
@@ -162,6 +163,15 @@ struct FSM_InstDataCPU
     int InstanceID = 0;
     float padding[3] {0};
 };
+using FPrimitiveInstCPU = FSM_InstDataCPU;
+
+
+struct FPrimitiveRenderData
+{
+    UINT IndexCount;
+    shared_ptr<VertexBuffer> VBuffer;
+    shared_ptr<IndexBuffer> IBuffer;
+};
 
 struct FStaticMeshRenderData
 {
@@ -213,6 +223,8 @@ struct FSKM_InstDataCPU
 
 
 
+
+
 // 조명 정보
 struct FLight
 {
@@ -224,18 +236,18 @@ struct FLight
     float padding0 = 0.0f;
     Vector3 direction = Vector3(0.0f, 0.0f, 1.0f);
     float padding1 = 0.0f;;
-    Vector3 position = Vector3(0.0f, 0.0f, -2.0f);
+    Vector3 position = Vector3(0.0f, 0.0f, -200.0f);
     float padding2 = 0.0f;;
 
 
     UINT LightType = ELightType::LT_None; 
     int LightID; 
-    float radius = 0.5f;
+    float radius = 20.0f;
     float spotPower = 1.0f;
 
 
     float fallOffStart = 0.0f;  
-    float fallOffEnd = 30.0f;                      
+    float fallOffEnd = 3000.0f;                      
     float innerCone = static_cast<float>(cos(XMConvertToRadians(20.0f)));
     float outerCone = static_cast<float>(cos(XMConvertToRadians(30.0f)));
 

@@ -28,6 +28,33 @@ FSceneRender* FSceneRender::Get()
     return Instance;
 }
 
+void FSceneRender::DestroyPrimitiveProxy(const ECollisionShape& InCollisionShape, const int InInstanceID)
+{
+    if(PrimProxy.find(InCollisionShape) != PrimProxy.end())
+    {
+        if(PrimProxy.size() == 1)
+            PrimProxy.clear();
+        else
+        {
+            PrimProxy[InCollisionShape]->DeleteInstance(InInstanceID);
+        }
+        
+    }
+}
+
+void FSceneRender::CreatePrimitiveRenderProxy(const ECollisionShape& InCollisionShape,
+                                              UPrimitiveComponent* InPrimitiveComponent)
+{
+    if(PrimProxyHasCreated(InCollisionShape))
+    {
+        PrimProxy[InCollisionShape]->AddInstance(InPrimitiveComponent);
+    }
+    else
+    {
+        PrimProxy[InCollisionShape] = make_shared<PrimitiveRenderProxy>(InPrimitiveComponent);
+    }
+}
+
 void FSceneRender::Render()
 {
     BeginRender();
@@ -162,6 +189,13 @@ void FSceneRender::MainRender()
     D3D::Get()->GetDeviceContext()->RSSetViewports(1, D3D::Get()->Viewport.get());  //다시복구
     ViewProxy->Render(GetDefaultRenderType());
     RenderObjects(GetDefaultRenderType());
+
+    
+    for(auto& proxy : PrimProxy)
+    {
+        proxy.second->Render(GetDefaultRenderType());
+    }
+    
 }
 
 void FSceneRender::EndRender()
@@ -249,6 +283,16 @@ bool FSceneRender::SkeletalMeshHasCreated(const string& meshName)
 bool FSceneRender::AnimProxyHasCreated(const string& meshName)
 {
     if (AnimProxies.find(meshName) != AnimProxies.end())
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool FSceneRender::PrimProxyHasCreated(const ECollisionShape& InCollisionShape)
+{
+    if (PrimProxy.find(InCollisionShape) != PrimProxy.end())
     {
         return true;
     }

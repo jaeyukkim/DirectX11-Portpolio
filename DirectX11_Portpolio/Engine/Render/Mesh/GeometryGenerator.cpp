@@ -32,9 +32,11 @@ VertexTextureData GeometryGenerator::MakeScreen(const float scale, const Vector2
     }
 
     ScreenData.Indices = { 0, 1, 2, 0, 2, 3 };
-
+    
     return ScreenData;
 }
+
+
 /*
 * 사각형을 만드는 함수
 */
@@ -78,6 +80,8 @@ StaticMeshData GeometryGenerator::MakeSquare(const float scale, const Vector2 te
     }
 
     meshData.Indices = {0, 1, 2, 0, 2, 3};
+
+    SetAABB(meshData);
     return meshData;
 }
 
@@ -125,6 +129,7 @@ StaticMeshData GeometryGenerator::MakeSquareGrid(const int numSlices, const int 
         }
     }
 
+    SetAABB(meshData);
     return meshData;
 }
 
@@ -268,11 +273,119 @@ StaticMeshData GeometryGenerator::MakeBox(const float scale)
         20, 21, 22, 20, 22, 23  // 오른쪽
     };
 
+    SetAABB(meshData);
     return meshData;
 }
 
+
+StaticMeshData GeometryGenerator::MakeCapsule(float radius, float halfHeight, int numSlices, int numStacks)
+{
+   StaticMeshData meshData;
+    vector<VertexObject>& vertices = meshData.Vertices;
+    vector<uint32_t>& indices = meshData.Indices;
+
+    const float pi = XM_PI;
+    const float thetaStep = XM_2PI / numSlices;
+    const float phiStep = pi / (numStacks * 2); // 반구 개수 기준
+
+    // === 위 반구 ===
+    for (int i = 0; i <= numStacks; ++i)
+    {
+        float phi = i * phiStep;
+        float y = cosf(phi);
+        float r = sinf(phi);
+
+        for (int j = 0; j <= numSlices; ++j)
+        {
+            float theta = j * thetaStep;
+            float x = r * cosf(theta);
+            float z = r * sinf(theta);
+
+            Vector3 normal = Vector3(x, y, z);
+            VertexObject v;
+            v.Position = normal * radius + Vector3(0, halfHeight, 0);
+            v.Normal = normal;
+            v.Tangent = Vector3(-sinf(theta), 0.f, cosf(theta));
+            v.Uv = Vector2(float(j) / numSlices, float(i) / (numStacks * 2));
+            vertices.push_back(v);
+        }
+    }
+
+    // === 실린더 부분 ===
+    for (int i = 0; i <= 1; ++i)
+    {
+        float y = halfHeight - i * (2.0f * halfHeight);
+
+        for (int j = 0; j <= numSlices; ++j)
+        {
+            float theta = j * thetaStep;
+            float x = cosf(theta);
+            float z = sinf(theta);
+
+            Vector3 normal = Vector3(x, 0.f, z);
+            VertexObject v;
+            v.Position = Vector3(x * radius, y, z * radius);
+            v.Normal = normal;
+            v.Tangent = Vector3(-z, 0.f, x);
+            v.Uv = Vector2(float(j) / numSlices, float(numStacks + i) / (numStacks * 2));
+            vertices.push_back(v);
+        }
+    }
+
+    //아래반구
+    for (int i = 0; i <= numStacks; ++i)
+    {
+        float phi = pi / 2.0f + i * phiStep; 
+        float y = cosf(phi);
+        float r = sinf(phi);
+
+        for (int j = 0; j <= numSlices; ++j)
+        {
+            float theta = j * thetaStep;
+            float x = r * cosf(theta);
+            float z = r * sinf(theta);
+
+            Vector3 normal = Vector3(x, y, z);
+            VertexObject v;
+            v.Position = normal * radius + Vector3(0, -halfHeight, 0);
+            v.Normal = normal;
+            v.Tangent = Vector3(-sinf(theta), 0.f, cosf(theta));
+            v.Uv = Vector2(float(j) / numSlices, float(numStacks + 2 + i) / (numStacks * 2));
+            vertices.push_back(v);
+        }
+    }
+
+    
+    // === 인덱스 연결 ===
+    int ringCount = (numStacks * 2 + 2);
+    int ringVerts = numSlices + 1;
+
+    for (int i = 0; i < ringCount - 1; ++i)
+    {
+        for (int j = 0; j < numSlices; ++j)
+        {
+            int a = i * ringVerts + j;
+            int b = (i + 1) * ringVerts + j;
+            int c = (i + 1) * ringVerts + j + 1;
+            int d = i * ringVerts + j + 1;
+
+            indices.push_back(a);
+            indices.push_back(b);
+            indices.push_back(c);
+
+            indices.push_back(a);
+            indices.push_back(c);
+            indices.push_back(d);
+        }
+    }
+
+    SetAABB(meshData);
+    return meshData;
+}
+
+
 StaticMeshData GeometryGenerator::MakeCylinder(const float bottomRadius,
-    const float topRadius, float height, int numSlices) 
+                                               const float topRadius, float height, int numSlices) 
 {
 
     // Texture 좌표계때문에 (numSlices + 1) x 2 개의 버텍스 사용
@@ -320,6 +433,7 @@ StaticMeshData GeometryGenerator::MakeCylinder(const float bottomRadius,
         Indices.push_back(i + 1);
     }
 
+    SetAABB(meshData);
     return meshData;
 }
 
@@ -379,7 +493,7 @@ StaticMeshData GeometryGenerator::MakeSphere(const float radius, const int numSl
         }
     }
 
-
+    SetAABB(meshData);
     return meshData;
 }
 
@@ -415,6 +529,7 @@ StaticMeshData GeometryGenerator::MakeIcosahedron()
       3,  10, 7, 10, 6, 7, 6, 11, 7, 6, 0, 11, 6,  1, 0,
       10, 1,  6, 11, 0, 9, 2, 11, 9, 5, 2, 9,  11, 2, 7 };
 
+    SetAABB(newMesh);
     return newMesh;
 }
 
@@ -459,6 +574,7 @@ StaticMeshData GeometryGenerator::MakeTetrahedron()
 
     meshData.Indices = { 0, 1, 2, 3, 2, 1, 0, 3, 1, 0, 2, 3 };
 
+    SetAABB(meshData);
     return meshData;
 }
 StaticMeshData GeometryGenerator::SubdivideToSphere(const float radius,
@@ -545,5 +661,25 @@ StaticMeshData GeometryGenerator::SubdivideToSphere(const float radius,
         count += 12;
     }
 
+    SetAABB(newMesh);
     return newMesh;
+}
+
+void GeometryGenerator::SetAABB(StaticMeshData& InMeshData)
+{
+    Vector3 minAABB = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+    Vector3 maxAABB = Vector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+    for(VertexObject& vertex : InMeshData.Vertices)
+    {
+        minAABB.x = std::min(vertex.Position.x, minAABB.x);
+        minAABB.y = std::min(vertex.Position.y, minAABB.y);
+        minAABB.z = std::min(vertex.Position.z, minAABB.z);
+
+        maxAABB.x = max(maxAABB.x, vertex.Position.x);
+        maxAABB.y = max(maxAABB.y, vertex.Position.y);
+        maxAABB.z = max(maxAABB.z, vertex.Position.z);
+    }
+    InMeshData.AABB.Max = maxAABB;
+    InMeshData.AABB.Max = minAABB;
 }

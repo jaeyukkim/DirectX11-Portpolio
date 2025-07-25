@@ -179,7 +179,7 @@ void FSceneView::UpdateLightView(FLight* InLightInfo)
             InLightInfo->position, InLightInfo->position + InLightInfo->direction, up);
 
         Matrix lightProjRow = XMMatrixPerspectiveFovLH(
-            XMConvertToRadians(75.0f), 1.0f, 1.0f, 50.0f);
+            XMConvertToRadians(75.0f), 1.0f, 100.0f, 10000.0f);
 
         
         auto& view = ShadowView[InLightInfo->LightID];

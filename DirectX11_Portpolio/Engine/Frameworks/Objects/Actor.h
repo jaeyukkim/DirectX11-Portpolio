@@ -2,7 +2,7 @@
 #include "UObject.h"
 
 struct FTransform;
-
+class UActorComponent;
 class USceneComponent;
 
 class Actor : public UObject

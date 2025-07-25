@@ -133,7 +133,7 @@ void FGlobalPSO::InitVSAndIL()
          D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
     
-    
+    CompileVSAndInputLayout(PrimitiveVSPath, PrimitiveVS, meshIED, MeshIL);
     CompileVSAndInputLayout(MeshVSPath, MeshVS, meshIED, MeshIL);
     CompileVSAndInputLayout(SkeletalMeshVSPath, SkeletalMeshVS, skeletalMeshIED, SkeletalMeshIL,
         vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, {NULL, NULL}});
@@ -149,6 +149,7 @@ void FGlobalPSO::InitVSAndIL()
 
 void FGlobalPSO::InitPixelShader()
 {
+    CompilePS(PrimitivePSPath, PrimitivePS);
     CompilePS(MeshPSPath, MeshPS);
     CompilePS(SkeletalMeshPSPath, SkeletalMeshPS);
     CompilePS(DepthOnlyPSPath, DepthOnlyPS);
@@ -205,9 +206,10 @@ void FGlobalPSO::InitRasterizeState()
     
     // wireCCWRS : CCW And Wire Rasterizer
     rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+    rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
     hr = D3D::Get()->GetDevice()->CreateRasterizerState(&rastDesc, WireCCWRS.GetAddressOf());
     AssertHR(hr, "Create wireCCWRS() failed");
-        
+    
     // wireRS : Wire Rasterizer
     rastDesc.FrontCounterClockwise = false;
     hr = D3D::Get()->GetDevice()->CreateRasterizerState(&rastDesc, WireRS.GetAddressOf());
@@ -359,6 +361,12 @@ void FGlobalPSO::InitBlendState()
 
 void FGlobalPSO::InitPSO()
 {
+    // PrimitivePSO
+    PrimitivePSO.m_vertexShader = PrimitiveVS;
+    PrimitivePSO.m_pixelShader = PrimitivePS;
+    PrimitivePSO.m_rasterizerState = WireRS;
+    PrimitivePSO.m_primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    
     // MeshSolidPSO
     MeshSolidPSO.m_vertexShader = MeshVS;
     MeshSolidPSO.m_inputLayout = MeshIL;

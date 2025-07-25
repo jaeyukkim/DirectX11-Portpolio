@@ -59,7 +59,8 @@ public:
     
 public:
     FPSO RenderPSO; //������ Render �� PipelineObject
-    
+
+    FPSO PrimitivePSO;
     FPSO MeshSolidPSO;
     FPSO MeshWirePSO;
     FPSO MeshReflectSolidPSO;
@@ -100,6 +101,7 @@ private:
     
 private:
     // VertexShader
+    ComPtr<ID3D11VertexShader> PrimitiveVS;
     ComPtr<ID3D11VertexShader> MeshVS;
     ComPtr<ID3D11VertexShader> SkeletalMeshVS;
     ComPtr<ID3D11VertexShader> DepthOnlyVS;
@@ -107,8 +109,10 @@ private:
     ComPtr<ID3D11VertexShader> NormalVS;
     ComPtr<ID3D11VertexShader> SkyboxVS;
     ComPtr<ID3D11VertexShader> SamplingVS;
+
     
     // PixelShader
+    ComPtr<ID3D11PixelShader> PrimitivePS;
     ComPtr<ID3D11PixelShader> MeshPS;
     ComPtr<ID3D11PixelShader> SkeletalMeshPS;
     ComPtr<ID3D11PixelShader> SkyboxPS;
@@ -158,6 +162,9 @@ private:
 
 private:
     const wstring HlslPath = L"../../Engine/Render/HLSL/";
+
+    const wstring PrimitiveVSPath = HlslPath + L"VS_Primitive.hlsl";
+    const wstring PrimitivePSPath = HlslPath + L"PS_Primitive.hlsl";
     
     const wstring MeshVSPath = HlslPath + L"VS_StaticMesh.hlsl";
     const wstring MeshPSPath = HlslPath + L"PS_StaticMesh.hlsl";

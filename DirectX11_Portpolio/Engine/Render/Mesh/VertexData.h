@@ -152,6 +152,13 @@ struct StaticMeshData
     FAABB AABB;
 };
 
+struct PrimitiveData
+{
+    vector<VertexObject> Vertices;
+    vector<UINT> Indices;
+    FAABB AABB;
+};
+
 struct VertexTextureData
 {
     vector<VertexTexture> Data;

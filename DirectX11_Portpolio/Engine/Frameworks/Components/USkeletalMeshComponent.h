@@ -27,8 +27,7 @@ public:
     vector<Material*> GetAllMaterials();
     vector<shared_ptr<SkeletalMesh>> GetAllMeshes() {return m_Mesh;}
     
-    int GetInstanceID() {return *InstanceID;}
-    void SetInstanceID(int* InInstanceId) {InstanceID = InInstanceId;}
+    
 
     template<typename ClassType>
     void CreateAnimInstance(AnimInstanceCreateInfo info = AnimInstanceCreateInfo());
@@ -46,7 +45,7 @@ private:
     Matrix Transforms[MAX_MODEL_TRANSFORM];
     Matrix OffsetTransforms[MAX_MODEL_TRANSFORM];
     
-    int* InstanceID;
+    
     string MeshName;
     shared_ptr<UAnimInstance> AnimInstance;
 

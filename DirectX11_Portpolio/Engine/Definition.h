@@ -22,6 +22,14 @@
 	}\
 }
 
+#define PXRelease(x)\
+{\
+	if (x != nullptr)\
+	{\
+		(x)->release(); \
+		(x) = nullptr; \
+	}\
+}
 
 #define CheckTrue(x) { if(x == true) return; }
 #define CheckTrueResult(x, y) { if(x == true) return y; }

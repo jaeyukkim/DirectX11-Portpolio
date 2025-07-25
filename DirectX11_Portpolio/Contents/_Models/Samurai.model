@@ -4,8 +4,8 @@
     "Mesh": "Samurai/Samurai"
   },
   "Transform": {
-    "Position": "0,0.25,6",
+    "Position": "0,100,600",
     "Rotation": "90.0,0,0",
-    "Scale": "1.00,1.00,1.00"
+    "Scale": "1,1,1"
   },
 }

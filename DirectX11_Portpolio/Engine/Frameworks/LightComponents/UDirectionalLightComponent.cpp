@@ -5,8 +5,8 @@ UDirectionalLightComponent::UDirectionalLightComponent()
     :ULightComponent(ELightType::LT_Directional | ELightType::LT_UseShadow)
 
 {
-    GetRelativeTransform()->SetPosition(Vector3(-7, 9, 5));
-    Vector3 LightDirection = Vector3(0.0f, 0.0f, 0.0f) - Vector3(-7, 9, 5);
+    GetRelativeTransform()->SetPosition(Vector3(-700, 900, 500));
+    Vector3 LightDirection = Vector3(0.0f, 0.0f, 0.0f) - GetRelativeTransform()->GetPosition();
     LightDirection.Normalize();
    
     GetLightInfo()->direction = LightDirection;

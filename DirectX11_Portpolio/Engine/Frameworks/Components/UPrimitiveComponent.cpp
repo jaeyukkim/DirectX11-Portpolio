@@ -2,11 +2,13 @@
 #include "UPrimitiveComponent.h"
 
 
-UPrimitiveComponent::~UPrimitiveComponent()
-{
-}
 
 void UPrimitiveComponent::TickComponent(float deltaTime)
 {
 	Super::TickComponent(deltaTime);
+
+	if(InstanceID != nullptr)
+	{
+		TransformChanged.Broadcast(*InstanceID, WorldBufferData.World);
+	}
 }

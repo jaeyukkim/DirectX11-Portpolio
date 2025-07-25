@@ -19,8 +19,8 @@
 #define MAX_CUBEMAP_TEXTURE_COUNT 3 // BRDF는 2D 텍스쳐임
 
 #define MaxLOD 10
-#define BasicLodScale 10
-#define NormalLod 4
+#define BasicLodScale 1000
+#define NormalLod 400
 
 
 TextureCube textureCube[MAX_CUBEMAP_TEXTURE_COUNT] : register(t0);

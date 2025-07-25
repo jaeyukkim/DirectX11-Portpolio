@@ -120,7 +120,7 @@ private:
 private:
 	UINT NumQualityLevels = 0;
 	bool bUseMSAA = true;
-	const UINT ShadowWidth = 1280;
-	const UINT ShadowHeight = 1280;
+	const UINT ShadowWidth = 2560;
+	const UINT ShadowHeight = 2560;
 	Color clearColor;
 };

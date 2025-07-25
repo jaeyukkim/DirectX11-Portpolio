@@ -2,7 +2,7 @@
 #include "Actor.h"
 
 
-
+class UCapsuleComponent;
 class USceneComponent;
 class USkeletalMeshComponent;
 
@@ -15,5 +15,5 @@ public:
 
 
 	vector<shared_ptr<USkeletalMeshComponent>> Mesh;
-
+	shared_ptr<UCapsuleComponent> Capsule;
 }; 

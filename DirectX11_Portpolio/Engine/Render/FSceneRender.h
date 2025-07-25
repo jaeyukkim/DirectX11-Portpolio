@@ -4,12 +4,14 @@
 #include "RenderProxy/AnimationRenderProxy.h"
 #include "RenderProxy/LightSceneRenderProxy.h"
 #include "RenderProxy/MirrorRenderProxy.h"
+#include "RenderProxy/PrimitiveRenderProxy.h"
 #include "RenderProxy/SkeletalMeshRenderProxy.h"
 #include "RenderProxy/SkyBoxRenderProxy.h"
 #include "RenderProxy/StaticMeshRenderProxy.h"
 #include "RenderProxy/ViewRenderProxy.h"
 
 
+enum class ECollisionShape : UINT8;
 class PostEffect;
 enum ERenderProxyType : UINT8;
 class RenderProxy;
@@ -34,7 +36,10 @@ public:
     void CreateAnimRenderProxy(const string& meshName, Args&&... args);
     template <typename ProxyType>
     void DestroyMeshProxy(const string& meshName, const int instanceID);
- 
+
+    void DestroyPrimitiveProxy(const ECollisionShape& InCollisionShape, const int InInstanceID);
+    void CreatePrimitiveRenderProxy(const ECollisionShape& InCollisionShape,
+        UPrimitiveComponent* InPrimitiveComponent);
 
     
     void Render();
@@ -62,6 +67,7 @@ public:
     bool StaticMeshHasCreated(const string& meshName);
     bool SkeletalMeshHasCreated(const string& meshName);
     bool AnimProxyHasCreated(const string& meshName);
+    bool PrimProxyHasCreated(const ECollisionShape& InCollisionShape);
 
 private:
     FSceneRender() = default;
@@ -73,10 +79,12 @@ private:
 
     
     static FSceneRender* Instance;
+    unordered_map<ECollisionShape, shared_ptr<PrimitiveRenderProxy>> PrimProxy;
     unordered_map<string, shared_ptr<StaticMeshRenderProxy>> MeshProxies;
     unordered_map<string, shared_ptr<SkeletalMeshRenderProxy>> SkeletalMeshProxies;
     unordered_map<string, shared_ptr<AnimationRenderProxy>> AnimProxies;
 
+    
     shared_ptr<LightSceneRenderProxy> LightSceneProxy;
     shared_ptr<ViewRenderProxy> ViewProxy;
     vector<shared_ptr<MirrorRenderProxy>> MirrorProxy;

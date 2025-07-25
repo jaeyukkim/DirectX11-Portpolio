@@ -44,20 +44,20 @@ private:
 template <typename Component, typename... Args>
 shared_ptr<Component> UObject::CreateComponent(Actor* Owner, Args&&... args)
 {
-	static_assert(is_base_of_v<UActorComponent, Component>, 
-				  "CreateComponent는 ComponentType은 UActorComponent로 파생된 클래스여야 합니다");
+	static_assert(is_base_of_v<UActorComponent, Component>,
+		"CreateComponent는 ComponentType은 UActorComponent로 파생된 클래스여야 합니다");
 
 	// 컴포넌트 생성
 	auto comp = make_shared<Component>(forward<Args>(args)...);
 
 	// Owner 설정
 	comp->SetOwner(Owner);
-	
-	if constexpr(is_base_of_v<USceneComponent, Component>)
+
+	if constexpr (is_base_of_v<USceneComponent, Component>)
 		Owner->AddToOwnedSceneComponents(comp.get());
 	else
 		Owner->AddToOwnedActorComponents(comp.get());
-	
+
 	return comp;
 }
 
@@ -70,13 +70,13 @@ shared_ptr<Component> UObject::CreateComponent(Actor* Owner, Args&&... args)
 template <typename ActorType, typename ... Args>
 void UObject::SpawnActor(UObject* InOuter, Args&&... args)
 {
-	static_assert(is_base_of_v<Actor, ActorType>, 
-				  "SpawnActor의 ActorType은 Actor로 파생된 클래스여야 합니다");
+	static_assert(is_base_of_v<Actor, ActorType>,
+		"SpawnActor의 ActorType은 Actor로 파생된 클래스여야 합니다");
 
 	// 컴포넌트 생성
 	auto newActor = make_shared<ActorType>(forward<Args>(args)...);
 
-	
+
 	string className = typeid(ActorType).name();
 	const std::string prefix = "class ";
 	if (className.find(prefix) == 0)
@@ -85,5 +85,5 @@ void UObject::SpawnActor(UObject* InOuter, Args&&... args)
 	// Owner 설정
 	newActor->Outer = InOuter;
 	World::GetLevel()->AddActorToLevel(newActor);
-	
+
 }

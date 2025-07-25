@@ -5,8 +5,8 @@
 #define MAX_LIGHT_COUNT 9
 #define MAX_SHADOW_COUNT 9
 
-#define NEAR_PLANE 1.0
-#define LIGHT_FRUSTUM_WIDTH 1.53465 // <- °è»êÇØ¼­ Ã£Àº °ª
+#define NEAR_PLANE 100
+#define LIGHT_FRUSTUM_WIDTH 153.465 // <- ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½
 
 
 #define LIGHT_None 0
@@ -132,7 +132,7 @@ float SchlickGGX(float NdotI, float NdotO, float roughness)
 }
 
 
-// Âü°í: https://github.com/opengl-tutorials/ogl/blob/master/tutorial16_shadowmaps/ShadowMapping.fragmentshader
+// ï¿½ï¿½ï¿½ï¿½: https://github.com/opengl-tutorials/ogl/blob/master/tutorial16_shadowmaps/ShadowMapping.fragmentshader
 float random(float3 seed, int i)
 {
     float4 seed4 = float4(seed, i);
@@ -245,21 +245,21 @@ float3 LightRadiance(Light light, float3 posWorld, float3 normalWorld, Texture2D
     
     if (light.Type & Use_Shadow)
     {
-        const float nearZ = 0.01; // Ä«¸Þ¶ó ¼³Á¤°ú µ¿ÀÏ
+       
 
         // 1. Project posWorld to light screen    
         float4 lightScreen = mul(float4(posWorld, 1.0), light.viewProj);
         lightScreen.xyz /= lightScreen.w;
 
-        // 2. Ä«¸Þ¶ó(±¤¿ø)¿¡¼­ º¼ ¶§ÀÇ ÅØ½ºÃç ÁÂÇ¥ °è»ê
+        // 2. Ä«ï¿½Þ¶ï¿½(ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½
         float2 lightTexcoord = float2(lightScreen.x, -lightScreen.y);
         lightTexcoord += 1.0;
         lightTexcoord *= 0.5;
 
-        // 3. ½¦µµ¿ì¸Ê¿¡¼­ °ª °¡Á®¿À±â
+        // 3. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         //float depth = shadowMap.Sample(shadowPointSampler, lightTexcoord).r;
 
-        // 4. °¡·ÁÁ® ÀÖ´Ù¸é ±×¸²ÀÚ·Î Ç¥½Ã
+        // 4. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ù¸ï¿½ ï¿½×¸ï¿½ï¿½Ú·ï¿½ Ç¥ï¿½ï¿½
         //if (depth + 0.001 < lightScreen.z)
           //  shadowFactor = 0.0;
 
@@ -285,7 +285,7 @@ float HaloEmission(Light light, float3 posView, float radius)
     float3 rayStart = float3(0, 0, 0); // View space
     float3 dir = normalize(posView - rayStart);
 
-    float3 center = mul(float4(light.position, 1.0), View).xyz; // View °ø°£À¸·Î º¯È¯
+    float3 center = mul(float4(light.position, 1.0), View).xyz; // View ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
 
     float t1 = 0.0;
     float t2 = 0.0;

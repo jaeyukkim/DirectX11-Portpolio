@@ -34,6 +34,15 @@ using Microsoft::WRL::ComPtr;
 #include <DirectXTex.h>
 #include <fp16.h>
 
+
+#include <physx/PxPhysics.h>
+#include <physx/PxPhysicsAPI.h>
+#include <physx/extensions/PxSimpleFactory.h>
+#include "Physics/PxPtr.h"
+using namespace physx;
+#include "Physics/FPhysX.h"
+
+
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "DirectXTex.lib")

@@ -90,7 +90,7 @@ void UCameraComponent::SetViewMatrix()
 	}
 	// View 행렬 생성
 	aspect = D3D::Get()->GetDesc().Width / D3D::Get()->GetDesc().Height;
-	ViewContext.Projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), aspect, 0.1f, 3000.0f);
+	ViewContext.Projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), aspect, 10.0f, 300000.0f);
 	ViewContext.ProjectionInverse = ViewContext.Projection.Invert();
 	ViewContext.View = XMMatrixLookAtLH(position, target, up);
 	ViewContext.ViewInverse = ViewContext.View.Invert();
@@ -98,7 +98,7 @@ void UCameraComponent::SetViewMatrix()
 	ViewContext.EyePos = position;
 	FSceneView::Get()->UpdateSceneView(ViewContext);
 	
-	FrustumViewContext.Projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(FrustumFOV), aspect, 0.1f, 3000.0f);
+	FrustumViewContext.Projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(FrustumFOV), aspect, 10.0f, 300000.0f);
 	FrustumViewContext.ProjectionInverse = FrustumViewContext.Projection.Invert();
 	FrustumViewContext.View = XMMatrixLookAtLH(position, target, up);
 	FrustumViewContext.ViewInverse = FrustumViewContext.View.Invert();

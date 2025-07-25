@@ -11,7 +11,7 @@ class StaticMeshRenderProxy : public RenderProxy
 {
 public:
     StaticMeshRenderProxy(UStaticMeshComponent* meshComp);
-    void Render(const FRenderOption& option) override;
+    virtual void Render(const FRenderOption& option) override;
     void AddInstance(UStaticMeshComponent* meshComp);
     void DeleteInstance(const int InstanceID);
     void CopyCntToIndirect();
