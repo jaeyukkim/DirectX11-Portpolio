@@ -47,6 +47,9 @@ using namespace physx;
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "DirectXTex.lib")
 #pragma comment(lib, "DirectXTK.lib")
+
+
+
 #pragma
 
 
@@ -60,8 +63,12 @@ using namespace DirectX::SimpleMath;
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_win32.h>
 
+
+
+
 #include "Libraries/MathLibrary/FTransform.h"
 #include "Definition.h"
+
 
 #include "Render/RenderDefinition.h"
 #include "Render/Mesh/Buffers.h"

@@ -212,3 +212,4 @@ inline uint32 GetTypeHash(ScalarType Value)
 }
 
 
+using ClassID = std::string;

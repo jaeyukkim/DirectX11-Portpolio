@@ -60,6 +60,7 @@ void Application::Run()
 	float deltaTime = Timer::Get()->GetDeltaTime();
 	Mouse::Get()->Tick(deltaTime);
 	Main->Tick(deltaTime);
+	FPhysX::Get()->Simulate(deltaTime);
 
 	//¸ŞÀÎ ·»´õ ·çÇÁ
 	FSceneRender::Get()->Render();

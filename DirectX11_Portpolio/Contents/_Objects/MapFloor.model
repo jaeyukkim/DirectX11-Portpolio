@@ -4,7 +4,7 @@
     "Mesh": "MapFloor/MapFloor"
   },
   "Transform": {
-    "Position": "0,0,0",
+    "Position": "0,-100,0",
     "Rotation": "90.0,0,0",
     "Scale": "5,5,5"
   }

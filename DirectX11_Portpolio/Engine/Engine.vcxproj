@@ -175,6 +175,8 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Frameworks\LightComponents\ULightComponent.h" />
     <ClInclude Include="Frameworks\LightComponents\UPointLightComponent.h" />
     <ClInclude Include="Frameworks\LightComponents\USpotLightComponent.h" />
+    <ClInclude Include="Frameworks\Manager\AGameMode.h" />
+    <ClInclude Include="Frameworks\Manager\APlayerController.h" />
     <ClInclude Include="Frameworks\Manager\TickTaskManager.h" />
     <ClInclude Include="Frameworks\Objects\ACharacter.h" />
     <ClInclude Include="Frameworks\Objects\Actor.h" />
@@ -788,6 +790,8 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Frameworks\LightComponents\ULightComponent.cpp" />
     <ClCompile Include="Frameworks\LightComponents\UPointLightComponent.cpp" />
     <ClCompile Include="Frameworks\LightComponents\USpotLightComponent.cpp" />
+    <ClCompile Include="Frameworks\Manager\AGameMode.cpp" />
+    <ClCompile Include="Frameworks\Manager\APlayerController.cpp" />
     <ClCompile Include="Frameworks\Manager\TickTaskManager.cpp" />
     <ClCompile Include="Frameworks\Objects\ACharacter.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>

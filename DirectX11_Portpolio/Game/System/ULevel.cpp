@@ -5,6 +5,7 @@
 #include "Enviroment/AFloor.h"
 #include "Enviroment/ACubeMap.h"
 #include "Enviroment/AMirror.h"
+#include "Frameworks/Manager/AGameMode.h"
 
 atomic<UINT32> ULevel::ObjectCount = -1;
 
@@ -12,9 +13,8 @@ void ULevel::Initialize()
 {
     FTickTaskManager::Create(this);
 
-
+    SpawnActor<AGameMode>(this);
     SpawnActor<ALightActor>(this);
-    SpawnActor<AKachujin>(this);
     SpawnActor<AFloor>(this);
     SpawnActor<ACubeMap>(this);
     //SpawnActor<AMirror>(this);

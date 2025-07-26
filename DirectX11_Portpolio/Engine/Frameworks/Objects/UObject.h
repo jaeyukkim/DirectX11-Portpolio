@@ -22,7 +22,7 @@ protected:
 	shared_ptr<Component> CreateComponent(Actor* Owner, Args&&... args);
 	
 	template<typename ActorType, typename... Args>
-	void SpawnActor(UObject* InOuter, Args&&... args);
+		Actor* SpawnActor(UObject* InOuter, Args&&... args);
 
 	
 
@@ -68,7 +68,7 @@ shared_ptr<Component> UObject::CreateComponent(Actor* Owner, Args&&... args)
  * @param args Args 생성할 Actor의 생성자 매개변수
  */
 template <typename ActorType, typename ... Args>
-void UObject::SpawnActor(UObject* InOuter, Args&&... args)
+Actor* UObject::SpawnActor(UObject* InOuter, Args&&... args)
 {
 	static_assert(is_base_of_v<Actor, ActorType>,
 		"SpawnActor의 ActorType은 Actor로 파생된 클래스여야 합니다");
@@ -85,5 +85,5 @@ void UObject::SpawnActor(UObject* InOuter, Args&&... args)
 	// Owner 설정
 	newActor->Outer = InOuter;
 	World::GetLevel()->AddActorToLevel(newActor);
-
+	return newActor.get();
 }

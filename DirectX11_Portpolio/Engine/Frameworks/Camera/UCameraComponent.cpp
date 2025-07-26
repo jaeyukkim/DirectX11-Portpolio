@@ -20,7 +20,8 @@ void UCameraComponent::TickComponent(float deltaTime)
 	Super::TickComponent(deltaTime);
 
 	//CaptureCinematic(deltaTime);
-	
+
+	/*
 	CheckFalse(Mouse::Get()->Press(MouseButton::Right));
 
 	FTransform* T = GetRelativeTransform();
@@ -52,7 +53,7 @@ void UCameraComponent::TickComponent(float deltaTime)
 	float yaw = mouseDelta.x * RotationSpeed * deltaTime;
 
 	T->AddRotation(yaw, pitch, 0.0f);
-
+	*/
 	
 	
 	SetViewMatrix();

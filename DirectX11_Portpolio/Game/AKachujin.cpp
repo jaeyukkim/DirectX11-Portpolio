@@ -82,7 +82,9 @@ AKachujin::AKachujin()
     
 
     Camera = CreateComponent<UCameraComponent>(this);
-   // Camera->SetUpAttachment(GetRootComponent());
+    Camera->SetUpAttachment(GetRootComponent());
+    Camera->GetRelativeTransform()->SetPosition(0.0f, 200.0f, -300.0f);
+    Camera->GetRelativeTransform()->SetRotation(20.0f, 0.0f, 0.0f);
 }
 
 AKachujin::~AKachujin()

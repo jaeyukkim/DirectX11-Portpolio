@@ -14,9 +14,10 @@ private:
     void InitPhysics();
     
     
-private:
+public:
     //float CapsuleRadius = 34.0f;
     //float CapsuleHalfHeight = 80.0f ;
     float CapsuleRadius = 34.0f;
     float CapsuleHalfHeight = 60.0f ;
+    PxPtr<PxMaterial> PhysMaterial;
 };

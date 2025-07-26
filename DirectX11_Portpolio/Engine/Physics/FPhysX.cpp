@@ -25,9 +25,10 @@ void FPhysX::Initialize()
     Assert(Foundation.get() != nullptr, "Foundation Init Failed");
     
     Pvd = PxPtr<PxPvd>::make_ptr(PxCreatePvd(*Foundation));
-    Transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
-    Pvd->connect(*Transport, physx::PxPvdInstrumentationFlag::eALL);
-
+    Transport = PxPtr<PxPvdTransport>::make_ptr(PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10));
+    bool bConnected = Pvd->connect(*Transport.get(), physx::PxPvdInstrumentationFlag::eALL);
+    if(!bConnected) cout<<"Connect ½ÇÆÐ";
+    
     ToleranceScale.length = 100;
     ToleranceScale.speed = 980;
     Physics = PxPtr<PxPhysics>::make_ptr(PxCreatePhysics(PX_PHYSICS_VERSION, *Foundation,
@@ -50,5 +51,14 @@ void FPhysX::Initialize()
         pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
     }
 
-    
+    ControllerManager = PxPtr<PxControllerManager>::make_ptr(PxCreateControllerManager(*PhysScene.get()));
+}
+
+void FPhysX::Simulate(float deltaTime)
+{
+    if (PhysScene)
+    {
+        PhysScene->simulate(deltaTime);
+        PhysScene->fetchResults(true);
+    }
 }

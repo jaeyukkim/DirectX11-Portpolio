@@ -1,6 +1,7 @@
 #pragma once
 #include "Frameworks/Objects/UObject.h"
 
+class ACharacter;
 
 class ULevel : public UObject
 {
@@ -14,8 +15,9 @@ public:
     Actor* GetActor(int InObjectID);
     void AddActorToLevel(const shared_ptr<Actor>& InActor);
     void DestroyActor(Actor* InActor);
-  
+
 private:
+    shared_ptr<ACharacter> PlayerCharacter;
     unordered_map<UINT32, shared_ptr<Actor>> Actors;
     static ULevel* level;
     static atomic<UINT32> ObjectCount;

@@ -10,7 +10,11 @@ UCapsuleComponent::UCapsuleComponent(FPhysicsOption InOption)
     PhysicsOption = InOption;
 
     InitCapsule();
-    InitPhysics();
+    
+    if(!InOption.bUseController)
+    {
+        InitPhysics();
+    }
     FSceneRender::Get()->CreatePrimitiveRenderProxy(CollisionShape, this);
 }
 void UCapsuleComponent::TickComponent(float deltaTime)
@@ -23,7 +27,8 @@ void UCapsuleComponent::TickComponent(float deltaTime)
 void UCapsuleComponent::InitPhysics()
 {
     PxPhysics* physics = FPhysX::Get()->GetPhysics();
-    PxPtr<PxMaterial> mat = PxPtr<PxMaterial>::make_ptr(
+    PxScene* scene = FPhysX::Get()->GetPhysScene();
+    PhysMaterial = PxPtr<PxMaterial>::make_ptr(
         physics->createMaterial(0.5f, 0.5f, 0.1f)); // 기본 마찰/탄성
 
     PxCapsuleGeometry CapsuleGeom(CapsuleRadius, CapsuleHalfHeight);
@@ -36,16 +41,16 @@ void UCapsuleComponent::InitPhysics()
             physics->createRigidStatic(PxTransform(PxIdentity))
         );
 
-        PxPtr<PxShape> Shape = PxPtr<PxShape>::make_ptr(physics->createShape(CapsuleGeom, *mat));
+        PxPtr<PxShape> Shape = PxPtr<PxShape>::make_ptr(physics->createShape(CapsuleGeom, *PhysMaterial.get()));
         RigidStatic->attachShape(*Shape);
-
+        scene->addActor(*RigidStatic);
     }
     else // Dynamic 또는 Kinematic
     {
         RigidDynamic = PxPtr<PxRigidDynamic>::make_ptr(
             physics->createRigidDynamic(PxTransform(PxIdentity)));
 
-        PxPtr<PxShape> Shape = PxPtr<PxShape>::make_ptr(physics->createShape(CapsuleGeom, *mat));
+        PxPtr<PxShape> Shape = PxPtr<PxShape>::make_ptr(physics->createShape(CapsuleGeom, *PhysMaterial.get()));
         RigidDynamic->attachShape(*Shape);
         
         // 질량 및 관성 설정
@@ -69,7 +74,11 @@ void UCapsuleComponent::InitPhysics()
         if (PhysicsOption.bLockRotationY) LockFlags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y;
         if (PhysicsOption.bLockRotationZ) LockFlags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z;
         RigidDynamic->setRigidDynamicLockFlags(LockFlags);
+        
+        scene->addActor(*RigidDynamic);
     }
+
+    
 }
 
 

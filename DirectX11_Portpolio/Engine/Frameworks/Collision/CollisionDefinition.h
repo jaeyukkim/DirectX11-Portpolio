@@ -27,7 +27,7 @@ struct FPhysicsOption
     ECollisionDetectionType DetectionType = ECollisionDetectionType::CDT_AllEnabled;
     EPhysicsType PhysicsType = EPhysicsType::PT_Static;
 
-    
+    bool bUseController = false;
     bool bSimulatePhysics = false;
     bool bEnableGravity = false;
     bool bKinematic = false;
