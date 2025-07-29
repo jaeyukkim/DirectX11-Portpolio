@@ -2,6 +2,7 @@
 #include "USkeletalMeshComponent.h"
 #include "Render/Mesh/SkeletalMesh.h"
 #include "Render/FSceneRender.h"
+#include "Frameworks/Objects/ACharacter.h"
 
 /**
  * @param InFileName SkeletalMesh의 바이너리 파일 이름

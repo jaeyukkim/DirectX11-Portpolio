@@ -2,6 +2,7 @@
 #include "UAnimInstance.h"
 
 #include "Render/FSceneRender.h"
+#include "Frameworks/Objects/Actor.h"
 
 UAnimInstance::UAnimInstance(USkeletalMeshComponent* meshComp)
 {
@@ -10,8 +11,10 @@ UAnimInstance::UAnimInstance(USkeletalMeshComponent* meshComp)
     
 }
 
-void UAnimInstance::InitInstance(AnimInstanceCreateInfo info)
+void UAnimInstance::InitInstance(Actor* InActorOwner, AnimInstanceCreateInfo info)
 {
+    ActorOwner = InActorOwner;
+    
     shared_ptr<Converter> converter = make_shared<Converter>();
     
     wstring InFileName = L"../../Contents/_Models/" +
@@ -23,11 +26,33 @@ void UAnimInstance::InitInstance(AnimInstanceCreateInfo info)
     FSceneRender::Get()->CreateAnimRenderProxy<UAnimInstance>(MeshComponent->MeshName, this);
 
     InitAnimTable();
+    NativeInitializeAnimation();
+}
+
+void UAnimInstance::AddNode(FAnimStateNode& InNode)
+{
+    AnimStateNode[InNode.NodeName] = InNode;
+}
+
+void UAnimInstance::InitFirstNode(const string& InName)
+{
+    if(AnimStateNode.find(InName) != AnimStateNode.end())
+    {
+        StartNode = &AnimStateNode[InName];
+    }
 }
 
 
+void UAnimInstance::NativeInitializeAnimation()
+{
+}
+
 void UAnimInstance::NativeUpdateAnimation(float deltaTime)
 {
+    CheckNull(StartNode);
+    FAnimStateNode* nextNode = ProcessNode(StartNode);
+    ChangeAnimation(nextNode->NodeName, nextNode->TakeBlendTime, nextNode->bLoop);
+    
     if(BlendingData.Next.ClipID > -1)
     {
         float running = Timer::Get()->GetRunningTime();
@@ -54,7 +79,7 @@ void UAnimInstance::NativeUpdateAnimation(float deltaTime)
     BlendChanged.Broadcast(MeshComponent->GetInstanceID(), BlendingData);
 }
 
-void UAnimInstance::ChangeAnimation(string InAnimName, float TakeTime)
+void UAnimInstance::ChangeAnimation(string InAnimName, float TakeTime, bool InbLoop)
 {
     int clipID = GetAnimClipID(InAnimName);
     
@@ -74,15 +99,15 @@ void UAnimInstance::ChangeAnimation(string InAnimName, float TakeTime)
 
     //같은 애니메이션이 들어왔을경우
     CheckTrue(BlendingData.Current.ClipID == clipID);
-
+    CheckTrue(BlendingData.Next.ClipID == clipID)
 
     BlendingData.ChangeStartTime = Timer::Get()->GetRunningTime();
     BlendingData.TakeTime = TakeTime;
     BlendingData.Next.ClipID = clipID;
     BlendingData.Next.Duration = Animations[clipID]->Duration + 1.0f;
     BlendingData.Next.TickPerSeconds = Animations[clipID]->TickPerSecond;
-
-    
+   
+    BlendingData.Next.bLoop = (int)InbLoop;
     BlendingData.Next.PlaySpeed = Animations[clipID]->PlaySpeed;
     BlendingData.Next.StartTime = Timer::Get()->GetRunningTime();
     bAnimStateChanged = true;
@@ -110,5 +135,21 @@ void UAnimInstance::InitAnimTable()
     {
         AnimClipTable.insert({Animations[i]->AnimName, i});
     }
+}
+
+
+FAnimStateNode* UAnimInstance::ProcessNode(FAnimStateNode* currentNode)
+{
+    // 현재 노드의 트랜지션을 검사
+    for (auto& transition : currentNode->Transitions)
+    {
+        if (transition.Condition && transition.Condition())
+        {
+            if(AnimStateNode.find(transition.NextNodeName) != AnimStateNode.end())
+                currentNode = ProcessNode(&AnimStateNode[transition.NextNodeName]);
+        }
+    }
+
+    return currentNode;
 }
 

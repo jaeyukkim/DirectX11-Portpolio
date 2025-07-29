@@ -76,6 +76,11 @@ Vector3 FTransform::GetRotation() const
     return Vector3(pitch, yaw, roll);
 }
 
+Quaternion FTransform::GetQuat() const
+{
+    return Rotation;
+}
+
 void FTransform::SetPosition(float x, float y, float z)
 {
     Position = XMVectorSet(x, y, z, 0);
@@ -124,6 +129,11 @@ void FTransform::SetScale(Vector3 InScale)
 {
     Scale = InScale;
 
+}
+
+void FTransform::SetQuat(Quaternion InQuat)
+{
+    Rotation = InQuat;
 }
 
 Vector4 FTransform::operator*(const Vector4& vec) const

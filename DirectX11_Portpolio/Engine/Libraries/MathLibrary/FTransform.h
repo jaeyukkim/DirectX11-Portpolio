@@ -21,6 +21,7 @@ public:
     Vector3 GetPosition() const;
     Vector3 GetScale() const;
     Vector3 GetRotation() const;
+    Quaternion GetQuat() const;
 
     void SetPosition(float x, float y, float z);
     void SetPosition(Vector3 InPosition);
@@ -30,6 +31,8 @@ public:
 
     void SetScale(float x, float y, float z);
     void SetScale(Vector3 InScale);
+
+    void SetQuat(Quaternion InQuat); 
 
     Vector4 operator*(const Vector4& vec) const;
     Vector4 operator=(const Vector4& vec) const;

@@ -163,6 +163,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Frameworks\Animation\UAnimInstance.h" />
     <ClInclude Include="Frameworks\Camera\UCameraComponent.h" />
     <ClInclude Include="Frameworks\Collision\CollisionDefinition.h" />
+    <ClInclude Include="Frameworks\Collision\UBoxComponent.h" />
     <ClInclude Include="Frameworks\Collision\UCapsuleComponent.h" />
     <ClInclude Include="Frameworks\Collision\UCollisionComponent.h" />
     <ClInclude Include="Frameworks\Components\UActorComponent.h" />
@@ -413,6 +414,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
       <AdditionalIncludeDirectories>./;;C:\Users\77\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
       <LibCompiled>true</LibCompiled>
     </ClCompile>
+    <ClCompile Include="Frameworks\Collision\UBoxComponent.cpp" />
     <ClCompile Include="Frameworks\Collision\UCapsuleComponent.cpp" />
     <ClCompile Include="Frameworks\Collision\UCollisionComponent.cpp" />
     <ClCompile Include="Frameworks\Components\UActorComponent.cpp">

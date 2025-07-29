@@ -3,6 +3,7 @@
 #include "UPrimitiveComponent.h"
 #include "Frameworks/Animation/UAnimInstance.h"
 
+class ACharacter;
 class UAnimInstance;
 class FClipData;
 class Material;
@@ -30,7 +31,8 @@ public:
     
 
     template<typename ClassType>
-    void CreateAnimInstance(AnimInstanceCreateInfo info = AnimInstanceCreateInfo());
+    void CreateAnimInstance(Actor* InActorOwner,
+        AnimInstanceCreateInfo info = AnimInstanceCreateInfo());
     void SetAnimInstace(shared_ptr<UAnimInstance> animInst) {AnimInstance = animInst;}
     UAnimInstance* GetAnimInstance() {return AnimInstance.get();}
 
@@ -57,12 +59,13 @@ private:
 };
 
 template <typename ClassType>
-void USkeletalMeshComponent::CreateAnimInstance(AnimInstanceCreateInfo info)
+void USkeletalMeshComponent::CreateAnimInstance(Actor* InActorOwner,
+                                                AnimInstanceCreateInfo info)
 {
     static_assert(is_base_of_v<UAnimInstance, ClassType>, 
                   "CreateAnimInstance의 ClassType UAnimInstance로 부터 파생된 클래스여야 합니다");
     
     AnimInstance = make_shared<ClassType>(this);
-    AnimInstance->InitInstance(info);
+    AnimInstance->InitInstance(InActorOwner, info);
 }
  

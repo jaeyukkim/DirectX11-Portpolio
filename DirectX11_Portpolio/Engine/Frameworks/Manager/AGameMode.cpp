@@ -9,12 +9,15 @@
 AGameMode::AGameMode()
 {
     Actor* controller = SpawnActor<APlayerController>(World::GetLevel());
-    Actor* playerCharacter = SpawnActor<AKachujin>(World::GetLevel());
+
+    FTransform transform;
+    transform.SetPosition(0.0f, 200.0f, 0.0f);
+    Actor* playerCharacter = SpawnActorAtLocation<AKachujin>(World::GetLevel(), transform);
 
     if(APlayerController* PC = dynamic_cast<APlayerController*>(controller))
     {
         if(ACharacter* character = dynamic_cast<ACharacter*>(playerCharacter))
-        PC->Possess(character);
+            PC->Possess(character);
     }
 }
 

@@ -10,7 +10,7 @@ class AKachujin : public ACharacter
 public:
     AKachujin();
     virtual ~AKachujin();
-
+    virtual void Possess(APlayerController* InPlayerController) override;
 public:
     virtual void Tick(float deltaTime) override;
 

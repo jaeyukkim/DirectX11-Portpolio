@@ -137,14 +137,14 @@ StaticMeshData GeometryGenerator::MakeSquareGrid(const int numSlices, const int 
 /**
 * 박스를 생성하는 함수
 */
-StaticMeshData GeometryGenerator::MakeBox(const float scale) 
+StaticMeshData GeometryGenerator::MakeBox(Vector3 scale) 
 {
-
     vector<Vector3> positions;
     vector<Vector3> colors;
     vector<Vector3> normals;
     vector<Vector2> Uvs; // 텍스춰 좌표
 
+    scale = Vector3(scale.x/2, scale.y/2, scale.z/2);
     // 윗면
     positions.push_back(Vector3(-1.0f, 1.0f, -1.0f) * scale);
     positions.push_back(Vector3(-1.0f, 1.0f, 1.0f) * scale);

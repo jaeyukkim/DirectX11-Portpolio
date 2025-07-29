@@ -1,6 +1,7 @@
 #pragma once
 #include "Frameworks/Objects/Actor.h"
 
+class UBoxComponent;
 class UStaticMeshComponent;
 class AFloor : public Actor
 {
@@ -13,5 +14,5 @@ public:
 
 public:
 	shared_ptr<UStaticMeshComponent> floor;
-
+	shared_ptr<UBoxComponent> boxCollision;
 };

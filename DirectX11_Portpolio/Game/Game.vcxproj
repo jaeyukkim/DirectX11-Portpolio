@@ -146,6 +146,7 @@
     <ClCompile Include="Enviroment\AFloor.cpp" />
     <ClCompile Include="Enviroment\ACubeMap.cpp" />
     <ClCompile Include="Enviroment\AMirror.cpp" />
+    <ClCompile Include="Player\UMyAnimInstance.cpp" />
     <ClCompile Include="System\main.cpp" />
     <ClCompile Include="System\ULevel.cpp" />
     <ClCompile Include="System\World.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Enviroment\AFloor.h" />
     <ClInclude Include="Enviroment\ACubeMap.h" />
     <ClInclude Include="Enviroment\AMirror.h" />
+    <ClInclude Include="Player\UMyAnimInstance.h" />
     <ClInclude Include="System\ULevel.h" />
     <ClInclude Include="System\World.h" />
     <ClInclude Include="Pch.h" />

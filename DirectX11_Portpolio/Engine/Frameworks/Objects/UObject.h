@@ -23,7 +23,8 @@ protected:
 	
 	template<typename ActorType, typename... Args>
 		Actor* SpawnActor(UObject* InOuter, Args&&... args);
-
+	template<typename ActorType, typename... Args>
+	    Actor* SpawnActorAtLocation(UObject* InOuter, FTransform transform, Args&&... args);
 	
 
 private:
@@ -85,5 +86,33 @@ Actor* UObject::SpawnActor(UObject* InOuter, Args&&... args)
 	// Owner 설정
 	newActor->Outer = InOuter;
 	World::GetLevel()->AddActorToLevel(newActor);
+	return newActor.get();
+}
+
+template <typename ActorType, typename ... Args>
+Actor* UObject::SpawnActorAtLocation(UObject* InOuter, FTransform transform, Args&&... args)
+{
+	static_assert(is_base_of_v<Actor, ActorType>,
+		"SpawnActor의 ActorType은 Actor로 파생된 클래스여야 합니다");
+
+	// 컴포넌트 생성
+	auto newActor = make_shared<ActorType>(forward<Args>(args)...);
+
+
+	string className = typeid(ActorType).name();
+	const std::string prefix = "class ";
+	if (className.find(prefix) == 0)
+		className = className.substr(prefix.length());
+	newActor->SetObjectName(className);
+	// Owner 설정
+	newActor->Outer = InOuter;
+	World::GetLevel()->AddActorToLevel(newActor);
+	
+	if(FTransform* actorTransform = newActor->GetActorTransform())
+	{
+		actorTransform->SetPosition(transform.GetPosition());
+		actorTransform->SetQuat(transform.GetQuat());
+		actorTransform->SetRotation(transform.GetScale());
+	}
 	return newActor.get();
 }

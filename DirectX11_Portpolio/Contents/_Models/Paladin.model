@@ -4,7 +4,7 @@
     "Mesh": "Paladin/Paladin"
   },
   "Transform": {
-    "Position": "0,-13.0,0",
+    "Position": "0,0,0",
     "Rotation": "0,180,0",
     "Scale": "1,1,1"
   },
@@ -12,6 +12,7 @@
     "Paladin/Animations/sword_and_shield_idle",
     "Paladin/Animations/sword_and_shield_walk",
     "Paladin/Animations/sword_and_shield_jump",
-    "Paladin/Animations/sheath_sword_1"
+    "Paladin/Animations/sword_and_shield_run",
+    "Paladin/Animations/sheath_sword_1",
   ]
 }

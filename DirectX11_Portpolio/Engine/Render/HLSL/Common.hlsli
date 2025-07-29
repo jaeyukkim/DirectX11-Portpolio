@@ -100,8 +100,9 @@ struct FAnimFrameData
 
     float PlaySpeed;
     float StartTime;
-
-    float2 afd_Padding2;
+    int bLoop;
+    
+    float afd_Padding2;
 };
 
 struct FAnimBlendingData
@@ -159,12 +160,24 @@ Texture2DArray Animations : register(t26);
 void CalcAnimFrameTime(in FAnimFrameData data, out int currentFrame, out int nextFrame, out float interpTime)
 {
     float time = (RunningTime - data.StartTime) * data.PlaySpeed;
-    time = (time * data.TickPerSeconds) % data.Duration;
+    time = time * data.TickPerSeconds;
+    bool notLoop = (!data.bLoop && (time > data.Duration));
     
-    currentFrame = (int)time;
-    nextFrame = (currentFrame + 1.0f) % data.Duration;
+    if(!notLoop)
+    {
+        time = time % data.Duration;
+        currentFrame = (int)time;
+        nextFrame = (currentFrame + 1.0f) % data.Duration;
+        interpTime = frac(time);
+    }
+    else
+    {
+        time = time > data.Duration-1;
+        currentFrame = (int)time;
+        nextFrame = currentFrame;
+        interpTime = 0.0f;
+    }
     
-    interpTime = frac(time);
 }
 
 matrix GetAnimFrameTransform(int index, int currentFrame, int nextFrame, int clip, float interp)

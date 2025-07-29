@@ -15,7 +15,8 @@ struct FAnimFrameData
     float PlaySpeed = 0.0f;
     float StartTime = 0.0f;
 
-    float Padding2[2] = {0.0f};
+    int bLoop = true;
+    float Padding2 = 0.0f;
 };
 
 struct FAnimBlendingData
@@ -98,3 +99,17 @@ private:
     friend class AnimationTexture;
 };
 
+
+struct FAnimTransition
+{
+    string NextNodeName;
+    std::function<bool()> Condition;
+};
+
+struct FAnimStateNode
+{
+    string NodeName; //노드 이름
+    float TakeBlendTime;
+    bool bLoop = true;
+    vector<FAnimTransition> Transitions;   // 이 노드에서 갈 수 있는 트랜지션들
+};

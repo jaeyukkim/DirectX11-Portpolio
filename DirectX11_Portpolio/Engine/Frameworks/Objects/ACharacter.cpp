@@ -30,9 +30,12 @@ void ACharacter::Tick(float deltaTime)
 
 void ACharacter::Possess(APlayerController* InPlayerController)
 {
-	CheckNull(PlayerController);
+	CheckNull(InPlayerController);
 	PlayerController = InPlayerController;
 	PlayerController->MoveAction.Add(this, &ACharacter::MoveCharacter);
+	PlayerController->JumpAction.Add(this, &ACharacter::JumpCharacter);
+
+	
 }
 
 void ACharacter::UnPossess()
@@ -56,4 +59,11 @@ void ACharacter::MoveCharacter(Vector2 InValue)
 		PlayerController->AddMovementInput(MoveDir);
 	}
 	
+}
+
+void ACharacter::JumpCharacter()
+{
+	if(PlayerController == nullptr) return;
+
+	PlayerController->Jump();
 }
