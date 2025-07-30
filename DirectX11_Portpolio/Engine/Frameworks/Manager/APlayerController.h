@@ -2,7 +2,8 @@
 #include "Frameworks/Objects/Actor.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FMoveActionSignatrue, Vector2);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FJumpActionSignatrue);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLookInputSignatrue, Vector3);
+DECLARE_DYNAMIC_DELEGATE(FJumpActionSignatrue);
 
 
 class ACharacter;
@@ -16,14 +17,19 @@ public:
     virtual void Possess(ACharacter* InCharacter);
     virtual void UnPossess();
     virtual void Tick(float deltaTime) override;
+    
+public:
+    void AddRotationInput(Vector3 InVal);
     virtual void AddMovementInput(const Vector3& moveVal);
     virtual void Jump();
+    
     void InitPhysController();
 
     
     inline ACharacter* GetConrolledCharacter() {return ControlledCharacter;}
     void ProcessMoveAction();
     void ProcessJumpAction();
+    void ProcessLookInput();
     void AddMovementToPhys(float deltaTime);
 
 public:
@@ -34,17 +40,20 @@ public:
 public:
     FMoveActionSignatrue MoveAction;
     FJumpActionSignatrue JumpAction;
-
+    FLookInputSignatrue LookInput;
 
 private:
     ACharacter* ControlledCharacter = nullptr;
     PxPtr<PxController> PhysController;
+
 
     
 private:
     Vector3 PendingMovementInput = Vector3(0, 0, 0);
     const float Gravity = -980.0f;
     const float JumpSpeed = 80.0f;
+    float RotationSpeed = 25.f;
+
 
     float VerticalVelocity = 0.0f;
     float MaxMovementSpeed = 600.0f;

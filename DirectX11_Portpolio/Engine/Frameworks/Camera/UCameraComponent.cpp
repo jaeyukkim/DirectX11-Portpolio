@@ -74,6 +74,15 @@ void UCameraComponent::TickComponent(float deltaTime)
 	*/
 }
 
+void UCameraComponent::AddLookInput(Vector2 InMoveDelta)
+{
+	FTransform* T = GetRelativeTransform();
+	float pitch = InMoveDelta.y * RotationSpeed * Timer::Get()->GetDeltaTime();
+	float yaw = InMoveDelta.x * RotationSpeed * Timer::Get()->GetDeltaTime();
+
+	T->AddRotation(yaw, pitch, 0.0f);
+}
+
 
 void UCameraComponent::SetViewMatrix()
 {

@@ -10,6 +10,15 @@ public:
     Quaternion Rotation;
     Vector3 Scale;
 
+    // 제한 각도 (도 단위)
+    Vector3 MinRotation = Vector3(-89.0f, -360.0f, -180.0f);
+    Vector3 MaxRotation = Vector3(89.0f, 360.0f, 180.0f);
+
+    // 축 잠금 (true면 해당 축은 회전하지 않음)
+    bool bLockPitch = false;
+    bool bLockYaw   = false;
+    bool bLockRoll  = true;
+    
 public:
     FTransform();
     FTransform(XMVECTOR Position, XMVECTOR rotation, XMVECTOR scale);
@@ -47,8 +56,10 @@ public:
     void SetUpVector(Vector3 InUp, Vector3 Forward = Vector3::Forward);
 
     void AddRotation(float yawDelta, float pitchDelta, float rollDelta);
-
-
+    
+    void AddPitchInput(float InVal);
+    void AddYawInput(float InVal);
+    void AddRollInput(float InVal);
 
 private:
     static float NormalizeAngle(float angle);

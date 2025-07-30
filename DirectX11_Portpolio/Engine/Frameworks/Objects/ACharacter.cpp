@@ -32,9 +32,7 @@ void ACharacter::Possess(APlayerController* InPlayerController)
 {
 	CheckNull(InPlayerController);
 	PlayerController = InPlayerController;
-	PlayerController->MoveAction.Add(this, &ACharacter::MoveCharacter);
-	PlayerController->JumpAction.Add(this, &ACharacter::JumpCharacter);
-
+	
 	
 }
 
@@ -42,28 +40,3 @@ void ACharacter::UnPossess()
 {
 }
 
-void ACharacter::MoveCharacter(Vector2 InValue)
-{
-	CheckNull(PlayerController);
-
-	
-	Vector3 Forward = GetActorTransform()->GetForwardVector();
-	Vector3 Right   = GetActorTransform()->GetRightVector();
-
-	Vector3 MoveDir = (Forward * InValue.y) + (Right * InValue.x);
-
-	// 방향값이 0인 경우는 무시
-	if (MoveDir.LengthSquared() > 0.0f)
-	{
-		MoveDir.Normalize();
-		PlayerController->AddMovementInput(MoveDir);
-	}
-	
-}
-
-void ACharacter::JumpCharacter()
-{
-	if(PlayerController == nullptr) return;
-
-	PlayerController->Jump();
-}

@@ -15,7 +15,7 @@ public:
 
 public:
 	FViewContext& GetViewMatrix() { return ViewContext; }
-
+	void AddLookInput(Vector2 InMoveDelta);
 public:
 	void SetMoveSpeed(float InValue) { MoveSpeed = InValue; }
 	void SetRotationSpeed(float InValue) { RotationSpeed = InValue; }

@@ -1,7 +1,9 @@
 #include "Pch.h"
 #include "AKachujin.h"
 #include "Frameworks/Camera/UCameraComponent.h"
+#include "Frameworks/Manager/APlayerController.h"
 #include "Player/UMyAnimInstance.h"
+#include "Frameworks/Camera/USpringArmConponent.h"
 
 AKachujin::AKachujin()
 {
@@ -24,68 +26,20 @@ AKachujin::AKachujin()
     }
     */
     
-    Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
-    
-    
+    Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Paladin");
+    Mesh->SetUpAttachment(GetRootComponent());
 
-    /*
-    shared_ptr<Converter> converter = make_shared<Converter>();
-    converter->ImportFBXFile(L"SunGlassGirl", EMeshType::SkeletalMeshType);
+    SpringArm = CreateComponent<USpringArmConponent>(this);
+    SpringArm->SetUpAttachment(GetRootComponent());
     
-    
-    string animName[4] =
-    {
-        "CatwalkIdle",
-        "CatwalkIdleToWalkForward",
-        "CatwalkWalkForward",
-        "CatwalkWalkStop"
-    };
-    for(string str : animName)
-    {
-        converter->ImportFBX_Animation(L"SunGlassGirl", String::ToWString(str));
-    }
-    
-    
-    Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"SunGlassGirl"));
-    Mesh[0]->CreateAnimInstance<UAnimInstance>();
-    */
-    
-    //Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
-    //Mesh[1]->CreateAnimInstance<UAnimInstance>();
-    //Mesh[1]->GetRelativeTransform()->SetPosition(Vector3(15.0f, 0.75f, 6.0f));
-
-
-
-    /*
-    string animName[4] =
-    {
-        "sword_and_shield_idle",
-        "sword_and_shield_walk",
-        "sword_and_shield_jump",
-        "sheath_sword_1"
-    };
-    int cnt = 0;
-    for(int i = 0 ; i<30 ; i++)
-    {
-        for(int j = 0 ; j<30 ; j++)
-        {
-            Mesh.push_back(CreateComponent<USkeletalMeshComponent>(this, L"Paladin"));
-            Mesh[cnt]->CreateAnimInstance<UAnimInstance>();
-            Mesh[cnt]->GetRelativeTransform()->SetPosition(Vector3(i*4, 0.75f, j*4));
-            Mesh[cnt]->GetAnimInstance()->ChangeAnimation(animName[cnt%4], 0.15f);
-
-            cnt++;
-        }
-    }
-    */
-    Mesh[0]->SetUpAttachment(GetRootComponent());
-
-    
-
     Camera = CreateComponent<UCameraComponent>(this);
-    Camera->SetUpAttachment(GetRootComponent());
+    Camera->SetUpAttachment(SpringArm.get());
     Camera->GetRelativeTransform()->SetPosition(0.0f, 150.0f, -200.0f);
     Camera->GetRelativeTransform()->SetRotation(25.0f, 0.0f, 0.0f);
+
+    GetRootComponent()->GetRelativeTransform()->bLockPitch = true;
+    GetRootComponent()->GetRelativeTransform()->bLockRoll = true;
+
     
 }
 
@@ -96,67 +50,57 @@ AKachujin::~AKachujin()
 void AKachujin::Possess(APlayerController* InPlayerController)
 {
     Super::Possess(InPlayerController);
-    if(Mesh[0] != nullptr)
+
+    PlayerController->MoveAction.Add(this, &AKachujin::MoveCharacter);
+    PlayerController->JumpAction.Add(this, &AKachujin::JumpCharacter);
+    PlayerController->LookInput.Add(this, &AKachujin::LookAction);
+    
+    if(Mesh != nullptr)
     {
-        Mesh[0]->CreateAnimInstance<UMyAnimInstance>(this);
+        Mesh->CreateAnimInstance<UMyAnimInstance>(this);
     }
    
 
 }
 
+
 void AKachujin::Tick(float deltaTime)
 {
     Super::Tick(deltaTime);
-
-    /*
-    if(Keyboard::Get()->Down('Q'))
-        Mesh[0]->GetAnimInstance()->ChangeAnimation("sword_and_shield_idle", 0.15f);
-    if(Keyboard::Get()->Down('E'))
-        Mesh[0]->GetAnimInstance()->ChangeAnimation("sword_and_shield_walk", 0.15f);
-    */
-
-    /*
-    if(Keyboard::Get()->Down('Q'))
-        Mesh[0]->GetAnimInstance()->ChangeAnimation("CatwalkIdle", 1);
-    if(Keyboard::Get()->Down('E'))
-        Mesh[0]->GetAnimInstance()->ChangeAnimation("CatwalkWalkForward", 1);
-    */
     
-    /*
-    if (ImGui::TreeNode("ModelMaterial")) 
+}
+
+void AKachujin::LookAction(Vector3 InValue)
+{
+    //Camera->AddLookInput(Vector2(InValue.x, InValue.y));
+    
+    PlayerController->AddRotationInput(InValue);
+    SpringArm->AddLookInput(Vector2(0, InValue.y));
+    
+}
+
+void AKachujin::MoveCharacter(Vector2 InValue)
+{
+    CheckNull(PlayerController);
+
+	
+    Vector3 Forward = GetActorTransform()->GetForwardVector();
+    Vector3 Right   = GetActorTransform()->GetRightVector();
+
+    Vector3 MoveDir = (Forward * InValue.y) + (Right * InValue.x);
+
+    // 방향값이 0인 경우는 무시
+    if (MoveDir.LengthSquared() > 0.0f)
     {
-
-        int flag = 0;
-
-        flag += ImGui::SliderFloat("Metallic", &Metallic, 0.0f, 1.0f);
-        flag += ImGui::SliderFloat("Roughness", &Roughness,0.0f, 1.0f);
-        flag += ImGui::CheckboxFlags("AlbedoTexture", &bUseAlbedoMap, 1);
-        flag += ImGui::CheckboxFlags("EmissiveTexture", &bUseEmissiveMap, 1);
-        flag += ImGui::CheckboxFlags("Use NormalMapping", &bUseNormalMap, 1);
-        flag += ImGui::CheckboxFlags("Use AO", &bUseAOMap, 1);
-        flag += ImGui::CheckboxFlags("Use MetallicMap", &bUseMetallicMap, 1);
-        flag += ImGui::CheckboxFlags("Use RoughnessMap",&bUseRoughnessMap, 1);
-       
-
-        if (flag) 
-        {
-            for (Material* mat : Mesh->GetAllMaterials())
-            {
-                Material::MaterialDescription* desc = mat->GetMatDesc();
-                desc->Metallic = Metallic;
-                desc->Roughness = Roughness;
-                desc->bUseAlbedoMap = bUseAlbedoMap;
-                desc->bUseEmissiveMap = bUseEmissiveMap;
-                desc->bUseNormalMap = bUseNormalMap;
-                desc->bUseAOMap = bUseAOMap;
-                desc->bUseMetallicMap = bUseMetallicMap;
-                desc->bUseRoughnessMap = bUseRoughnessMap;
-                desc->bInvertNormalMapY = true;
-            }
-        }
-
-        ImGui::TreePop();
+        MoveDir.Normalize();
+        PlayerController->AddMovementInput(MoveDir);
     }
-    
-    */
+	
+}
+
+void AKachujin::JumpCharacter()
+{
+    if(PlayerController == nullptr) return;
+
+    PlayerController->Jump();
 }

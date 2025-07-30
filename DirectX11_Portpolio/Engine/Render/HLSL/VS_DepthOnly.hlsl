@@ -31,7 +31,7 @@ VertexOutput VS_Main(VertexShaderInput input, uint instanceID : SV_InstanceID)
 
     output.posWorld = posWorld.xyz;
 
-    output.modelNormal = normalize(mul(input.modelNormal, (float3x3)InstanceDatas[instanceID].Inst_World));
+    output.modelNormal = normalize(mul(input.modelNormal, (float3x3)InstanceDatas[instanceID].newWorld));
     output.texCoord = input.texCoord;
 
 

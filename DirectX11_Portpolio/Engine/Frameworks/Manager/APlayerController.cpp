@@ -31,12 +31,24 @@ void APlayerController::Tick(float deltaTime)
     Actor::Tick(deltaTime);
     
     ProcessMoveAction();
+    ProcessLookInput();
     ProcessJumpAction();
     AddMovementToPhys(deltaTime);
     
     
     PendingMovementInput = Vector3(0, 0, 0);
     
+}
+
+void APlayerController::AddRotationInput(Vector3 InVal)
+{
+    FTransform* T = ControlledCharacter->GetActorTransform();
+    
+    float yaw = InVal.x * RotationSpeed * Timer::Get()->GetDeltaTime();
+    float pitch = InVal.y * RotationSpeed * Timer::Get()->GetDeltaTime();
+    float roll = InVal.z * RotationSpeed * Timer::Get()->GetDeltaTime();
+    
+    T->AddRotation(yaw, pitch, roll);
 }
 
 void APlayerController::AddMovementInput(const Vector3& moveVal)
@@ -107,6 +119,15 @@ void APlayerController::ProcessJumpAction()
     if(Keyboard::Get()->Down(VK_SPACE))
     {
         JumpAction.Broadcast();
+    }
+}
+
+void APlayerController::ProcessLookInput()
+{
+    Vector3 moveDelta = Mouse::Get()->GetMoveDelta();
+    if(moveDelta.Length() > 0)
+    {
+        LookInput.Broadcast(moveDelta);
     }
 }
 

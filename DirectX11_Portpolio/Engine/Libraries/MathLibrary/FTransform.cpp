@@ -183,10 +183,26 @@ void FTransform::SetUpVector(Vector3 InUp, Vector3 Forward)
 
 void FTransform::AddRotation(float yawDelta, float pitchDelta, float rollDelta)
 {
-    Vector3 rot = GetRotation();
-    SetRotation(rot.x + pitchDelta, rot.y + yawDelta, rot.z + rollDelta);
+    Vector3 rot = GetRotation(); // 오일러각으로 변환
+
+    // 축 잠금 처리
+    if (!bLockPitch)
+        rot.x += pitchDelta;
+    if (!bLockYaw)
+        rot.y += yawDelta;
+    if (!bLockRoll)
+        rot.z += rollDelta;
+
+    // 제한 각도 클램프
+    rot.x = std::clamp(rot.x, MinRotation.x, MaxRotation.x);
+    rot.y = std::clamp(rot.y, MinRotation.y, MaxRotation.y);
+    rot.z = std::clamp(rot.z, MinRotation.z, MaxRotation.z);
+
+    SetRotation(rot);
 
 }
+
+
 
 float FTransform::NormalizeAngle(float angle)
 {
