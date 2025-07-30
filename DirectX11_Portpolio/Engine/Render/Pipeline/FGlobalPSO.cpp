@@ -139,7 +139,7 @@ void FGlobalPSO::InitVSAndIL()
         vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, {NULL, NULL}});
     
     CompileVSAndInputLayout(DepthOnlyVSPath, DepthOnlyVS, meshIED, MeshIL);
-    CompileVSAndInputLayout(DepthOnlyVSPath, DepthOnlySkeletalVS, skeletalMeshIED, SkeletalMeshIL,
+    CompileVSAndInputLayout(DepthOnlySkinnedVSPath, DepthOnlySkeletalVS, skeletalMeshIED, SkeletalMeshIL,
         vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, {NULL, NULL}});
     
     CompileVSAndInputLayout(SkyBoxVSPath, SkyboxVS, meshIED, MeshIL);
@@ -507,6 +507,7 @@ void FGlobalPSO::InitPSO()
 
     DepthOnlySkinnedPSO = DepthOnlyPSO;
     DepthOnlySkinnedPSO.m_vertexShader = DepthOnlySkeletalVS;
+    DepthOnlySkinnedPSO.m_inputLayout = SkeletalMeshIL;
 
     // GaussianPSO
     XGaussianPSO.m_computeShader = XGaussianCS;

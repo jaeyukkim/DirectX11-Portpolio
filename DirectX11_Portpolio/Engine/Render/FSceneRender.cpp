@@ -89,7 +89,7 @@ void FSceneRender::RenderDepthOnly()
     ViewProxy->Render(option);
     LightSceneProxy->Render(option);
 
-    FRenderOption defaultOption = GetDefaultRenderType();
+    FRenderOption defaultOption = GetDepthOnlyRenderType();
     RenderObjects(defaultOption);
     for(shared_ptr<MirrorRenderProxy> mirror : MirrorProxy)
     {

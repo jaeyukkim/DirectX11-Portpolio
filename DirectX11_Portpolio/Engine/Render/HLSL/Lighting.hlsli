@@ -269,7 +269,7 @@ float3 LightRadiance(Light light, float3 posWorld, float3 normalWorld, Texture2D
         // Texel size
         float dx = 5.0 / (float)width;
         // shadowFactor = PCF_Filter(lightTexcoord.xy, lightScreen.z - 0.001, dx, shadowMap);
-        shadowFactor = PCSS(lightTexcoord, lightScreen.z - 0.01, shadowMap, light.invProj, light.radius);
+        shadowFactor = PCSS(lightTexcoord, lightScreen.z - 0.0005, shadowMap, light.invProj, light.radius);
     }
     
     float3 radiance = light.strength * spotFactor * att * shadowFactor;

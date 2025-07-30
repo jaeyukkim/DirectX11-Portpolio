@@ -170,9 +170,18 @@ void FSceneView::UpdateLightView(FLight* InLightInfo)
     if(InLightInfo->LightType & LT_UseShadow)
     {
         
-        Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
-        if (abs(up.Dot(InLightInfo->direction) + 1.0f) < 1e-5)
-            up = Vector3(1.0f, 0.0f, 0.0f);
+        Vector3 forward = InLightInfo->position + InLightInfo->direction;
+        forward.Normalize();
+        Vector3 tempUp = Vector3(0.0f, 1.0f, 0.0f);
+
+        Vector3 right = tempUp.Cross(forward);
+        right.Normalize();
+        Vector3 up = forward.Cross(right);
+        up.Normalize();
+        
+        //Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
+        //if (abs(up.Dot(InLightInfo->direction) + 1.0f) < 1e-5)
+        //    up = Vector3(1.0f, 0.0f, 0.0f);
 
         // 그림자맵을 만들 때 필요
         Matrix lightViewRow = XMMatrixLookAtLH(

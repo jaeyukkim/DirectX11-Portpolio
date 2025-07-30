@@ -8,7 +8,7 @@
 
 AFloor::AFloor()
 {
-	boxCollision = CreateComponent<UBoxComponent>(this, Vector3(10000.0f, 120.0f, 10000.0f));
+	boxCollision = CreateComponent<UBoxComponent>(this, Vector3(10000.0f, 145.0f, 10000.0f));
 	SetRootComponent(boxCollision.get());
 	floor = CreateComponent<UStaticMeshComponent>(this, L"MapFloor");
 	floor->SetUpAttachment(GetRootComponent());

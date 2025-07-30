@@ -180,6 +180,7 @@ private:
     const wstring NormalPSPath = HlslPath + L"PS_Normal.hlsl";
 
     const wstring DepthOnlyVSPath = HlslPath + L"VS_DepthOnly.hlsl";
+    const wstring DepthOnlySkinnedVSPath = HlslPath + L"VS_DepthOnlySkinned.hlsl";
     const wstring DepthOnlyPSPath = HlslPath + L"PS_DepthOnly.hlsl";
 
     const wstring PostEffectPSPath = HlslPath + L"PS_PostEffect.hlsl";

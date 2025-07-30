@@ -14,10 +14,14 @@ AGameMode::AGameMode()
     transform.SetPosition(0.0f, 200.0f, 0.0f);
     Actor* playerCharacter = SpawnActorAtLocation<AKachujin>(World::GetLevel(), transform);
 
+    
     if(APlayerController* PC = dynamic_cast<APlayerController*>(controller))
     {
         if(ACharacter* character = dynamic_cast<ACharacter*>(playerCharacter))
+        {
             PC->Possess(character);
+            World::GetLevel()->SetPlayerCharacter(character);
+        }
     }
 }
 

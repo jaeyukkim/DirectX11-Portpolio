@@ -51,21 +51,15 @@ void SkeletalMeshRenderProxy::RunFrustumCulling()
 
     D3D::Get()->ComputeShaderBarrier();
     
-    CopyCntToIndirect();
+    
 }
 
 
 void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
 {
+
+    RunFrustumCulling();
     
-    if(option.bDepthOnly)
-    {
-        FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->DepthOnlySkinnedPSO);
-    }
-    else
-    {
-        RunFrustumCulling();
-    }
     
     // Todo : Enum 만들어서 비트마스킹으로 여러 조합으로 가능하게 만들 예정
     if(option.bDefaultDraw)
@@ -86,19 +80,15 @@ void SkeletalMeshRenderProxy::Render(const FRenderOption& option)
             FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->SkeletalMeshReflectWirePSO);
         }
     }
+    else if(option.bDepthOnly)
+    {
+        FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->DepthOnlySkinnedPSO);
+    }
     
     CopyCntToIndirect();
 
-    if(option.bDepthOnly)
-    {
-        CteateInstanceIndirectData(InstanceDatas.size());
-        Consume.UpdateSubResource();
-        Consume.VSSetSRV(EShaderResourceSlot::ERS_InstanceData);
-    }
-    else
-    {
-        Append.VSSetSRV(EShaderResourceSlot::ERS_InstanceData);
-    }
+   
+    Append.VSSetSRV(EShaderResourceSlot::ERS_InstanceData);
     
     
     for(int i = 0 ; i<RenderData.size() ; i++)
