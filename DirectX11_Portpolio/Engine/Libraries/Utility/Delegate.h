@@ -46,7 +46,7 @@ public:
     {
     public:
         virtual ~ICallable() = default;
-        virtual void Invoke(Args... args) = 0;
+        virtual void Invoke(Args... args) {};
     };
 
     template<typename T>

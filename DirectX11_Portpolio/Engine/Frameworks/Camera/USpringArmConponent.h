@@ -13,5 +13,5 @@ public:
 public:
     float RotationSpeed = 25.f;
     float TargetArmLength = 300.0f;
-    float bUsePawnControlRotation = true;
+    bool bUsePawnControlRotation = false;
 };

@@ -29,6 +29,10 @@ void UAnimInstance::InitInstance(Actor* InActorOwner, AnimInstanceCreateInfo inf
     NativeInitializeAnimation();
 }
 
+void UAnimInstance::NativeInitializeAnimation()
+{
+}
+
 void UAnimInstance::AddNode(FAnimStateNode& InNode)
 {
     AnimStateNode[InNode.NodeName] = InNode;
@@ -43,16 +47,64 @@ void UAnimInstance::InitFirstNode(const string& InName)
 }
 
 
-void UAnimInstance::NativeInitializeAnimation()
+void UAnimInstance::PlayAnimMontage(AnimMontage* montage)
 {
+    
+    int clipID = GetAnimClipID(montage->AnimationName);
+    Animations[clipID]->PlaySpeed = montage->PlaySpeed;
+
+    RunningMontageData.Notifies.clear();
+    for(FAnimationNotifyEvent* notify : montage->Triggers)
+    {
+        notify->bNotifyPlayed = false;
+        RunningMontageData.Notifies.push_back(notify);
+    }
+    
+    RunningMontageData.bMontagePlaying = true;
+    RunningMontageData.MontageStartTime = Timer::Get()->GetRunningTime();
+    RunningMontageData.MontageDuration = Animations[clipID]->Duration;
+    RunningMontageData.MontageTickPerSeconds = Animations[clipID]->TickPerSecond;
+    RunningMontageData.MontageSpeed = montage->PlaySpeed;
+
+    
+    ChangeAnimation(montage->AnimationName, montage->BlendTime, false);
 }
 
 void UAnimInstance::NativeUpdateAnimation(float deltaTime)
 {
     CheckNull(StartNode);
-    FAnimStateNode* nextNode = ProcessNode(StartNode);
-    ChangeAnimation(nextNode->NodeName, nextNode->TakeBlendTime, nextNode->bLoop);
+
     
+    if (RunningMontageData.bMontagePlaying)
+    {
+        float running = Timer::Get()->GetRunningTime();
+        float time = (running - RunningMontageData.MontageStartTime) * RunningMontageData.MontageSpeed;
+        time = time * RunningMontageData.MontageTickPerSeconds;
+
+        float progress = time / (RunningMontageData.MontageDuration/RunningMontageData.MontageSpeed) + 0.00001;
+        if(time > RunningMontageData.MontageDuration)
+        {
+            RunningMontageData.bMontagePlaying = false;
+        }
+
+        for(FAnimationNotifyEvent* notify : RunningMontageData.Notifies)
+        {
+            if(!notify->bNotifyPlayed && progress >= notify->TriggerOnPercent)
+            {
+                notify->Trigger->Broadcast();
+                notify->bNotifyPlayed = true;
+            }
+          
+        }
+        
+    }
+    else
+    {
+        FAnimStateNode* nextNode = ProcessNode(StartNode);
+        ChangeAnimation(nextNode->NodeName, nextNode->TakeBlendTime, nextNode->bLoop);
+    }
+    
+   
     if(BlendingData.Next.ClipID > -1)
     {
         float running = Timer::Get()->GetRunningTime();
@@ -72,9 +124,8 @@ void UAnimInstance::NativeUpdateAnimation(float deltaTime)
             BlendingData.Next.ClipID = -1;
             bAnimStateChanged = false;
         }
-        
-        // else 인 경우는 현재 블렌딩 중이며 아직 완료되지 않은 상태.
     }
+    
 
     BlendChanged.Broadcast(MeshComponent->GetInstanceID(), BlendingData);
 }
@@ -98,8 +149,8 @@ void UAnimInstance::ChangeAnimation(string InAnimName, float TakeTime, bool InbL
     }
 
     //같은 애니메이션이 들어왔을경우
-    CheckTrue(BlendingData.Current.ClipID == clipID);
-    CheckTrue(BlendingData.Next.ClipID == clipID)
+    CheckTrue(((BlendingData.Current.ClipID == clipID) && (!RunningMontageData.bMontagePlaying)));
+    CheckTrue(((BlendingData.Next.ClipID == clipID)  && (!RunningMontageData.bMontagePlaying)))
 
     BlendingData.ChangeStartTime = Timer::Get()->GetRunningTime();
     BlendingData.TakeTime = TakeTime;

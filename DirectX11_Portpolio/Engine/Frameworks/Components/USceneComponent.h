@@ -38,11 +38,9 @@ public:
 	
 
 protected:
-	
 	WorldBufferDesc WorldBufferData;
 	shared_ptr<FTransform> WorldTransform;
 	shared_ptr<FTransform> RelativeTransform;
 	shared_ptr<ConstantBuffer> WorldConstantBuffer;
-	
 	
 };

@@ -25,7 +25,7 @@ public:
     virtual void NativeUpdateAnimation(float deltaTime);
     virtual void ChangeAnimation(string InAnimName, float TakeTime, bool InbLoop);
     virtual void InitInstance(Actor* InActorOwner, AnimInstanceCreateInfo info = AnimInstanceCreateInfo());
-    
+    virtual void PlayAnimMontage(AnimMontage* montage);
     int GetAnimClipID(string InAnimName);
 
     
@@ -39,6 +39,7 @@ private:
     void InitAnimTable();
     void SetAnimInst(const vector<shared_ptr<FClipData>>& InAnimations) {Animations = InAnimations;}
     FAnimStateNode* ProcessNode(FAnimStateNode* currentNode);
+    
 private:
     USkeletalMeshComponent* MeshComponent;
     
@@ -55,7 +56,8 @@ private:
     
     FOnBlendDataChanged BlendChanged;
     bool bAnimStateChanged = false;
-
+    MontageData RunningMontageData;
+    
 private:
     Actor* ActorOwner;
     

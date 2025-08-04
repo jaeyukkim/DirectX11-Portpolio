@@ -14,5 +14,9 @@
     "Paladin/Animations/sword_and_shield_jump",
     "Paladin/Animations/sword_and_shield_run",
     "Paladin/Animations/sheath_sword_1",
+    "Paladin/Animations/Melee_Attack1",
+    "Paladin/Animations/Melee_Attack2",
+    "Paladin/Animations/Melee_Attack3",
+    "Paladin/Animations/Melee_Attack4"
   ]
 }
