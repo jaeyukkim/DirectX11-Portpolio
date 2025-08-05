@@ -8,6 +8,8 @@ class UCameraComponent;
 
 DECLARE_DYNAMIC_DELEGATE(FCanAttack);
 DECLARE_DYNAMIC_DELEGATE(FCanNotAttack);
+DECLARE_DYNAMIC_DELEGATE(FCanMove);
+DECLARE_DYNAMIC_DELEGATE(FCanNotMove);
 
 
 class AKachujin : public ACharacter
@@ -31,17 +33,23 @@ protected:
 
     void CanAttack();
     void CanNotAttack();
-
+    void CanMove();
+    void CanNotMove();
 private:
     vector<AnimMontage> AttackMontage;
     shared_ptr<AnimMontage> AbilityRMBMontage;
     unordered_map<string, FAnimationNotifyEvent> Notifies;
     
+    
+    FCanAttack CanAtkDelegate;
+    FCanNotAttack CanNotAtkDelegate;
+    FCanMove CanMoveDelegate;
+    FCanNotMove CanNotMoveDelegate;
+
     uint8 MaxAttackCount = 0;
     uint8 AttackCount = 0;
     bool bCanAttack = true;
-    FCanAttack CanAtkDelegate;
-    FCanNotAttack CanNotAtkDelegate;
+    bool bCanMove = true;
     
 public:
     float RotateSpeed = 5.0f;
@@ -55,6 +63,7 @@ public:
     int bUseMetallicMap = false;    //4
     int bUseRoughnessMap = false;    //4
     int bUseEmissiveMap = false;    //4
+    
 public:
     shared_ptr<UCameraComponent> Camera;
     shared_ptr<USpringArmConponent> SpringArm;

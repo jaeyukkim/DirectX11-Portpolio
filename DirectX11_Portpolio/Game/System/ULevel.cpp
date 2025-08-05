@@ -2,6 +2,7 @@
 #include "ULevel.h"
 #include "AKachujin.h"
 #include "ALightActor.h"
+#include "Characters/AEnemy.h"
 #include "Enviroment/AFloor.h"
 #include "Enviroment/ACubeMap.h"
 #include "Enviroment/AMirror.h"
@@ -17,7 +18,15 @@ void ULevel::Initialize()
     SpawnActor<ALightActor>(this);
     SpawnActor<AFloor>(this);
     SpawnActor<ACubeMap>(this);
-    //SpawnActor<AMirror>(this);
+   
+    FTransform transform;
+    transform.SetPosition(0.0f, 200.0f, 300.0f);
+    Actor* enemy = SpawnActorAtLocation<AEnemy>(World::GetLevel(), transform);
+
+    if(AEnemy* enemyCharacter = dynamic_cast<AEnemy*>(enemy))
+    {
+        enemyCharacter->InitEnemy();
+    }
 }
 
 void ULevel::Destroy()

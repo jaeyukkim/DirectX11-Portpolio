@@ -49,7 +49,7 @@ private:
     
     
     string MeshName;
-    shared_ptr<UAnimInstance> AnimInstance;
+    shared_ptr<UAnimInstance> AnimInstance = nullptr;
 
     
 private:

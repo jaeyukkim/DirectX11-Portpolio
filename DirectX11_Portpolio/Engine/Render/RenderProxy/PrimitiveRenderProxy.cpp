@@ -8,6 +8,9 @@ PrimitiveRenderProxy::PrimitiveRenderProxy(UPrimitiveComponent* primComp)
     CSIndirectBuffer(nullptr, 0, 0),
     InstanceIndirectBuffer(nullptr, sizeof(D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS), 1)
 {
+    //반드시 해야함
+    InstanceDatas.reserve(MAX_INSTANCE_SIZE);
+    
     RenderData = std::move(primComp->PrimRenderData);
 
     minAABB = primComp->PrimData.AABB.Min;
@@ -46,7 +49,7 @@ void PrimitiveRenderProxy::DeleteInstance(const int InstanceID)
 
     Consume = AppendBuffer(InstanceDatas.data(),
         sizeof(FPrimitiveInstCPU), InstanceDatas.size());
-    Append = AppendBuffer(nullptr, sizeof(FPrimitiveInstCPU), 1);
+    Append = AppendBuffer(nullptr, sizeof(FPrimitiveInstCPU), InstanceDatas.size());
  
     CreateCSIndirectData();
     CteateInstanceIndirectData();
@@ -72,7 +75,7 @@ void PrimitiveRenderProxy::AddInstance(UPrimitiveComponent* primComp)
        sizeof(FPrimitiveInstCPU), InstanceDatas.size());
 
     //초기 사이즈는 지정해줘야한다고??
-    Append = AppendBuffer(nullptr, sizeof(FPrimitiveInstCPU), 1);
+    Append = AppendBuffer(nullptr, sizeof(FPrimitiveInstCPU), InstanceDatas.size());
 
     
     primComp->TransformChanged.Add(this, &PrimitiveRenderProxy::TransformChange);
@@ -86,7 +89,7 @@ void PrimitiveRenderProxy::RunFrustumCulling()
 {
     FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->FrustumCullingPSO);
     
-    Append = AppendBuffer(nullptr, sizeof(FPrimitiveInstCPU), 1);
+    Append = AppendBuffer(nullptr, sizeof(FPrimitiveInstCPU), InstanceDatas.size());
     Consume.UpdateSubResource();
   
     Consume.CSSetUAV(EUAV_Slot::USLOT_InstanceConsume, InstanceDatas.size());
@@ -94,8 +97,6 @@ void PrimitiveRenderProxy::RunFrustumCulling()
     
     D3D::Get()->GetDeviceContext()->DispatchIndirect(CSIndirectBuffer.GetBuffer().Get(), 0);
     D3D::Get()->ComputeShaderBarrier();
-    
-    CopyCntToIndirect();
 }
 
 

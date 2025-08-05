@@ -84,6 +84,8 @@ struct ClipTransform
 struct FAnimationNotifyEvent
 {
 public:
+    FAnimationNotifyEvent() 
+        : Trigger(nullptr), TriggerOnPercent(0.0f), bNotifyPlayed(false) { }
     FAnimationNotifyEvent(FDynamicDelegate<>* InTrigger, float InTriggerTime)
         : Trigger(InTrigger), TriggerOnPercent(InTriggerTime) { }
     

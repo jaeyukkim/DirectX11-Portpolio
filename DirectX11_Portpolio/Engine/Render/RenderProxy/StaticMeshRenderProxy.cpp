@@ -37,7 +37,7 @@ void StaticMeshRenderProxy::RunFrustumCulling()
 {
     FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->FrustumCullingPSO);
     
-    Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), 1);
+    Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), InstanceDatas.size());
     //Consume = AppendBuffer(InstanceDatas.data(), sizeof(FSKM_InstDataCPU), InstanceDatas.size());
     Consume.UpdateSubResource();
   
@@ -131,7 +131,7 @@ void StaticMeshRenderProxy::AddInstance(UStaticMeshComponent* meshComp)
         sizeof(FSKM_InstDataCPU), InstanceDatas.size());
 
     //초기 사이즈는 지정해줘야한다고??
-    Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), 1);
+    Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), InstanceDatas.size());
 
     
     meshComp->TransformChanged.Add(this, &StaticMeshRenderProxy::TransformChange);
@@ -158,7 +158,7 @@ void StaticMeshRenderProxy::DeleteInstance(const int InstanceID)
 
     Consume = AppendBuffer(InstanceDatas.data(),
         sizeof(FSKM_InstDataCPU), InstanceDatas.size());
-    Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), 1);
+    Append = AppendBuffer(nullptr, sizeof(FSKM_InstDataCPU), InstanceDatas.size());
  
     CreateCSIndirectData();
     CteateInstanceIndirectData();

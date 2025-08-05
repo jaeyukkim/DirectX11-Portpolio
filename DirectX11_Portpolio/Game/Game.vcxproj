@@ -143,6 +143,8 @@
   <ItemGroup>
     <ClCompile Include="AKachujin.cpp" />
     <ClCompile Include="ALightActor.cpp" />
+    <ClCompile Include="Characters\AEnemy.cpp" />
+    <ClCompile Include="Enemy\UEnemyAnimInstance.cpp" />
     <ClCompile Include="Enviroment\AFloor.cpp" />
     <ClCompile Include="Enviroment\ACubeMap.cpp" />
     <ClCompile Include="Enviroment\AMirror.cpp" />
@@ -157,6 +159,8 @@
   <ItemGroup>
     <ClInclude Include="AKachujin.h" />
     <ClInclude Include="ALightActor.h" />
+    <ClInclude Include="Characters\AEnemy.h" />
+    <ClInclude Include="Enemy\UEnemyAnimInstance.h" />
     <ClInclude Include="Enviroment\AFloor.h" />
     <ClInclude Include="Enviroment\ACubeMap.h" />
     <ClInclude Include="Enviroment\AMirror.h" />

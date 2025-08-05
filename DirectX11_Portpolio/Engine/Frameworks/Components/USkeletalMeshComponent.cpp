@@ -38,8 +38,10 @@ void USkeletalMeshComponent::TickComponent(float deltaTime)
 	}
 
 	
-
-	AnimInstance->NativeUpdateAnimation(deltaTime);
+	if(AnimInstance != nullptr)
+	{
+		AnimInstance->NativeUpdateAnimation(deltaTime);
+	}
 }
 
 

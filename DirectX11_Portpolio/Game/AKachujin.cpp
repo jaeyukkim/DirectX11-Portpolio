@@ -83,6 +83,20 @@ void AKachujin::Tick(float deltaTime)
     }
 }
 
+void AKachujin::InitNotify()
+{
+    CanAtkDelegate.Add(this, &AKachujin::CanAttack);
+    CanNotAtkDelegate.Add(this, &AKachujin::CanNotAttack);
+    CanMoveDelegate.Add(this, &AKachujin::CanMove);
+    CanNotMoveDelegate.Add(this, &AKachujin::CanNotMove);
+
+    Notifies.emplace("CanAttack", FAnimationNotifyEvent(&CanAtkDelegate, 0.75f));
+    Notifies.emplace("CanNotAttack", FAnimationNotifyEvent(&CanNotAtkDelegate, 0.01f));
+    Notifies.emplace("CanMove", FAnimationNotifyEvent(&CanMoveDelegate, 0.98f));
+    Notifies.emplace("CanNotMove", FAnimationNotifyEvent(&CanNotMoveDelegate, 0.01f));
+    
+}
+
 void AKachujin::InitMontage()
 {
     InitNotify();
@@ -96,19 +110,17 @@ void AKachujin::InitMontage()
         montage.PlaySpeed = 1.5f;
         montage.Triggers.push_back(&Notifies["CanAttack"]);
         montage.Triggers.push_back(&Notifies["CanNotAttack"]);
+        montage.Triggers.push_back(&Notifies["CanMove"]);
+        montage.Triggers.push_back(&Notifies["CanNotMove"]);
     }
     
     AbilityRMBMontage = make_shared<AnimMontage>("Melee_Attack4");
     AbilityRMBMontage->PlaySpeed = 1.7f;
+    AbilityRMBMontage->Triggers.push_back(&Notifies["CanMove"]);
+    AbilityRMBMontage->Triggers.push_back(&Notifies["CanNotMove"]);
 }
 
-void AKachujin::InitNotify()
-{
-    CanAtkDelegate.Add(this, &AKachujin::CanAttack);
-    CanNotAtkDelegate.Add(this, &AKachujin::CanNotAttack);
-    Notifies.emplace("CanAttack", FAnimationNotifyEvent(&CanAtkDelegate, 0.01f));
-    Notifies.emplace("CanNotAttack", FAnimationNotifyEvent(&CanNotAtkDelegate, 0.95f));
-}
+
 
 void AKachujin::LookAction(Vector3 InValue)
 {
@@ -122,7 +134,7 @@ void AKachujin::LookAction(Vector3 InValue)
 void AKachujin::MoveCharacter(Vector2 InValue)
 {
     CheckNull(PlayerController);
-    
+    CheckFalse(bCanMove);
 	
     Vector3 Forward = Camera->GetWorldTransform()->GetForwardVector();
     Vector3 Right   = Camera->GetWorldTransform()->GetRightVector();
@@ -173,6 +185,8 @@ void AKachujin::JumpCharacter()
 
 void AKachujin::Attack()
 {
+    CheckFalse(bCanAttack);
+    
     AttackCount = AttackCount % MaxAttackCount;
     Mesh->GetAnimInstance()->PlayAnimMontage(&AttackMontage[AttackCount]);
     AttackCount++;
@@ -185,10 +199,24 @@ void AKachujin::AbilityRMB()
 
 void AKachujin::CanAttack()
 {
+    cout << "CanAttack = true" << endl;
     bCanAttack = true;
 }
 
 void AKachujin::CanNotAttack()
 {
+    cout << "CanAttack = false" << endl;
     bCanAttack = false;
+}
+
+void AKachujin::CanMove()
+{
+    cout << "CanMove = true" << endl;
+    bCanMove = true;
+}
+
+void AKachujin::CanNotMove()
+{
+    cout << "bCanMove = false" << endl;
+    bCanMove = false;
 }
