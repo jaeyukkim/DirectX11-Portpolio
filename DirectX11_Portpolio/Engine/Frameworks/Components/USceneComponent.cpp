@@ -33,6 +33,10 @@ void USceneComponent::TickComponent(float deltaTime)
 	
 }
 
+void USceneComponent::InitComponent()
+{
+}
+
 
 /**
  * @param InParent »õ·Î¿î AttachParent 

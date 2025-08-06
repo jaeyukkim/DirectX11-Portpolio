@@ -7,29 +7,38 @@
 
 AKachujin::AKachujin()
 {
-    
+    SetMaxHealth(300);
+    SetHealth(MaxHealth);
+    SetAttackDamage(10);
+    SetTeamID(ETeamID::TID_RED);
+
     shared_ptr<Converter> converter = make_shared<Converter>();
     //converter->ImportFBXFile(L"Paladin", EMeshType::SkeletalMeshType);
     
     /*
-    string animName[4] =
+    string animName[10] =
     {
         "Melee_Attack1",
         "Melee_Attack2",
         "Melee_Attack3",
         "Melee_Attack4",
-        //"sword_and_shield_run"
-        //"sword_and_shield_idle",
-        //"sword_and_shield_walk",
-        //"sword_and_shield_jump",
-        //"sheath_sword_1"
+        "sword_and_shield_run",
+        "sword_and_shield_idle",
+        "sword_and_shield_walk",
+        "sword_and_shield_jump",
+        "sheath_sword_1",
+        "sword_and_shield_impact_3"
     };
     
     for(string str : animName)
     {
         converter->ImportFBX_Animation(L"Paladin", String::ToWString(str));
     }
+    
+    string rootMotion = "sword_and_shield_death_2";
+    converter->ImportFBX_Animation(L"Paladin", String::ToWString(rootMotion));
     */
+    
     
     Mesh = CreateComponent<USkeletalMeshComponent>(this, L"Paladin");
     Mesh->SetUpAttachment(GetRootComponent());
@@ -53,10 +62,11 @@ AKachujin::~AKachujin()
 {
 }
 
-void AKachujin::Possess(APlayerController* InPlayerController)
+void AKachujin::Possess(AController* InController)
 {
-    Super::Possess(InPlayerController);
-
+    Super::Possess(InController);
+    
+    PlayerController = reinterpret_cast<APlayerController*>(InController);
     PlayerController->MoveAction.Add(this, &AKachujin::MoveCharacter);
     PlayerController->JumpAction.Add(this, &AKachujin::JumpCharacter);
     PlayerController->LookInput.Add(this, &AKachujin::LookAction);
@@ -89,12 +99,30 @@ void AKachujin::InitNotify()
     CanNotAtkDelegate.Add(this, &AKachujin::CanNotAttack);
     CanMoveDelegate.Add(this, &AKachujin::CanMove);
     CanNotMoveDelegate.Add(this, &AKachujin::CanNotMove);
-
+    BasicAttackDelegate.Add(this, &AKachujin::BasicAttack);
+    
     Notifies.emplace("CanAttack", FAnimationNotifyEvent(&CanAtkDelegate, 0.75f));
     Notifies.emplace("CanNotAttack", FAnimationNotifyEvent(&CanNotAtkDelegate, 0.01f));
     Notifies.emplace("CanMove", FAnimationNotifyEvent(&CanMoveDelegate, 0.98f));
     Notifies.emplace("CanNotMove", FAnimationNotifyEvent(&CanNotMoveDelegate, 0.01f));
+
+    Notifies.emplace("BasicAttack0", FAnimationNotifyEvent(&BasicAttackDelegate, 0.43f));
+    Notifies.emplace("BasicAttack1", FAnimationNotifyEvent(&BasicAttackDelegate, 0.45f));
+    Notifies.emplace("BasicAttack2", FAnimationNotifyEvent(&BasicAttackDelegate, 0.53f));
     
+    Notifies.emplace("AbilityRMBAttack1", FAnimationNotifyEvent(&BasicAttackDelegate, 0.63f));
+    Notifies.emplace("AbilityRMBAttack2", FAnimationNotifyEvent(&BasicAttackDelegate, 0.97f));
+
+
+}
+
+void AKachujin::TakeDamage(ICombatInterface* damageCauser, LL damageAmount)
+{
+    ICombatInterface::TakeDamage(damageCauser, damageAmount);
+    if(bDamaged)
+    {
+        Mesh->GetAnimInstance()->PlayAnimMontage(HitReactMontage.get());
+    }
 }
 
 void AKachujin::InitMontage()
@@ -113,11 +141,21 @@ void AKachujin::InitMontage()
         montage.Triggers.push_back(&Notifies["CanMove"]);
         montage.Triggers.push_back(&Notifies["CanNotMove"]);
     }
+    AttackMontage[0].Triggers.push_back(&Notifies["BasicAttack0"]);
+    AttackMontage[1].Triggers.push_back(&Notifies["BasicAttack1"]);
+    AttackMontage[2].Triggers.push_back(&Notifies["BasicAttack2"]);
+
     
     AbilityRMBMontage = make_shared<AnimMontage>("Melee_Attack4");
     AbilityRMBMontage->PlaySpeed = 1.7f;
+    AbilityRMBMontage->Triggers.push_back(&Notifies["CanAttack"]);
     AbilityRMBMontage->Triggers.push_back(&Notifies["CanMove"]);
     AbilityRMBMontage->Triggers.push_back(&Notifies["CanNotMove"]);
+    AbilityRMBMontage->Triggers.push_back(&Notifies["AbilityRMBAttack1"]);
+    AbilityRMBMontage->Triggers.push_back(&Notifies["AbilityRMBAttack2"]);
+    
+    HitReactMontage = make_shared<AnimMontage>("sword_and_shield_impact_3");
+   
 }
 
 
@@ -197,26 +235,40 @@ void AKachujin::AbilityRMB()
     Mesh->GetAnimInstance()->PlayAnimMontage(AbilityRMBMontage.get());
 }
 
+void AKachujin::BasicAttack()
+{
+    vector<FHitResult> hitResults;
+    Vector3 pos = GetActorTransform()->GetPosition();
+    Vector3 attackPos = pos + GetActorTransform()->GetForwardVector() * 110.0f;
+    World::SphereTraceMulti(hitResults, attackPos, 50.0f);
+
+    for(FHitResult& result : hitResults)
+    {
+        if(result.HitActor == nullptr) continue;
+        ICombatInterface* target = dynamic_cast<ICombatInterface*>(result.HitActor);
+        if(target == nullptr) continue;
+
+        LL damage = AttackDamage + (AttackDamage * (AttackCount * 0.2));
+        SendDamage(target, damage);
+    }
+}
+
 void AKachujin::CanAttack()
 {
-    cout << "CanAttack = true" << endl;
     bCanAttack = true;
 }
 
 void AKachujin::CanNotAttack()
 {
-    cout << "CanAttack = false" << endl;
     bCanAttack = false;
 }
 
 void AKachujin::CanMove()
 {
-    cout << "CanMove = true" << endl;
     bCanMove = true;
 }
 
 void AKachujin::CanNotMove()
 {
-    cout << "bCanMove = false" << endl;
     bCanMove = false;
 }

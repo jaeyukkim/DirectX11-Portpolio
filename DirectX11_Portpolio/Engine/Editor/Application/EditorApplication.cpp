@@ -146,14 +146,34 @@ void EditorApplication::OpenScene(const std::filesystem::path& path)
 void EditorApplication::OnImGuiRender()
 {
 	
+	ShowDockSpace(); //dockSpace begin
+	{
+		ShowMenuBar();
+	
 
+		for (auto& iter : mEditorWindows)
+			iter.second->Run();
+		
+		ShowSceneView();	// Scene begin
+		{
+			ShowGizmo();
+		}
+		ImGui::End();	// Scene end
+
+	}
+	ImGui::PopStyleVar();
+	ImGui::End(); // dockspace end
+	
+}
+
+
+void EditorApplication::ShowDockSpace()
+{
 	// Our state
 	bool show_demo_window = true;
 	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-	// because it would be confusing to have two docking targets within each others.
 	mFlag = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 	if (mFullScreen)
 	{
@@ -167,18 +187,13 @@ void EditorApplication::OnImGuiRender()
 		mFlag |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 	}
 
-	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-	// and handle the pass-thru hole, so we ask Begin() to not render a background.
 	if (mDockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
 		mFlag |= ImGuiWindowFlags_NoBackground;
 
-	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-	// all active windows docked into it will lose their parent and become undocked.
-	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	bool Active = static_cast<bool>(mState);
+
+	
 	ImGui::Begin("EditorApplication", &Active, mFlag);
 	ImGui::PopStyleVar();
 
@@ -197,7 +212,11 @@ void EditorApplication::OnImGuiRender()
 	}
 
 	style.WindowMinSize.x = minWinSizeX;
+}
 
+
+void EditorApplication::ShowMenuBar()
+{
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu("File"))
@@ -234,17 +253,41 @@ void EditorApplication::OnImGuiRender()
 			ImGui::EndMenu();
 		}
 
-
+		ShowToolBar();
+		
 		ImGui::EndMenuBar();
+		
 	}
 
-	for (auto& iter : mEditorWindows)
-		iter.second->Run();
 
-	// viewport
+}
+
+void EditorApplication::ShowToolBar()
+{
+	
+	ImGui::BeginChild("Toolbar", ImVec2(0, 40), false, ImGuiWindowFlags_NoScrollbar);
+
+	float regionWidth = ImGui::GetContentRegionAvail().x;
+	float totalButtonWidth = 3 * 50.0f + 2 * 12.0f;
+	float startX = (regionWidth - totalButtonWidth) * 0.5f;
+	if (startX > 0) ImGui::SetCursorPosX(startX);
+
+	ImVec2 buttonSize(60, 20);
+	if (ImGui::Button("Play", buttonSize)) {}
+	ImGui::SameLine();
+	if (ImGui::Button("Stop", buttonSize)) {}
+
+
+	ImGui::EndChild();
+
+	
+}
+
+void EditorApplication::ShowSceneView()
+{
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 	ImGui::Begin("Scene");
-
+	
 	const auto viewportMinRegion = ImGui::GetWindowContentRegionMin(); // æ¿∫‰¿« √÷º“ ¡¬«•
 	const auto viewportMaxRegion = ImGui::GetWindowContentRegionMax(); // æ¿∫‰¿« √÷¥Î ¡¬«•
 	const auto viewportOffset = ImGui::GetWindowPos(); // æ¿∫‰¿« ¿ßƒ°
@@ -275,7 +318,10 @@ void EditorApplication::OnImGuiRender()
 		}
 		ImGui::EndDragDropTarget();
 	}
-	
+}
+
+void EditorApplication::ShowGizmo()
+{
 	// To do : guizmo
 	Actor* selectedObject = GetSelectedActor();
 	if (selectedObject && mGuizmoType != -1)
@@ -351,10 +397,4 @@ void EditorApplication::OnImGuiRender()
 		}
 		
 	}
-	
-	ImGui::End();	// Scene end
-
-	ImGui::PopStyleVar();
-	ImGui::End(); // dockspace end
-	
 }

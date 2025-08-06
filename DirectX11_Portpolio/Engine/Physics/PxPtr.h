@@ -58,7 +58,7 @@ public:
 
 private:
    
-    pxResource* Resource;
+    pxResource* Resource = nullptr;
 
 };
 

@@ -74,7 +74,7 @@ shared_ptr<ClipTransform> FClipData::CalcClipTransform(const vector<shared_ptr<S
 
                 // 루트 본이면 위치를 고정(-1번이 루트인데 fbx에
                 // mixamo 애니메이션 움직임은 보통 hip을 중심으로 하는경우가 많음)
-                if (bone->ParentIndex <= 0)
+                if (bone->ParentIndex <= 0 && !bRootMotion)
                 {
                     position = Vector3::Zero;
       

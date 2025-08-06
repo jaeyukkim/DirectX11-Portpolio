@@ -20,7 +20,7 @@ private:
     float Speed = 0.0f;
     Vector3 Direction;
     bool bFalling = false;
-    
+    bool bDead = false;
     
 private:
     AKachujin* Paladin = nullptr;

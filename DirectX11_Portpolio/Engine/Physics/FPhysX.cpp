@@ -27,7 +27,11 @@ void FPhysX::Initialize()
     Pvd = PxPtr<PxPvd>::make_ptr(PxCreatePvd(*Foundation));
     Transport = PxPtr<PxPvdTransport>::make_ptr(PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10));
     bool bConnected = Pvd->connect(*Transport.get(), physx::PxPvdInstrumentationFlag::eALL);
-    if(!bConnected) cout<<"Connect ½ÇÆÐ";
+    if(!bConnected)
+    {
+        string log = "PhysX Visual Debugger Connect Failed";
+        World::PushLog(log, Color(1, 0, 0, 1));
+    }
     
     ToleranceScale.length = 100;
     ToleranceScale.speed = 980;

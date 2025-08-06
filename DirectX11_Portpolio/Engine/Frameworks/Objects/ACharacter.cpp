@@ -3,6 +3,7 @@
 
 #include "Frameworks/Collision/UCapsuleComponent.h"
 #include "Frameworks/Components/USkeletalMeshComponent.h"
+#include "Frameworks/Manager/AController.h"
 #include "Frameworks/Manager/APlayerController.h"
 
 
@@ -28,11 +29,10 @@ void ACharacter::Tick(float deltaTime)
 	Super::Tick(deltaTime);
 }
 
-void ACharacter::Possess(APlayerController* InPlayerController)
+void ACharacter::Possess(AController* InController)
 {
-	CheckNull(InPlayerController);
-	PlayerController = InPlayerController;
-	
+	CheckNull(InController);
+	Controller = InController;
 	
 }
 

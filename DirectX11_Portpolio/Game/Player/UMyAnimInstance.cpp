@@ -1,7 +1,7 @@
 #include "Pch.h"
 #include "UMyAnimInstance.h"
 
-#include "AKachujin.h"
+#include "../Characters/AKachujin.h"
 #include "Frameworks/Manager/APlayerController.h"
 
 UMyAnimInstance::UMyAnimInstance(USkeletalMeshComponent* meshComp)
@@ -33,6 +33,7 @@ void UMyAnimInstance::NativeUpdateAnimation(float deltaTime)
     bFalling = Controller->IsFalling();
     Speed = Controller->GetSpeed();
     Direction = Controller->GetVelocity();
+    bDead = Paladin->IsDead();
     Direction.Normalize();
 
 
@@ -48,14 +49,19 @@ void UMyAnimInstance::CreateNode()
         
         FAnimTransition idleToWalk;
         idleToWalk.NextNodeName = "sword_and_shield_walk";
-        idleToWalk.Condition = [this](){return Speed > 20 && !bFalling;};
+        idleToWalk.Condition = [this](){return Speed > 20 && !bFalling && !bDead;};
 
         FAnimTransition idleToJump;
         idleToJump.NextNodeName = "sword_and_shield_jump";
-        idleToJump.Condition = [this](){return bFalling;};
+        idleToJump.Condition = [this](){return bFalling && !bDead;};
+
+        FAnimTransition idleToDead;
+        idleToDead.NextNodeName = "sword_and_shield_death_2";
+        idleToDead.Condition = [this](){return bDead;};
         
         idle.Transitions.push_back(idleToWalk);
         idle.Transitions.push_back(idleToJump);
+        idle.Transitions.push_back(idleToDead);
         AddNode(idle);
     }
 
@@ -103,6 +109,14 @@ void UMyAnimInstance::CreateNode()
         
         AddNode(walkFoward);
     }
-    
+
+    {
+        FAnimStateNode dead;
+        dead.NodeName = "sword_and_shield_death_2";
+        dead.TakeBlendTime = 0.15f;
+        dead.bLoop = false;
+
+        AddNode(dead);
+    }
 }
 

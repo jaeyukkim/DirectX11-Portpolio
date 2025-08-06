@@ -70,7 +70,13 @@ public:
 	void SaveSceneAs();
 	void OpenScene(const std::filesystem::path& path);
 	void OnImGuiRender();
-
+	
+	void ShowMenuBar();
+	void ShowToolBar();
+	void ShowDockSpace();
+	void ShowSceneView();
+	void ShowGizmo();
+	
 	//Event
 	void SetKeyPressed(int keyCode, int scancode, int action, int mods);
 	void SetCursorPos(double x, double y);

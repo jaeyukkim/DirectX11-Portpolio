@@ -112,6 +112,7 @@ public:
     float Duration;
     float TickPerSecond;
     float PlaySpeed = 1.0f;
+    bool bRootMotion = false;
 
     void ClearKeyFrame();
 

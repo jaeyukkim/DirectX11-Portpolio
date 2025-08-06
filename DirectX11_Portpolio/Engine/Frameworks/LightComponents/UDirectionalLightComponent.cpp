@@ -1,8 +1,6 @@
 #include "HeaderCollection.h"
 #include "UDirectionalLightComponent.h"
 
-#include "../../../Game/System/ULevel.h"
-#include "../../../Game/System/World.h"
 #include "Frameworks/Objects/ACharacter.h"
 
 UDirectionalLightComponent::UDirectionalLightComponent()

@@ -1,5 +1,6 @@
 #pragma once
 
+#define __DEBUG 1;
 #define Check(x) { assert((x) >= (0)); }
 #define Assert(x, message) { assert((x) && (message)); }
 #define AssertHR(x, message) { assert((SUCCEEDED(x)) && (message)); }
@@ -44,6 +45,7 @@
 
 /* Numeric constants
  *****************************************************************************/
+typedef long long LL;
 
 #define uint8 UINT8
 #define uint16 UINT16
@@ -77,6 +79,12 @@
 #define MAX_flt			(3.402823466e+38F)
 #define MIN_dbl			(2.2250738585072014e-308)	/* min positive value */
 #define MAX_dbl			(1.7976931348623158e+308)
+
+struct LogEntry
+{
+	std::string Message;
+	ImVec4 Color;
+};
 
 
 

@@ -14,7 +14,7 @@ public:
     vector<shared_ptr<Actor>> GetAllActor();
     Actor* GetActor(int InObjectID);
     void AddActorToLevel(const shared_ptr<Actor>& InActor);
-    void DestroyActor(Actor* InActor);
+    void DestroyActor(int InObjectID);
     
     ACharacter* GetPlayerCharacter() {return PlayerCharacter;}
     void SetPlayerCharacter(ACharacter* InPlayerCharacter) {PlayerCharacter = InPlayerCharacter;}

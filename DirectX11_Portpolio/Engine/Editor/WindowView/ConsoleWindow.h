@@ -18,6 +18,13 @@ public:
 	void OnDisable() override;
 	void OnDestroy() override;
 
+	static void AddLog(const string& msg, ImVec4 color = ImVec4(1, 1, 1, 1))
+	{
+		LogBuffer.push_back({ msg, color });
+	}
 private:
 	vector<Editor*> mEditors;
+
+	static vector<LogEntry> LogBuffer;
+	static char SearchBuffer[256];
 };

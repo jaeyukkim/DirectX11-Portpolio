@@ -1,11 +1,12 @@
-#include "Pch.h"
+#include "HeaderCollection.h"
 #include "ULevel.h"
-#include "AKachujin.h"
-#include "ALightActor.h"
-#include "Characters/AEnemy.h"
-#include "Enviroment/AFloor.h"
-#include "Enviroment/ACubeMap.h"
-#include "Enviroment/AMirror.h"
+#include "../Game/Characters/AKachujin.h"
+#include "../Game/Enviroment/ALightActor.h"
+#include "../Game/Characters/AEnemy.h"
+#include "../Game/Enviroment/AFloor.h"
+#include "../Game/Enviroment/ACubeMap.h"
+#include "../Game/Enviroment/AMirror.h"
+#include "Frameworks/AI/AAIController.h"
 #include "Frameworks/Manager/AGameMode.h"
 
 atomic<UINT32> ULevel::ObjectCount = -1;
@@ -22,10 +23,14 @@ void ULevel::Initialize()
     FTransform transform;
     transform.SetPosition(0.0f, 200.0f, 300.0f);
     Actor* enemy = SpawnActorAtLocation<AEnemy>(World::GetLevel(), transform);
+    Actor* aiController = UObject::SpawnActor<AAIController>(World::GetLevel());
 
     if(AEnemy* enemyCharacter = dynamic_cast<AEnemy*>(enemy))
     {
-        enemyCharacter->InitEnemy();
+        if(AAIController* AIC = dynamic_cast<AAIController*>(aiController))
+        {
+            AIC->Possess(enemyCharacter);
+        }
     }
 }
 
@@ -77,12 +82,10 @@ void ULevel::AddActorToLevel(const shared_ptr<Actor>& InActor)
     FTickTaskManager::bNeedUpdate = true;
 }
 
-void ULevel::DestroyActor(Actor* InActor)
+void ULevel::DestroyActor(int InObjectID)
 {
-    assert(InActor != nullptr && "Actor is null");
-
-    /*
-    auto it = std::find(Actors.begin(), Actors.end(), InActor);
+    
+    auto it = Actors.find(InObjectID);
     if (it != Actors.end())
     {
         Actors.erase(it);
@@ -90,7 +93,7 @@ void ULevel::DestroyActor(Actor* InActor)
     else
     {
         assert(false && "등록되어있지 않은 액터 제거");
-    }*/
+    }
 
     FTickTaskManager::bNeedUpdate = true;
 }

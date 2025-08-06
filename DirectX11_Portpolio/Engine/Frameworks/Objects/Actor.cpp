@@ -4,8 +4,10 @@
 #include "Frameworks/Components/UActorComponent.h"
 
 
+
 Actor::Actor()
 {
+    
 }
 
 Actor::~Actor()
@@ -34,6 +36,16 @@ FTransform* Actor::GetActorTransform()
 
     return GetRootComponent()->GetRelativeTransform();
 }
+
+void Actor::InitAllComponents()
+{
+    for(USceneComponent* sceneComp : OwnedSceneComponents)
+    {
+        sceneComp->InitComponent();
+    }
+}
+
+
 
 void Actor::AddToOwnedActorComponents(UActorComponent* InComponent)
 {

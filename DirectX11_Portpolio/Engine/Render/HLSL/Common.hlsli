@@ -172,7 +172,7 @@ void CalcAnimFrameTime(in FAnimFrameData data, out int currentFrame, out int nex
     }
     else
     {
-        time = time > data.Duration-1;
+        time = data.Duration-1;
         currentFrame = (int)time;
         nextFrame = currentFrame;
         interpTime = 0.0f;

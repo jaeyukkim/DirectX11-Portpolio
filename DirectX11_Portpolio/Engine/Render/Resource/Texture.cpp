@@ -183,7 +183,8 @@ ComPtr<ID3D11Texture2D> Texture::CreateStagingTexture(const int width, const int
 	if (FAILED(D3D::Get()->GetDevice()->CreateTexture2D(&txtDesc, NULL,
 		stagingTexture.GetAddressOf()))) 
 	{
-		cout << "Failed()" << endl;
+		string log = "CreateTextureFailed";
+		World::PushLog(log, Color(1, 0, 0, 1));
 	}
 
 	// CPU에서 이미지 데이터 복사
@@ -217,7 +218,12 @@ void Texture::ReadImage(vector<uint8_t>& image, int& width, int& height)
 
 	// assert(channels == 4);
 
-	cout << filename << " " << width << " " << height << " " << channels << endl;
+	std::string log = "Texture Load : " + filename + " " + 
+					 std::to_string(width) + " " +
+					 std::to_string(height) + " " +
+					 std::to_string(channels);
+	
+	World::PushLog(log, Color(0.5, 0.5, 0.5, 1));
 
 	// 4채널로 만들어서 복사
 	image.resize(width * height * 4);
@@ -268,7 +274,9 @@ void Texture::ReadImage(vector<uint8_t>& image, int& width, int& height)
 	}
 	else
 	{
-		cout << "Cannot read " << channels << " channels" << endl;
+		std::string log2 = "Cannot read channels";
+	
+		World::PushLog(log2, Color(1, 0, 0, 1));
 	}
 }
 

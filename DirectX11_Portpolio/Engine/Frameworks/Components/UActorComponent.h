@@ -13,7 +13,7 @@ public:
 public:
 	virtual void TickComponent(float deltaTime);
 	inline void SetOwner(Actor* InOwner) { OwnerPrivate = InOwner; }
-
+	Actor* GetOwner() { return OwnerPrivate;}
 
 private:
 	Actor* OwnerPrivate;

@@ -31,7 +31,8 @@ void Converter::ImportFBXFile(const wstring objectName, const EMeshType meshType
 	}
 	else
 	{
-		wcout << L"모델 파일이 존재하지 않습니다: " << endl;
+		string log = "모델 파일이 존재하지 않습니다";
+		World::PushLog(log, Color(1, 0, 0, 1));
 		return;
 	}
 
@@ -273,7 +274,7 @@ string Converter::SaveTexture(string InSaveFolder, string InFileName)
  * @param animationName 애니메이션 fbx 파일 이름
  * @param InClipIndex 
  */
-void Converter::ImportFBX_Animation(wstring objectName, wstring animationName, int InClipIndex)
+void Converter::ImportFBX_Animation(wstring objectName, wstring animationName, bool isRootMotion, int InClipIndex)
 {
 	wstring fbxPath = L"../../Contents/_Assets/" + objectName + L"/" + animationName + L".fbx";
 
@@ -285,7 +286,8 @@ void Converter::ImportFBX_Animation(wstring objectName, wstring animationName, i
 	}
 	else
 	{
-		wcout << L"모델 파일이 존재하지 않습니다: " << endl;
+		string log = "모델 파일이 존재하지 않습니다";
+		World::PushLog(log, Color(1, 0, 0, 1));
 		return;
 	}
 
@@ -304,7 +306,7 @@ void Converter::ImportFBX_Animation(wstring objectName, wstring animationName, i
 		L"/Animations/" + animationName + L".animation";
 	
 	shared_ptr<FClipData> clipData = ReadAnimationData(Scene->mAnimations[InClipIndex], animationName);
-	ConvertFBX_ToBinary_Animation(exportFileName, clipData);
+	ConvertFBX_ToBinary_Animation(exportFileName, clipData, isRootMotion);
 	
 }
 
@@ -796,7 +798,8 @@ void Converter::ReadBinary_Animation(wstring InFilePath, USkeletalMeshComponent*
 		animation->AnimName = reader->FromString();
 		animation->Duration = reader->FromFloat();
 		animation->TickPerSecond = reader->FromFloat();
-
+		animation->bRootMotion = static_cast<bool>(reader->FromInt());
+		
 		UINT count = reader->FromUInt();
 		animation->Keyframes.assign(count, nullptr);
 
@@ -842,7 +845,7 @@ void Converter::ReadBinary_Animation(wstring InFilePath, USkeletalMeshComponent*
 	}
 }
 
-void Converter::ConvertFBX_ToBinary_Animation(wstring InSaveFileName, shared_ptr<FClipData> InClipData)
+void Converter::ConvertFBX_ToBinary_Animation(wstring InSaveFileName, shared_ptr<FClipData> InClipData, bool isRootMotion)
 {
 	Path::CreateFolders(Path::GetDirectoryName(InSaveFileName));
 
@@ -853,6 +856,7 @@ void Converter::ConvertFBX_ToBinary_Animation(wstring InSaveFileName, shared_ptr
 
 	w->ToFloat(InClipData->Duration);
 	w->ToFloat(InClipData->TickPerSecond);
+	w->ToInt(isRootMotion);
 
 	w->ToUInt(InClipData->Keyframes.size());
 	for (shared_ptr<FKeyFrameData>& nodeData : InClipData->Keyframes)

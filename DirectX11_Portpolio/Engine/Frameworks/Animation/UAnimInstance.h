@@ -2,6 +2,8 @@
 #include "Render/Resource/AnimationData.h"
 
 
+class Actor;
+class USkeletalMeshComponent;
 class ACharacter;
 class FClipData;
 

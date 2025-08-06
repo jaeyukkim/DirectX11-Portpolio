@@ -17,6 +17,8 @@
     "Paladin/Animations/Melee_Attack1",
     "Paladin/Animations/Melee_Attack2",
     "Paladin/Animations/Melee_Attack3",
-    "Paladin/Animations/Melee_Attack4"
+    "Paladin/Animations/Melee_Attack4",
+    "Paladin/Animations/sword_and_shield_death_2",
+    "Paladin/Animations/sword_and_shield_impact_3"
   ]
 }

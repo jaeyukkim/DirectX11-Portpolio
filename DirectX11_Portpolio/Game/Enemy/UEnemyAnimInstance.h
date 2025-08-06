@@ -15,4 +15,5 @@ public:
 
 private:
     AEnemy* m_Enemy = nullptr;
+    bool bDead = false;
 };

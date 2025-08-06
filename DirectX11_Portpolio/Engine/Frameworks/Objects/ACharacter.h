@@ -2,6 +2,7 @@
 #include "Actor.h"
 
 
+class AController;
 class APlayerController;
 class UCapsuleComponent;
 class USceneComponent;
@@ -13,16 +14,16 @@ public:
 	ACharacter();
 	virtual ~ACharacter();
 	virtual void Tick(float deltaTime) override;
-	virtual void Possess(APlayerController* InPlayerController);
+	virtual void Possess(AController* InController);
 	virtual void UnPossess();
 	
 
 	
-	APlayerController* GetPlayerController() {return PlayerController;}
+	AController* GetController() {return Controller;}
 	
 	shared_ptr<USkeletalMeshComponent> Mesh;
 	shared_ptr<UCapsuleComponent> Capsule;
 
 protected:
-	APlayerController* PlayerController = nullptr;
+	AController* Controller = nullptr;
 }; 

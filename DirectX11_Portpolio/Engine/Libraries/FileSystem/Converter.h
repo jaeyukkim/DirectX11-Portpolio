@@ -39,7 +39,8 @@ public:
 	shared_ptr<FClipData> ReadAnimationData(aiAnimation* InAnimation, wstring InAnimName);
 	
 	void ImportFBXFile(const wstring objectName, const EMeshType meshType);
-	void ImportFBX_Animation(wstring objectName, wstring animationName, int InClipIndex = 0);
+	void ImportFBX_Animation(wstring objectName, wstring animationName,
+		bool isRootMotion = false, int InClipIndex = 0);
 
 private:
 	void ImportFBX_Mesh(wstring InSaveFileName, EMeshType FileType);
@@ -54,7 +55,7 @@ private:
 	void ConvertFBX_ToBinary_Material(wstring InSaveFileName, bool InOverwrite);
 	void ConvertFBX_ToBinary_Mesh(wstring InSaveFileName);
 	void ConvertFBX_ToBinary_SkeletalMesh(wstring InSaveFileName);
-	void ConvertFBX_ToBinary_Animation(wstring InSaveFileName, shared_ptr<FClipData> InClipData);
+	void ConvertFBX_ToBinary_Animation(wstring InSaveFileName, shared_ptr<FClipData> InClipData, bool isRootMotion = false);
 
 private:
 	template<typename MeshType>

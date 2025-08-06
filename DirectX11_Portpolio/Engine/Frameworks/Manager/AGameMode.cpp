@@ -1,9 +1,8 @@
 #include "HeaderCollection.h"
 #include "AGameMode.h"
 #include "APlayerController.h"
-#include "../../../Game/AKachujin.h"
-#include "../../../Game/System/World.h"
-#include "../../../Game/System/ULevel.h"
+#include "../../../Game/Characters/AKachujin.h"
+
 
 
 AGameMode::AGameMode()

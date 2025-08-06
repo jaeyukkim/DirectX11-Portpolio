@@ -23,6 +23,7 @@ public:
 	virtual void OnDisable() override;
 	virtual void OnDestroy() override;
 	virtual void SelectedActorChange(Actor* actor) override;
-
+	
+	
 	unordered_map<EDetailEditorType, unique_ptr<Editor>> mEditors;
 };

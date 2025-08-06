@@ -94,3 +94,6 @@ using namespace DirectX::SimpleMath;
 
 #include "Editor/Application/Gui.h"
 #include "Editor/Application/EditorApplication.h"
+#include "Frameworks/Manager/World.h"
+#include "Frameworks/Manager/ULevel.h"
+#include "Frameworks/Collision/CollisionDefinition.h"

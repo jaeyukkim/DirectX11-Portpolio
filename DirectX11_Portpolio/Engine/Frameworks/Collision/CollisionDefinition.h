@@ -43,6 +43,15 @@ struct FPhysicsOption
     bool bLockRotationY = false;
     bool bLockRotationZ = false;
     
-    
 };
 
+
+struct FHitResult
+{
+    bool bBlockingHit = false;
+    Vector3 HitLocation = Vector3::Zero;
+    Vector3 TraceStart = Vector3::Zero;
+    Vector3 TraceEnd = Vector3::Zero;
+    
+    Actor* HitActor;
+};

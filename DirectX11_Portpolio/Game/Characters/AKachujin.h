@@ -1,27 +1,32 @@
 #pragma once
 
+#include "../Combat/ICombatInterface.h"
 #include "Frameworks/Objects/ACharacter.h"
-#include "Player/UMyAnimInstance.h"
+
 
 class USpringArmConponent;
 class UCameraComponent;
+class APlayerController;
 
 DECLARE_DYNAMIC_DELEGATE(FCanAttack);
 DECLARE_DYNAMIC_DELEGATE(FCanNotAttack);
 DECLARE_DYNAMIC_DELEGATE(FCanMove);
 DECLARE_DYNAMIC_DELEGATE(FCanNotMove);
+DECLARE_DYNAMIC_DELEGATE(FBasicAttack);
 
 
-class AKachujin : public ACharacter
+class AKachujin : public ACharacter, public ICombatInterface
 {
 public:
     AKachujin();
     virtual ~AKachujin();
-    virtual void Possess(APlayerController* InPlayerController) override;
+    virtual void Possess(AController* InController) override;
     virtual void Tick(float deltaTime) override;
-
-
-
+   
+public:
+    APlayerController* GetPlayerController() { return PlayerController;}
+    virtual void TakeDamage(ICombatInterface* damageCauser, LL damageAmount) override;
+    
 protected:
     void InitMontage();
     void InitNotify();
@@ -30,14 +35,18 @@ protected:
     void JumpCharacter();
     void Attack();
     void AbilityRMB();
+    void BasicAttack();
 
     void CanAttack();
     void CanNotAttack();
     void CanMove();
     void CanNotMove();
+    
 private:
+    APlayerController* PlayerController;
     vector<AnimMontage> AttackMontage;
     shared_ptr<AnimMontage> AbilityRMBMontage;
+    shared_ptr<AnimMontage> HitReactMontage;
     unordered_map<string, FAnimationNotifyEvent> Notifies;
     
     
@@ -45,12 +54,9 @@ private:
     FCanNotAttack CanNotAtkDelegate;
     FCanMove CanMoveDelegate;
     FCanNotMove CanNotMoveDelegate;
-
-    uint8 MaxAttackCount = 0;
-    uint8 AttackCount = 0;
-    bool bCanAttack = true;
-    bool bCanMove = true;
+    FBasicAttack BasicAttackDelegate;
     
+
 public:
     float RotateSpeed = 5.0f;
     float Roughness = 1.0f;     //4

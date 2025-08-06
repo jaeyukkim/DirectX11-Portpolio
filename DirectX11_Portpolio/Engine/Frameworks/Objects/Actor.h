@@ -16,11 +16,8 @@ public:
 public:
 	void SetRootComponent(USceneComponent* InRootComponent);
 	USceneComponent* GetRootComponent();
-
-public:
 	FTransform* GetActorTransform();
-
-public:
+	virtual void InitAllComponents();
 	vector<UActorComponent*>& GetAllActorComponents() {return OwnedActorComponents;}
 	void AddToOwnedActorComponents(UActorComponent* InComponent);
 	vector<USceneComponent*>& GetAllSceneComponents() {return OwnedSceneComponents;}

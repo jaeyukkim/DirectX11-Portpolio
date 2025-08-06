@@ -10,6 +10,7 @@ public:
     virtual ~UCollisionComponent() override;
     virtual void TickComponent(float deltaTime) override;
     virtual void CreatePrimitive();
+    virtual void InitComponent() override;
     
 public:
     FPhysicsOption PhysicsOption;

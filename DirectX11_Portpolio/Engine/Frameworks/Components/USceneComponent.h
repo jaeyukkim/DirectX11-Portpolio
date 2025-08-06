@@ -13,7 +13,7 @@ public:
 	USceneComponent();
 	virtual ~USceneComponent() = default;
 	virtual void TickComponent(float deltaTime) override;
-
+	virtual void InitComponent();
 public:
 	void SetUpAttachment(USceneComponent* InParent, const string& InSocketName = "");
 	void Deteach();

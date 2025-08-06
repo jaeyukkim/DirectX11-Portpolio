@@ -86,6 +86,7 @@ Actor* UObject::SpawnActor(UObject* InOuter, Args&&... args)
 	// Owner ¼³Á¤
 	newActor->Outer = InOuter;
 	World::GetLevel()->AddActorToLevel(newActor);
+	newActor->InitAllComponents();
 	return newActor.get();
 }
 
@@ -114,5 +115,7 @@ Actor* UObject::SpawnActorAtLocation(UObject* InOuter, FTransform transform, Arg
 		actorTransform->SetQuat(transform.GetQuat());
 		actorTransform->SetRotation(transform.GetScale());
 	}
+
+	newActor->InitAllComponents();
 	return newActor.get();
 }
