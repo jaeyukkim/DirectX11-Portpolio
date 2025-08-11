@@ -220,6 +220,7 @@
     <ClCompile Include="Enemy\UEnemyAnimInstance.cpp" />
     <ClCompile Include="Enviroment\AFloor.cpp" />
     <ClCompile Include="Enviroment\ACubeMap.cpp" />
+    <ClCompile Include="Enviroment\AFluidActor.cpp" />
     <ClCompile Include="Enviroment\ALightActor.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -308,6 +309,7 @@
     <ClInclude Include="Enemy\UEnemyAnimInstance.h" />
     <ClInclude Include="Enviroment\AFloor.h" />
     <ClInclude Include="Enviroment\ACubeMap.h" />
+    <ClInclude Include="Enviroment\AFluidActor.h" />
     <ClInclude Include="Enviroment\ALightActor.h" />
     <ClInclude Include="Enviroment\AMirror.h" />
     <ClInclude Include="Player\UMyAnimInstance.h" />

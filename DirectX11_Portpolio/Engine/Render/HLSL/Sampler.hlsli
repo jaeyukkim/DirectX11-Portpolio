@@ -5,6 +5,7 @@ SamplerState LinearWarpSampler : register(s0);
 SamplerState LinearClampSampler : register(s1);
 SamplerState shadowPointSampler : register(s2);
 SamplerComparisonState shadowCompareSampler : register(s3);
+SamplerState PointWrapSampler : register(s4);
 
 
 static const float2 poissonDisk[16] =

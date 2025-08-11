@@ -1,5 +1,7 @@
 #include "HeaderCollection.h"
 #include "ULevel.h"
+
+#include "../../../Game/Enviroment/AFluidActor.h"
 #include "../Game/Characters/AKachujin.h"
 #include "../Game/Enviroment/ALightActor.h"
 #include "../Game/Characters/AEnemy.h"
@@ -19,7 +21,8 @@ void ULevel::Initialize()
     SpawnActor<ALightActor>(this);
     SpawnActor<AFloor>(this);
     SpawnActor<ACubeMap>(this);
-   
+    SpawnActor<AFluidActor>(this);
+
     FTransform transform;
     transform.SetPosition(0.0f, 200.0f, 300.0f);
     Actor* enemy = SpawnActorAtLocation<AEnemy>(World::GetLevel(), transform);

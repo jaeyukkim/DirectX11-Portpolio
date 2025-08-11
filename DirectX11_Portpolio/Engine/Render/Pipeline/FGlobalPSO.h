@@ -26,6 +26,20 @@ public:
     void VSSetConstantBuffers(UINT StartSlot, const vector<ID3D11Buffer*>& InBuffers) const;
     void PSSetConstantBuffers(UINT StartSlot, const vector<ID3D11Buffer*>& InBuffers) const;
 
+    
+public:
+    void CompileVSAndInputLayout(const wstring& path, ComPtr<ID3D11VertexShader>& InVertexShader,
+        const vector<D3D11_INPUT_ELEMENT_DESC>& InIE, ComPtr<ID3D11InputLayout>& InIL,
+        const vector<D3D_SHADER_MACRO> shaderMacros = {/* Empty default */});
+    void CompilePS(const wstring& path, ComPtr<ID3D11PixelShader>& InPixelShader);
+    void CompileHS(const wstring& path, ComPtr<ID3D11HullShader>& InHullShader);
+    void CompileDS(const wstring& path, ComPtr<ID3D11DomainShader>& InDomainShader);
+    void CompileGS(const wstring& path, ComPtr<ID3D11GeometryShader>& InGeometryShader);
+    void CompileCS(const wstring& path, ComPtr<ID3D11ComputeShader>& InComputeShader,
+        const vector<D3D_SHADER_MACRO> shaderMacros = {/* Empty default */});
+    void Assert_IF_FailedCompile(HRESULT hr, const ComPtr<ID3DBlob>& errorBlob);
+
+    
 private:
     void InitShaderAndState();
     void InitVSAndIL();
@@ -41,17 +55,8 @@ private:
     void InitSamplerState();
     void InitBlendState();
     void InitPSO();
-    
-    void CompileVSAndInputLayout(const wstring& path, ComPtr<ID3D11VertexShader>& InVertexShader,
-        const vector<D3D11_INPUT_ELEMENT_DESC>& InIE, ComPtr<ID3D11InputLayout>& InIL,
-        const vector<D3D_SHADER_MACRO> shaderMacros = {/* Empty default */});
-    void CompilePS(const wstring& path, ComPtr<ID3D11PixelShader>& InPixelShader);
-    void CompileHS(const wstring& path, ComPtr<ID3D11HullShader>& InHullShader);
-    void CompileDS(const wstring& path, ComPtr<ID3D11DomainShader>& InDomainShader);
-    void CompileGS(const wstring& path, ComPtr<ID3D11GeometryShader>& InGeometryShader);
-    void CompileCS(const wstring& path, ComPtr<ID3D11ComputeShader>& InComputeShader,
-        const vector<D3D_SHADER_MACRO> shaderMacros = {/* Empty default */});
-    void Assert_IF_FailedCompile(HRESULT hr, const ComPtr<ID3DBlob>& errorBlob);
+
+
 
 public:
     static bool DrawAsWire;
@@ -88,6 +93,7 @@ public:
     FPSO CombinePSO;
     FPSO FrustumCullingPSO;
     FPSO FrustumCullingSkinnedPSO;
+    FPSO SimpleTexturePSO;
 
     
 private:
@@ -122,6 +128,8 @@ private:
     ComPtr<ID3D11PixelShader> BloomDownPS;
     ComPtr<ID3D11PixelShader> DepthOnlyPS;
     ComPtr<ID3D11PixelShader> PostEffectsPS;
+    ComPtr<ID3D11PixelShader> SimpleTexturePS;
+
 
     // GeometryShader
     ComPtr<ID3D11GeometryShader> NormalGS;
@@ -196,6 +204,7 @@ private:
     const wstring FrustumCullingCSPath = HlslPath + L"CS_FrustumCulling.hlsl";
 
     const wstring CombinePSPath = HlslPath + L"PS_Combine.hlsl";
+    const wstring SimpleTexturePSPath = HlslPath + L"PS_SimpleTexture.hlsl";
 
     
     

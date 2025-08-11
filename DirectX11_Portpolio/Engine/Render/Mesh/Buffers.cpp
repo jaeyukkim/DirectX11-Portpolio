@@ -758,8 +758,31 @@ void TextureBuffer::CreateUAVTexture(const int width, const int height, const DX
 }
 
 
+void TextureBuffer::CreateSRVUAVTexture(const int width, const int height, const DXGI_FORMAT pixelFormat,
+	ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& srv, ComPtr<ID3D11UnorderedAccessView>& uav)
+{
+	D3D11_TEXTURE2D_DESC txtDesc;
+	ZeroMemory(&txtDesc, sizeof(txtDesc));
+	txtDesc.Width = width;
+	txtDesc.Height = height;
+	txtDesc.MipLevels = 1;
+	txtDesc.ArraySize = 1;
+	txtDesc.Format = pixelFormat; // 주로 FLOAT 사용
+	txtDesc.SampleDesc.Count = 1;
+	txtDesc.Usage = D3D11_USAGE_DEFAULT;
+	txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET | D3D11_BIND_UNORDERED_ACCESS;
+	txtDesc.MiscFlags = 0;
+	txtDesc.CPUAccessFlags = 0;
+
+	
+	FAILED(D3D::Get()->GetDevice()->CreateTexture2D(&txtDesc, NULL, texture.GetAddressOf()));
+	FAILED(D3D::Get()->GetDevice()->CreateShaderResourceView(texture.Get(), NULL, srv.GetAddressOf()));
+	FAILED(D3D::Get()->GetDevice()->CreateUnorderedAccessView(texture.Get(), NULL, uav.GetAddressOf()));
+}
+
+
 void TextureBuffer::CreateBuffer(ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& srv,
-	ComPtr<ID3D11RenderTargetView>& rtv, int width, int height)
+                                 ComPtr<ID3D11RenderTargetView>& rtv, int width, int height)
 {
 	D3D11_TEXTURE2D_DESC txtDesc;
 	ZeroMemory(&txtDesc, sizeof(txtDesc));

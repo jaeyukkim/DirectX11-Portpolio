@@ -202,6 +202,12 @@ public:
 								ComPtr<ID3D11RenderTargetView> &rtv,
 								ComPtr<ID3D11ShaderResourceView> &srv,
 								ComPtr<ID3D11UnorderedAccessView> &uav);
+	static void CreateSRVUAVTexture(const int width,
+								const int height,
+								const DXGI_FORMAT pixelFormat,
+								ComPtr<ID3D11Texture2D> &texture,
+								ComPtr<ID3D11ShaderResourceView> &srv,
+								ComPtr<ID3D11UnorderedAccessView> &uav);
 
 	static void CreateBuffer(ComPtr<ID3D11Texture2D>& texture,
 		ComPtr<ID3D11ShaderResourceView>& srv, ComPtr<ID3D11RenderTargetView>& rtv,

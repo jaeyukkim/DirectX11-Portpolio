@@ -158,6 +158,8 @@ void FGlobalPSO::InitPixelShader()
     CompilePS(BloomUpPSPath, BloomUpPS);
     CompilePS(BloomDownPSPath, BloomDownPS);
     CompilePS(PostEffectPSPath, PostEffectsPS);
+    CompilePS(SimpleTexturePSPath, SimpleTexturePS);
+
     //CompilePS(NormalPSPath, NormalPS);
 }
 
@@ -330,6 +332,14 @@ void FGlobalPSO::InitSamplerState()
     }
     hr = D3D::Get()->GetDevice()->CreateSamplerState(&shadowCompareSDE, Samplers[ESamplerSlot::shadowCompareSampler].GetAddressOf());
     AssertHR(hr, "Create shadowCompareSampler failed");
+
+
+    D3D11_SAMPLER_DESC PointWrapSDE = LinearSDE;
+    {
+        PointWrapSDE.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    }
+    hr = D3D::Get()->GetDevice()->CreateSamplerState(&PointWrapSDE, Samplers[ESamplerSlot::PointWrapSampler].GetAddressOf());
+    AssertHR(hr, "Create shadowCompareSampler failed");
 }
 
 
@@ -450,7 +460,10 @@ void FGlobalPSO::InitPSO()
     SkyboxWirePSO = SkyboxSolidPSO;
     SkyboxWirePSO.m_rasterizerState = WireRS;
 
-
+    SimpleTexturePSO = SkyboxSolidPSO;
+    SimpleTexturePSO.m_vertexShader = DepthOnlyVS;
+    SimpleTexturePSO.m_pixelShader = SimpleTexturePS;
+    
     // reflectSkyboxSolidPSO
     ReflectSkyboxSolidPSO = SkyboxSolidPSO;
     ReflectSkyboxSolidPSO.m_depthStencilState = DrawMaskedDSS;

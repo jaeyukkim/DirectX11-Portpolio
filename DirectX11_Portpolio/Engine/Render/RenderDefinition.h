@@ -109,7 +109,8 @@ enum ESamplerSlot : UINT8
     LinearClampSampler = 1,
     shadowPointSampler = 2,
     shadowCompareSampler = 3,
-    MaxSamplerSlot = 4
+    PointWrapSampler = 4,
+    MaxSamplerSlot = 5
 };
 
 
