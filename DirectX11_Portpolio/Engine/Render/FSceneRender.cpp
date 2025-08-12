@@ -1,5 +1,7 @@
 #include "HeaderCollection.h"
 #include "FSceneRender.h"
+
+#include "Frameworks/Objects/Actor.h"
 #include "PostEffects/PostEffect.h"
 
 
@@ -146,6 +148,10 @@ void FSceneRender::RenderObjects(FRenderOption option)
             AnimProxies[proxy.first]->Render(option);
         }
         proxy.second->Render(option);
+    }
+    for(auto& actor : CustomRenderObject)
+    {
+        actor->CustomRender(Timer::Get()->GetDeltaTime());
     }
     if(SkyBoxProxy != nullptr)
     {

@@ -1,15 +1,9 @@
+#include "StableFluids.hlsli"
+
 Texture2D<float> vorticity : register(t0);
 RWTexture2D<float2> velocity : register(u0);
 
-cbuffer Consts : register(b0)
-{
-    float dt;
-    float viscosity;
-    float2 sourcingVelocity;
-    float4 sourcingDensity;
-    uint i;
-    uint j;
-}
+
 
 [numthreads(32, 32, 1)]
 void CS_Main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,

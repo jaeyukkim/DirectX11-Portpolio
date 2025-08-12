@@ -22,7 +22,7 @@ public:
 	void AddToOwnedActorComponents(UActorComponent* InComponent);
 	vector<USceneComponent*>& GetAllSceneComponents() {return OwnedSceneComponents;}
 	void AddToOwnedSceneComponents(USceneComponent* InComponent);
-
+	virtual void CustomRender(float deltaTime);
 	
 public:
 	UObject* Outer = nullptr;

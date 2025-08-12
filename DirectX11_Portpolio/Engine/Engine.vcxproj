@@ -168,6 +168,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClInclude Include="Frameworks\Collision\UBoxComponent.h" />
     <ClInclude Include="Frameworks\Collision\UCapsuleComponent.h" />
     <ClInclude Include="Frameworks\Collision\UCollisionComponent.h" />
+    <ClInclude Include="Frameworks\Collision\USquareComponent.h" />
     <ClInclude Include="Frameworks\Components\UActorComponent.h" />
     <ClInclude Include="Frameworks\Components\UPrimitiveComponent.h" />
     <ClInclude Include="Frameworks\Components\USceneComponent.h" />
@@ -425,6 +426,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <ClCompile Include="Frameworks\Collision\UBoxComponent.cpp" />
     <ClCompile Include="Frameworks\Collision\UCapsuleComponent.cpp" />
     <ClCompile Include="Frameworks\Collision\UCollisionComponent.cpp" />
+    <ClCompile Include="Frameworks\Collision\USqareComponent.cpp" />
     <ClCompile Include="Frameworks\Components\UActorComponent.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -1618,6 +1620,7 @@ copy /Y "$(SolutionDir)x64\Debug\$(ProjectName).pdb" "$(SolutionDir)Game\"</Comm
     <None Include="Render\HLSL\Lighting.hlsli" />
     <None Include="Render\HLSL\Material.hlsli" />
     <None Include="Render\HLSL\Sampler.hlsli" />
+    <None Include="Render\HLSL\StableFluids\StableFluids.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Render\HLSL\CS_FrustumCulling.hlsl">

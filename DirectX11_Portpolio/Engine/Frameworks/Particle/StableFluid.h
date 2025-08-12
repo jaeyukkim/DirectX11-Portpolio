@@ -5,11 +5,11 @@ struct FFluidsConst
 {
     float dt;
     float viscosity;
-    Vector2 sourcingVelocity;
-    Vector4 sourcingDensity;
     uint32_t i;
     uint32_t j;
+    Vector2 sourcingVelocity;
     float pad[2];
+    Vector4 sourcingDensity;
 };
 
 struct FFluidTexture

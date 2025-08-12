@@ -1,3 +1,5 @@
+#include "StableFluids.hlsli"
+
 Texture2D<float> pressure : register(t0);
 RWTexture2D<float2> velocity : register(u0);
 

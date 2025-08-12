@@ -1,22 +1,24 @@
 #pragma once
 #include "UCollisionComponent.h"
 
-class UBoxComponent : public UCollisionComponent
+class USquareComponent : public UCollisionComponent
 {
 public:
-    UBoxComponent(Vector3 InBoxSize = Vector3(300.0f, 300.0f, 300.0f),
+
+    USquareComponent(Vector2 InSqaureSize = Vector2(300.0f, 300.0f),
         FPhysicsOption InOption = FPhysicsOption());
     virtual void InitComponent() override;
-    virtual ~UBoxComponent() override = default;
+    virtual ~USquareComponent() override = default;
     virtual void TickComponent(float deltaTime) override;
 
 public:
-    void InitBox();
+    void InitSqare();
     void InitPhysics();
 
 private:
     PxPtr<PxMaterial> PhysMaterial;
-    float BoxX = 300.0f;
-    float BoxY = 300.0f;
-    float BoxZ  = 300.0f;
+    float SquareX = 300.0f;
+    float SquareY = 300.0f;
+
 };
+

@@ -11,7 +11,10 @@ public:
     virtual void TickComponent(float deltaTime) override;
     virtual void CreatePrimitive();
     virtual void InitComponent() override;
-    
+
+    PxRigidDynamic* GetRigidDynamic() { return RigidDynamic.get();}
+    PxRigidStatic* GetRigidStatic() { return RigidStatic.get();}
+
 public:
     FPhysicsOption PhysicsOption;
 

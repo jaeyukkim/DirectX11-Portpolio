@@ -100,3 +100,18 @@ void USceneComponent::RemoveChild(USceneComponent* InChild)
 		assert(false && "등록되어있지 않은 자식 컴포넌트 제거");
 	}
 }
+
+
+FTransform* USceneComponent::GetWorldTransform() const
+{
+	if(AttachParent == nullptr)
+	{
+		return RelativeTransform.get();
+	}
+	return WorldTransform.get();
+}
+
+FTransform* USceneComponent::GetRelativeTransform() const
+{
+	return RelativeTransform.get();
+}

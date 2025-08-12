@@ -16,7 +16,7 @@ public:
 public:
 	Vector3 GetPosition() { return Position; }
 	Vector3 GetMoveDelta() { return WheelMoveDelta; }
-
+	Vector2 GetMouseNDC() {return MouseNDC;}
 public:
 	bool Down(int InType);
 	bool Up(int InType);
@@ -48,6 +48,7 @@ private:
 
 private:
 	Vector3 Position;
+	Vector2 MouseNDC;
 
 	BYTE ButtonStatus[(int)MouseButton::Max];
 	BYTE ButtonOldStatus[(int)MouseButton::Max];

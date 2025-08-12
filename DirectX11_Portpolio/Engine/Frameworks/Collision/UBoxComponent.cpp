@@ -10,11 +10,19 @@ UBoxComponent::UBoxComponent(Vector3 InBoxSize, FPhysicsOption InOption)
     BoxX = InBoxSize.x;
     BoxY = InBoxSize.y;
     BoxZ = InBoxSize.z;
+
     
     PhysicsOption = InOption;
+    
+}
+
+void UBoxComponent::InitComponent()
+{
     InitBox();
     InitPhysics();
-    FSceneRender::Get()->CreatePrimitiveRenderProxy(CollisionShape, this);
+   // FSceneRender::Get()->CreatePrimitiveRenderProxy(CollisionShape, this);
+
+    Super::InitComponent();
 }
 
 void UBoxComponent::TickComponent(float deltaTime)
@@ -26,6 +34,7 @@ void UBoxComponent::TickComponent(float deltaTime)
 
 void UBoxComponent::InitBox()
 {
+    
     StaticMeshData meshData = GeometryGenerator::MakeBox(Vector3(BoxX, BoxY, BoxZ));
     
     PrimData.AABB = std::move(meshData.AABB);

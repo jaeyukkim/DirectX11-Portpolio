@@ -1,10 +1,12 @@
+#include "StableFluids.hlsli"
+
+
 Texture2D<float> pressureTemp : register(t0);
 Texture2D<float> divergence : register(t1);
 
 RWTexture2D<float> pressureOut : register(u0);
 
-SamplerState pointWrapSS : register(s0);
-SamplerState linearWrapSS : register(s1);
+
 
 [numthreads(32, 32, 1)]
 void CS_Main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,

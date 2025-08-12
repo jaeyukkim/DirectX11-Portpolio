@@ -98,6 +98,8 @@ void Mouse::Tick(float deltaTime)
 	POINT point;
 	GetCursorPos(&point);
 	ScreenToClient(D3D::GetDesc().Handle, &point);
+	Position.x = point.x;
+	Position.y = point.y;
 
 	WheelOldStatus.x = WheelStatus.x;
 	WheelOldStatus.y = WheelStatus.y;
@@ -108,6 +110,14 @@ void Mouse::Tick(float deltaTime)
 	WheelMoveDelta = WheelStatus - WheelOldStatus;
 	WheelOldStatus.z = WheelStatus.z;
 
+	MouseNDC.x = Position.x * 2.0f / D3D::GetDesc().Width - 1.0f;
+	MouseNDC.y = -Position.y * 2.0f / D3D::GetDesc().Height + 1.0f;
+
+	// 커서가 화면 밖으로 나갔을 경우 범위 조절
+	// 게임에서는 클램프를 안할 수도 있습니다.
+	MouseNDC.x = std::clamp(MouseNDC.x, -1.0f, 1.0f);
+	MouseNDC.y = std::clamp(MouseNDC.y, -1.0f, 1.0f);
+	
 	/*
 	* //  인게임용 마우스 좌표고정
 		POINT screenPoint;

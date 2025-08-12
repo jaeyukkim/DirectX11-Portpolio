@@ -19,9 +19,7 @@ void ULevel::Initialize()
 
     SpawnActor<AGameMode>(this);
     SpawnActor<ALightActor>(this);
-    SpawnActor<AFloor>(this);
     SpawnActor<ACubeMap>(this);
-    SpawnActor<AFluidActor>(this);
 
     FTransform transform;
     transform.SetPosition(0.0f, 200.0f, 300.0f);
@@ -35,6 +33,13 @@ void ULevel::Initialize()
             AIC->Possess(enemyCharacter);
         }
     }
+
+    transform.SetPosition(0.0f, 0.0f, 0.0f);
+    SpawnActorAtLocation<AFloor>(this, transform);
+    
+    transform.SetPosition(-6000.0f, -100.0f, 0.0f);
+    SpawnActorAtLocation<AFluidActor>(this, transform);
+
 }
 
 void ULevel::Destroy()

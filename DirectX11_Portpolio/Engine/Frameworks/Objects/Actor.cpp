@@ -65,3 +65,7 @@ void Actor::AddToOwnedSceneComponents(USceneComponent* InComponent)
     OwnedSceneComponents.push_back(InComponent);
     FTickTaskManager::bNeedUpdate = true;
 }
+
+void Actor::CustomRender(float deltaTime)
+{
+}

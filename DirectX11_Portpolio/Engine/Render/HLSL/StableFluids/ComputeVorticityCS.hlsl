@@ -1,3 +1,5 @@
+#include "StableFluids.hlsli"
+
 Texture2D<float2> velocity : register(t0);
 RWTexture2D<float> vorticity : register(u0);
 

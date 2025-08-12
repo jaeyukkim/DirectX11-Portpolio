@@ -1,15 +1,9 @@
+#include "StableFluids.hlsli"
+
 RWTexture2D<float2> velocity : register(u0);
 RWTexture2D<float4> density : register(u1);
 
-cbuffer Consts : register(b0)
-{
-    float dt;
-    float viscosity;
-    float2 sourcingVelocity;
-    float4 sourcingDensity;
-    uint i;
-    uint j;
-}
+
 
 // https://en.wikipedia.org/wiki/Smoothstep
 float smootherstep(float x, float edge0 = 0.0f, float edge1 = 1.0f)

@@ -5,7 +5,8 @@ enum class ECollisionShape : uint8
 {
     ECS_Sphere,
     ECS_Capsule,
-    ECS_Box
+    ECS_Box,
+    ECS_Sqare
 };
 enum class EPhysicsType : uint8
 {

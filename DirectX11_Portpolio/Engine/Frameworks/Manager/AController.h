@@ -35,7 +35,9 @@ private:
 protected:
     Vector3 PendingMovementInput = Vector3(0, 0, 0);
     const float Gravity = -980.0f;
-    const float JumpSpeed = 80.0f;
+    const float JumpSpeed = 160.0f;
+    float JumpTime = 0.0f;
+    float InitYPos;
     float RotationSpeed = 25.f;
 
 

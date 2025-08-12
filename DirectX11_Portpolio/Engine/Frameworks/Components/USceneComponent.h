@@ -19,10 +19,10 @@ public:
 	void Deteach();
 	void AddChild(USceneComponent* InChild);
 	void RemoveChild(USceneComponent* InChild);
-	
+
 public:
-	FTransform* GetWorldTransform() const { return WorldTransform.get(); }
-	FTransform* GetRelativeTransform() const { return RelativeTransform.get(); }
+	FTransform* GetWorldTransform() const;
+	FTransform* GetRelativeTransform() const;
 	shared_ptr<ConstantBuffer> GetWorldConstantBuffer() const {return WorldConstantBuffer; }
 	WorldBufferDesc* GetWorldBufferData() { return &WorldBufferData;}
 	

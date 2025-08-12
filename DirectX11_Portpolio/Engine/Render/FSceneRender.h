@@ -40,7 +40,7 @@ public:
     void DestroyPrimitiveProxy(const ECollisionShape& InCollisionShape, const int InInstanceID);
     void CreatePrimitiveRenderProxy(const ECollisionShape& InCollisionShape,
         UPrimitiveComponent* InPrimitiveComponent);
-
+    void AddCustomRenderObject(Actor* InActor) {CustomRenderObject.push_back(InActor);}
     
     void Render();
     void BeginRender();
@@ -91,7 +91,7 @@ private:
     shared_ptr<SkyBoxRenderProxy> SkyBoxProxy;
 
     shared_ptr<PostEffect> PostEffectEntity;
-
+    vector<Actor*> CustomRenderObject;
 private:
     shared_ptr<ConstantBuffer> TimeCBuffer;
     TimeDesc TimeData;
