@@ -190,6 +190,8 @@ class TextureBuffer : public CsResource
 public:
 	TextureBuffer(ID3D11Texture2D* InSource);
 	virtual ~TextureBuffer() override;
+
+	static size_t GetPixelSize(DXGI_FORMAT pixelFormat);
 	
 	static ComPtr<ID3D11Texture2D> CreateStagingTexture(const std::vector<uint8_t> &image,
 		const int width, const int height, const DXGI_FORMAT pixelFormat = DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -277,4 +279,56 @@ class AnimationTexture
 public:
 	static void CreateAnimationTexture(USkeletalMeshComponent* meshComp,
 		ComPtr<ID3D11Texture2D>& InClipTexture, ComPtr<ID3D11ShaderResourceView>& InClipSRV);
+};
+
+//-----------------------------------------------
+
+
+class Texture3D
+{
+  public:
+	static void CreateTexture3D(const int width,
+								 const int height, const int depth,
+								 const DXGI_FORMAT pixelFormat,
+								 const vector<float> &initData,
+								 ComPtr<ID3D11Texture3D> &texture,
+								 ComPtr<ID3D11RenderTargetView> &rtv,
+								 ComPtr<ID3D11ShaderResourceView> &srv,
+								 ComPtr<ID3D11UnorderedAccessView> &uav);
+
+	static ComPtr<ID3D11Texture3D> CreateStagingTexture3D(const int width, const int height,
+										const int depth, const DXGI_FORMAT pixelFormat);
+
+	
+    void Initialize(UINT width, UINT height, UINT depth, DXGI_FORMAT pixelFormat)
+	{
+        Initialize(width, height, depth, pixelFormat, {});
+    }
+
+    void Initialize(UINT width, UINT height, UINT depth, DXGI_FORMAT pixelFormat,
+                    const vector<float> &initData);
+
+    void InitNoiseF16(ComPtr<ID3D11Device> &device);
+
+    void Upload(ComPtr<ID3D11DeviceContext> &context, const vector<float> &data);
+
+	
+    const auto GetTexture() { return m_texture.Get(); }
+    const auto GetRTV() { return m_rtv.Get(); }
+    const auto GetSRV() { return m_srv.Get(); }
+    const auto GetUAV() { return m_uav.Get(); }
+    const auto GetAddressOfRTV() { return m_rtv.GetAddressOf(); }
+    const auto GetAddressOfSRV() { return m_srv.GetAddressOf(); }
+    const auto GetAddressOfUAV() { return m_uav.GetAddressOf(); }
+
+  private:
+    UINT m_width = 1;
+    UINT m_height = 1;
+    UINT m_depth = 1;
+
+    ComPtr<ID3D11Texture3D> m_texture;
+    ComPtr<ID3D11Texture3D> m_staging;
+    ComPtr<ID3D11RenderTargetView> m_rtv;
+    ComPtr<ID3D11ShaderResourceView> m_srv;
+    ComPtr<ID3D11UnorderedAccessView> m_uav;
 };

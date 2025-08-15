@@ -89,6 +89,19 @@ void FSceneView::UpdateReflactView(const Matrix InReflactRow)
     
 }
 
+Vector3 FSceneView::GetDirectionalLightDir()
+{
+    for(FLight& light : Lights.Lights)
+    {
+        if(light.LightType == ELightType::LT_Directional)
+        {
+            return light.direction;
+        }
+    }
+
+    return Vector3(0, -1, 0);
+}
+
 void FSceneView::AddToLightMap(FLight* InLightInfo)
 {
     

@@ -458,6 +458,31 @@ TextureBuffer::~TextureBuffer()
 {
 }
 
+size_t TextureBuffer::GetPixelSize(DXGI_FORMAT pixelFormat)
+{
+	switch (pixelFormat)
+	{
+	case DXGI_FORMAT_R16G16B16A16_FLOAT:
+		return sizeof(uint16_t) * 4;
+	case DXGI_FORMAT_R32G32B32A32_FLOAT:
+		return sizeof(uint32_t) * 4;
+	case DXGI_FORMAT_R32_FLOAT:
+		return sizeof(uint32_t) * 1;
+	case DXGI_FORMAT_R8G8B8A8_UNORM:
+		return sizeof(uint8_t) * 4;
+	case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+		return sizeof(uint8_t) * 4;
+	case DXGI_FORMAT_R32_SINT:
+		return sizeof(int32_t) * 1;
+	case DXGI_FORMAT_R16_FLOAT:
+		return sizeof(uint16_t) * 1;
+	}
+
+	cout << "PixelFormat not implemented " << pixelFormat << endl;
+
+	return sizeof(uint8_t) * 4;
+}
+
 void TextureBuffer::CreateSRV()
 {
 	ID3D11Texture2D* texture = (ID3D11Texture2D*)Input.Get();
@@ -698,6 +723,8 @@ void AnimationTexture::CreateAnimationTexture(USkeletalMeshComponent* meshComp,
 }
 
 
+
+
 ComPtr<ID3D11Texture2D> TextureBuffer::CreateStagingTexture( const std::vector<uint8_t> &image,
                                                              const int width, const int height, const DXGI_FORMAT pixelFormat, const int mipLevels, const int arraySize)
 {
@@ -724,7 +751,9 @@ ComPtr<ID3D11Texture2D> TextureBuffer::CreateStagingTexture( const std::vector<u
 	D3D11_MAPPED_SUBRESOURCE ms;
 	D3D::Get()->GetDeviceContext()->Map(stagingTexture.Get(), NULL, D3D11_MAP_WRITE, NULL, &ms);
 	uint8_t *pData = (uint8_t *)ms.pData;
-	for (UINT h = 0; h < UINT(height); h++) { // 가로줄 한 줄씩 복사
+	
+	for (UINT h = 0; h < UINT(height); h++)
+	{ // 가로줄 한 줄씩 복사
 		memcpy(&pData[h * ms.RowPitch], &image[h * width * pixelSize],
 			   width * pixelSize);
 	}
@@ -827,4 +856,147 @@ size_t CsResource::GetPixelSize(DXGI_FORMAT pixelFormat)
 	cout << "PixelFormat not implemented " << pixelFormat << endl;
 
 	return sizeof(uint8_t) * 4;
+}
+
+
+void Texture3D::CreateTexture3D(const int width, const int height, const int depth, const DXGI_FORMAT pixelFormat,
+	const vector<float>& initData, ComPtr<ID3D11Texture3D>& texture, ComPtr<ID3D11RenderTargetView>& rtv,
+	ComPtr<ID3D11ShaderResourceView>& srv, ComPtr<ID3D11UnorderedAccessView>& uav)
+{
+	D3D11_TEXTURE3D_DESC txtDesc;
+	ZeroMemory(&txtDesc, sizeof(txtDesc));
+	txtDesc.Width = width;
+	txtDesc.Height = height;
+	txtDesc.Depth = depth;
+	txtDesc.MipLevels = 1;
+	txtDesc.Format = pixelFormat;
+	txtDesc.Usage = D3D11_USAGE_DEFAULT;
+	txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET |
+						D3D11_BIND_UNORDERED_ACCESS;
+	txtDesc.MiscFlags = 0;
+	txtDesc.CPUAccessFlags = 0;
+
+	ID3D11Device* device = D3D::Get()->GetDevice();
+	
+	if (initData.size() > 0)
+	{
+		size_t pixelSize = TextureBuffer::GetPixelSize(pixelFormat);
+		D3D11_SUBRESOURCE_DATA bufferData;
+		ZeroMemory(&bufferData, sizeof(bufferData));
+		bufferData.pSysMem = initData.data();
+		bufferData.SysMemPitch = UINT(width * pixelSize);
+		bufferData.SysMemSlicePitch = UINT(width * height * pixelSize);
+		
+		FAILED(device->CreateTexture3D(&txtDesc, &bufferData, texture.GetAddressOf()));
+	}
+	else
+	{
+		FAILED(device->CreateTexture3D(&txtDesc, NULL, texture.GetAddressOf()));
+	}
+
+	FAILED(device->CreateRenderTargetView(texture.Get(), NULL, rtv.GetAddressOf()));
+	FAILED(device->CreateShaderResourceView(texture.Get(), NULL, srv.GetAddressOf()));
+	FAILED(device->CreateUnorderedAccessView(texture.Get(), NULL, uav.GetAddressOf()));
+}
+
+
+
+void Texture3D::Initialize(UINT width, UINT height, UINT depth, DXGI_FORMAT pixelFormat, const vector<float>& initData)
+{
+
+	m_width = width;
+	m_height = height;
+	m_depth = depth;
+
+	Texture3D::CreateTexture3D(width, height, depth, pixelFormat,
+								initData, m_texture, m_rtv, m_srv, m_uav);
+}
+
+void Texture3D::InitNoiseF16(ComPtr<ID3D11Device>& device)
+{
+
+	using namespace std;
+
+	DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+	const UINT width = 64;
+	const UINT height = 1024;
+	const UINT depth = 64;
+
+	vector<float> f32(width * height * depth * 4);
+
+	mt19937 gen(0);
+	uniform_real_distribution<float> dp(0.0f, 1.0f);
+	for (auto &f : f32)
+	{
+		f = dp(gen);
+	}
+
+	vector<float> f16(f32.size() / 2);
+
+	uint16_t *f16Ptr = (uint16_t *)f16.data();
+	
+	for (int i = 0; i < f32.size(); i++)
+	{
+		f16Ptr[i] = fp16_ieee_from_fp32_value(f32[i]);
+	}
+
+	Initialize(width, height, depth, DXGI_FORMAT_R16G16B16A16_FLOAT, f16);
+}
+
+void Texture3D::Upload(ComPtr<ID3D11DeviceContext>& context, const vector<float>& data)
+{
+
+	D3D11_TEXTURE3D_DESC desc;
+	m_texture->GetDesc(&desc);
+
+	if (!m_staging)
+	{
+		m_staging = Texture3D::CreateStagingTexture3D(
+			 desc.Width, desc.Height, desc.Depth, desc.Format);
+	}
+
+	size_t pixelSize = TextureBuffer::GetPixelSize(desc.Format);
+
+	D3D11_MAPPED_SUBRESOURCE ms;
+	context->Map(m_staging.Get(), NULL, D3D11_MAP_WRITE, NULL, &ms);
+
+	const uint8_t *src = (uint8_t *)data.data();
+	uint8_t *dst = (uint8_t *)ms.pData;
+	
+	for (UINT k = 0; k < desc.Depth; k++)
+	{
+		for (UINT j = 0; j < desc.Height; j++)
+		{
+			memcpy(&dst[j * ms.RowPitch + k * ms.DepthPitch],
+			       &src[(j * desc.Width + k * desc.Width * desc.Height) *
+				       pixelSize],
+			       desc.Width * pixelSize);
+		}
+	}
+	context->Unmap(m_staging.Get(), NULL);
+	context->CopyResource(m_texture.Get(), m_staging.Get());
+}
+
+
+ComPtr<ID3D11Texture3D> Texture3D::CreateStagingTexture3D(const int width, const int height, const int depth,
+	const DXGI_FORMAT pixelFormat)
+{
+	D3D11_TEXTURE3D_DESC txtDesc;
+	ZeroMemory(&txtDesc, sizeof(txtDesc));
+	txtDesc.Width = width;
+	txtDesc.Height = height;
+	txtDesc.Depth = depth;
+	txtDesc.MipLevels = 1;
+	txtDesc.Format = pixelFormat;
+	txtDesc.Usage = D3D11_USAGE_STAGING;
+	txtDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+
+	ComPtr<ID3D11Texture3D> stagingTexture;
+	if (FAILED(D3D::Get()->GetDevice()->CreateTexture3D(&txtDesc, NULL, stagingTexture.GetAddressOf())))
+	{
+		cout << "CreateStagingTexture3D() failed." << endl;
+	}
+
+	return stagingTexture;
 }

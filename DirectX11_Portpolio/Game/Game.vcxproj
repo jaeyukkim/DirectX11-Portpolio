@@ -218,6 +218,7 @@
     </ClCompile>
     <ClCompile Include="Combat\ICombatInterface.cpp" />
     <ClCompile Include="Enemy\UEnemyAnimInstance.cpp" />
+    <ClCompile Include="Enviroment\ACloud.cpp" />
     <ClCompile Include="Enviroment\AFloor.cpp" />
     <ClCompile Include="Enviroment\ACubeMap.cpp" />
     <ClCompile Include="Enviroment\AFluidActor.cpp" />
@@ -307,6 +308,7 @@
     <ClInclude Include="Characters\AKachujin.h" />
     <ClInclude Include="Combat\ICombatInterface.h" />
     <ClInclude Include="Enemy\UEnemyAnimInstance.h" />
+    <ClInclude Include="Enviroment\ACloud.h" />
     <ClInclude Include="Enviroment\AFloor.h" />
     <ClInclude Include="Enviroment\ACubeMap.h" />
     <ClInclude Include="Enviroment\AFluidActor.h" />

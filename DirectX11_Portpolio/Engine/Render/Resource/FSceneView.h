@@ -29,7 +29,8 @@ public:
     void UpdateIBLStrength(float InIBLStrength) {LightInfo.IBLStrength = InIBLStrength;}
     FLightObjects* GetLights() { return &Lights; }
     FLightInfo* GetLightInfo() {return &LightInfo;}
-
+    Vector3 GetDirectionalLightDir();
+    
 public:
     void AddToLightMap(FLight* InLightInfo);
     void DeleteFromLightMap(int InLightID);
