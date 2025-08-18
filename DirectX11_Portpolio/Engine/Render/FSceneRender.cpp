@@ -149,13 +149,13 @@ void FSceneRender::RenderObjects(FRenderOption option)
         }
         proxy.second->Render(option);
     }
-    for(auto& actor : CustomRenderObject)
-    {
-        actor->CustomRender(Timer::Get()->GetDeltaTime());
-    }
     if(SkyBoxProxy != nullptr)
     {
         SkyBoxProxy->Render(option);
+    }
+    for(auto& actor : CustomRenderObject)
+    {
+        actor->CustomRender(Timer::Get()->GetDeltaTime());
     }
 }
 

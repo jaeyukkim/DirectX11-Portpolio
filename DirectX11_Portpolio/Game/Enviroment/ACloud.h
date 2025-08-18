@@ -7,13 +7,19 @@ class UBoxComponent;
 struct VolumeConsts
 {
     Vector3 uvwOffset = Vector3(0.0f);
-    float lightAbsorption = 5.0f;
+    float lightAbsorption = 2.0f;
     Vector3 lightDir = Vector3(0.0f, 1.0f, 0.0f);
-    float densityAbsorption = 10.0f;
-    Vector3 lightColor = Vector3(1, 1, 1) * 40.0f;
-    float aniso = 0.3f;
+    float densityAbsorption = 0.1f;
+    Vector3 lightColor = Vector3(1, 1, 1) * 100.0f;
+    float aniso = 0.07f;
 };
 
+struct SmokeConst
+{
+    float BoxHalfWidth;
+    float pad[3];
+    Matrix meshWorldInv;
+};
 
 class ACloud : public Actor
 {
@@ -24,6 +30,9 @@ public:
     virtual void UpdateGUI();
     virtual void Tick(float deltaTime) override;
     virtual void CustomRender(float deltaTime) override;
+
+
+    static VolumeConsts m_volumeConstsCpu;
 
 protected:
     int m_volumeWidth = 128;
@@ -36,12 +45,14 @@ protected:
     
     shared_ptr<UBoxComponent> boxCollision;
     StaticMeshData meshData;
-    VolumeConsts m_volumeConstsCpu;
+    //VolumeConsts m_volumeConstsCpu;
 
     Matrix meshWorld;
+    SmokeConst SmokeMeshInfoCPU;
     FTransform meshTransform;
     shared_ptr<ConstantBuffer> WorldCBuffer;
-    
+    shared_ptr<ConstantBuffer> SmokeMeshInfoGPU;
+
 private:
     ComPtr<ID3D11ComputeShader> m_cloudDensityCS;
     ComPtr<ID3D11ComputeShader> m_cloudLightingCS;
@@ -52,6 +63,8 @@ private:
     Texture3D densityTex;
     Texture3D lightingTex;
 
+private:
+    float BoxWidth = 3000.0f;
 private:
     const wstring HlslPath = L"../../Engine/Render/HLSL/Cloud/";
     const wstring CloudDensityCSPath = HlslPath + L"CloudDensityCS.hlsl";

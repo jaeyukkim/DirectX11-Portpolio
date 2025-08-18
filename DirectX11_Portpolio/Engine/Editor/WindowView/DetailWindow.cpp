@@ -5,6 +5,8 @@
 #include "Render/PostProcess/PostProcess.h"
 #include "Render/PostProcess/ImageFilter.h"
 #include <Render/FSceneRender.h>
+
+#include "../../../Game/Enviroment/ACloud.h"
 #include "Render/PostEffects/PostEffect.h"
 
 
@@ -66,6 +68,17 @@ void DetailWindow::Run()
 		flag += ImGui::SliderFloat("IBLStrength", &lightInfo->IBLStrength, 0.0f, 5.0f);
 		flag += ImGui::SliderFloat("FogStrength", &postEffectData.FogStrength, 0.0f, 25.0f);
 
+		
+		flag += ImGui::SliderFloat("LightAbsorption", &ACloud::m_volumeConstsCpu.lightAbsorption, 0.0f, 10.0f);
+		flag += ImGui::SliderFloat("DensityAbsorption", &ACloud::m_volumeConstsCpu.densityAbsorption, 0.0f, 1.0f);
+		flag += ImGui::SliderFloat("Aniso", &ACloud::m_volumeConstsCpu.aniso, 0.0f, 2.0f);
+
+		static float lightScale = 40.0f;
+		flag += ImGui::SliderFloat("lightScale", &lightScale, 0.0f, 400.0f);
+		ACloud::m_volumeConstsCpu.lightColor = Vector3(1.0f) * lightScale;
+		
+
+		
 		// 편의상 사용자 입력이 인식되면 바로 GPU 버퍼를 업데이트
 		if (flag)
 		{

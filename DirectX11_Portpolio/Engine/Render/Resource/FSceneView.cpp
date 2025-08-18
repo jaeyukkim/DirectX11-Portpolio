@@ -93,8 +93,9 @@ Vector3 FSceneView::GetDirectionalLightDir()
 {
     for(FLight& light : Lights.Lights)
     {
-        if(light.LightType == ELightType::LT_Directional)
+        if(light.LightType & ELightType::LT_Directional)
         {
+            light.direction.Normalize();
             return light.direction;
         }
     }

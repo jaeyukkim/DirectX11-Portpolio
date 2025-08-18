@@ -10,7 +10,7 @@ VertexOutput VS_Main(VertexShaderInput input)
     posWorld = mul(float4(input.posModel, 1.0f), World);
     output.posProj = mul(posWorld, ViewProjection);
     output.texCoord = input.texCoord;
-   
+    output.posModel = input.posModel;
 
     return output;
 }

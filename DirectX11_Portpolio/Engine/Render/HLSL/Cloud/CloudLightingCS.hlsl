@@ -1,25 +1,16 @@
+#include "../Smoke.hlsli"
+#include "../Sampler.hlsli"
+
 Texture3D<float> densityTex : register(t0);
 RWTexture3D<float> lightingTex : register(u0);
 
-SamplerState linearClampSampler : register(s1);
 
-cbuffer Consts : register(b0)
-{
-    float3 uvwOffset;
-    float lightAbsorptionCoeff = 5.0;
-    float3 lightDir = float3(0, 1, 0);
-    float densityAbsorption = 10.0;
-    float3 lightColor = float3(1, 1, 1) * 40.0;
-    float aniso = 0.3;
-}
-
-// https://wallisc.github.io/rendering/2020/05/02/Volumetric-Rendering-Part-2.html
 float BeerLambert(float absorptionCoefficient, float distanceTraveled)
 {
     return exp(-absorptionCoefficient * distanceTraveled);
 }
 
-// ¹Ú½º °¡ÀåÀÚ¸® ÁÂÇ¥·ÎºÎÅÍ 3D ÅØ½ºÃç ÁÂÇ¥ °è»ê
+// ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ï¿½Ç¥ï¿½Îºï¿½ï¿½ï¿½ 3D ï¿½Ø½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½
 float3 GetUVW(float3 posModel)
 {
     return (posModel.xyz + 1.0) * 0.5;
@@ -27,24 +18,24 @@ float3 GetUVW(float3 posModel)
 
 float LightRay(float3 posModel, float3 lightDir)
 {
-    // ±ÙÃ³¸¸ Å½»ö
+    // ï¿½ï¿½Ã³ï¿½ï¿½ Å½ï¿½ï¿½
     int numSteps = 128 / 4;
     float stepSize = 2.0 / float(numSteps);
     // float absorptionCoeff = 5.0;
 
-    float alpha = 1.0; // visibility 1.0À¸·Î ½ÃÀÛ
+    float alpha = 1.0; // visibility 1.0ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-    [loop] // [unroll] »ç¿ë ½Ã ½¦ÀÌ´õ »ý¼ºÀÌ ³Ê¹« ´À¸²
+    [loop] // [unroll] ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¹ï¿½ ï¿½ï¿½ï¿½ï¿½
     for (int i = 0; i < numSteps; i++)
     {
         float prevAlpha = alpha;
-        float density = densityTex.SampleLevel(linearClampSampler, GetUVW(posModel), 0).
+        float density = densityTex.SampleLevel(LinearClampSampler, GetUVW(posModel), 0).
             r;
 
         if (density > 1e-3)
             alpha *= BeerLambert(lightAbsorptionCoeff * density, stepSize);
 
-        posModel += lightDir * stepSize;
+        posModel += -lightDir * stepSize;
 
         if (abs(posModel.x) > 1 || abs(posModel.y) > 1 || abs(posModel.z) > 1)
             break;
@@ -53,7 +44,7 @@ float LightRay(float3 posModel, float3 lightDir)
             break;
     }
 
-    // alpha°¡ 0¿¡ °¡±î¿ï ¼ö·Ï Á¶¸íÀ¸·ÎºÎÅÍ ºûÀ» Àß ¸ø ¹ÞÀ½
+    // alphaï¿½ï¿½ 0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     return alpha;
 }
 
@@ -65,9 +56,9 @@ void CS_Main(uint3 dtID : SV_DispatchThreadID)
     uint width, height, depth;
     lightingTex.GetDimensions(width, height, depth);
 
-    float3 uvw = dtID / float3(width, height, depth); //+ uvwOffset; ¶óÀÌÆ®¸ÊÀº ÁÖ¾îÁø ¹ÐµµÀå¿¡ ´ëÇØ °è»êÇÏ´Â °ÍÀÌ¶ó¼­ uvwOffset ¹Ì»ç¿ë
+    float3 uvw = dtID / float3(width, height, depth); //+ uvwOffset; ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ï¿½ ï¿½Ðµï¿½ï¿½å¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½Ì¶ï¿½ uvwOffset ï¿½Ì»ï¿½ï¿½
 
-    // uvw´Â [0, 1]x[0,1]x[0,1]
-    // ¸ðµ¨ ÁÂÇ¥°è´Â [-1,1]x[-1,1]x[-1,1]
+    // uvwï¿½ï¿½ [0, 1]x[0,1]x[0,1]
+    // ï¿½ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ï¿½ [-1,1]x[-1,1]x[-1,1]
     lightingTex[dtID] = LightRay((uvw - 0.5) * 2.0, lightDir);
 }

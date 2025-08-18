@@ -87,7 +87,9 @@ enum class EConstBufferSlot : UINT8
     CB_PostEffectData = 8,
     CB_FrustumData = 9,
     CB_Time = 10,
-    CB_BoneIdx = 11
+    CB_BoneIdx = 11,
+    CB_SmokeMesh = 12,
+    CB_VolumeSmoke = 13
 };
 
 
@@ -98,8 +100,9 @@ enum class EShaderResourceSlot : UINT8
     ERS_ShadowMap = 11,
     ERS_PostEffect = 20,
     ERS_InstanceData = 25,
-    ERS_AnimationData = 26
-    
+    ERS_AnimationData = 26,
+    ERS_DensityTex = 30,
+    ERS_LightingTex = 31,
 };
 
 

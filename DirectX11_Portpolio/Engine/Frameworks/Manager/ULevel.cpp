@@ -1,6 +1,7 @@
 #include "HeaderCollection.h"
 #include "ULevel.h"
 
+#include "../../../Game/Enviroment/ACloud.h"
 #include "../../../Game/Enviroment/AFluidActor.h"
 #include "../Game/Characters/AKachujin.h"
 #include "../Game/Enviroment/ALightActor.h"
@@ -37,9 +38,11 @@ void ULevel::Initialize()
     transform.SetPosition(0.0f, 0.0f, 0.0f);
     SpawnActorAtLocation<AFloor>(this, transform);
     
-    transform.SetPosition(-6000.0f, -100.0f, 0.0f);
-    SpawnActorAtLocation<AFluidActor>(this, transform);
+    //transform.SetPosition(-6000.0f, -100.0f, 0.0f);
+    //SpawnActorAtLocation<AFluidActor>(this, transform);
 
+    transform.SetPosition(0.0f, 5000.0f, 0.0f);
+    SpawnActorAtLocation<ACloud>(this, transform);
 }
 
 void ULevel::Destroy()

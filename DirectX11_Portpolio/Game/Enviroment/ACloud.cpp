@@ -4,12 +4,15 @@
 #include "Render/FSceneRender.h"
 #include "Render/Mesh/GeometryGenerator.h"
 
+VolumeConsts ACloud::m_volumeConstsCpu = VolumeConsts();
 ACloud::ACloud()
 {
-    boxCollision = CreateComponent<UBoxComponent>(this, Vector3(500.0f, 500.0f, 500.0f));
+    boxCollision = CreateComponent<UBoxComponent>(this, Vector3(BoxWidth, BoxWidth, BoxWidth));
     SetRootComponent(boxCollision.get());
 
-    meshData = GeometryGenerator::MakeSquare(250);
+    meshData = GeometryGenerator::MakeBox(Vector3(BoxWidth, BoxWidth, BoxWidth));
+    SmokeMeshInfoCPU.BoxHalfWidth = BoxWidth / 2;
+    
     IBuffer = make_shared<IndexBuffer>(meshData.Indices.data(), meshData.Indices.size());
     VBuffer = make_shared<VertexBuffer>(meshData.Vertices.data(), meshData.Vertices.size(), sizeof(VertexObject));
 
@@ -21,20 +24,25 @@ ACloud::ACloud()
 
     FGlobalPSO::Get()->CompileCS(CloudDensityCSPath, m_cloudDensityCS);
     FGlobalPSO::Get()->CompileCS(CloudLightingCSPath, m_cloudLightingCS);
+    FGlobalPSO::Get()->InitVolumeShader();
 
-    
+    meshTransform.SetPosition(0.0f, 5000.0f, 0.0f);
     FSceneRender::Get()->AddCustomRenderObject(this);
 }
 
 void ACloud::InitAllComponents()
 {
     Actor::InitAllComponents();
+
+    WorldCBuffer = make_shared<ConstantBuffer>(&meshWorld, sizeof(Matrix));
+    SmokeMeshInfoGPU = make_shared<ConstantBuffer>(&SmokeMeshInfoCPU, sizeof(SmokeConst));
     
     ID3D11DeviceContext* context = D3D::Get()->GetDeviceContext();
 
     {
         //0번슬롯 바인딩
-        m_volumeConstsGpu->CSSetConstantBuffer(EConstBufferSlot::CB_MaterialDesc, 1);
+        SmokeMeshInfoGPU->CSSetConstantBuffer(EConstBufferSlot::CB_SmokeMesh, 1);
+        m_volumeConstsGpu->CSSetConstantBuffer(EConstBufferSlot::CB_VolumeSmoke, 1);
         context->CSSetUnorderedAccessViews( 0, 1, densityTex.GetAddressOfUAV(), NULL);
         context->CSSetShader(m_cloudDensityCS.Get(), 0, 0);
         context->Dispatch(UINT(ceil(m_volumeWidth / 16.0f)),
@@ -54,9 +62,7 @@ void ACloud::InitAllComponents()
 
         D3D::Get()->ComputeShaderBarrier();
     }
-
-    WorldCBuffer = make_shared<ConstantBuffer>(&meshWorld, sizeof(Matrix));
-
+    
 }
 
 void ACloud::UpdateGUI()
@@ -69,11 +75,15 @@ void ACloud::Tick(float deltaTime)
     
     ID3D11DeviceContext* context = D3D::Get()->GetDeviceContext();
     Offset += 0.3f * deltaTime; // 애니메이션 효과
+   
+
     {
         m_volumeConstsCpu.lightDir = FSceneView::Get()->GetDirectionalLightDir();
         m_volumeConstsCpu.uvwOffset.z = Offset;
         m_volumeConstsGpu->UpdateConstBuffer();
-        m_volumeConstsGpu->CSSetConstantBuffer(EConstBufferSlot::CB_MaterialDesc, 1);
+        m_volumeConstsGpu->CSSetConstantBuffer(EConstBufferSlot::CB_VolumeSmoke, 1);
+        SmokeMeshInfoGPU->CSSetConstantBuffer(EConstBufferSlot::CB_SmokeMesh, 1);
+
         context->CSSetUnorderedAccessViews(0, 1, densityTex.GetAddressOfUAV(), NULL);
         context->CSSetShader(m_cloudDensityCS.Get(), 0, 0);
         context->Dispatch(UINT(ceil(m_volumeWidth / 16.0f)),
@@ -98,15 +108,25 @@ void ACloud::CustomRender(float deltaTime)
 {
     Super::CustomRender(deltaTime);
 
-  
-    FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->SimpleTexturePSO);
+    ID3D11DeviceContext* context = D3D::Get()->GetDeviceContext();
+    FGlobalPSO::Get()->BindPSO(FGlobalPSO::Get()->VolumeSmokePSO);
 
     VBuffer->IASetVertexBuffer();
     IBuffer->IASetIndexBuffer();
 
+    context->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::ERS_DensityTex), 1, densityTex.GetAddressOfSRV());
+    context->PSSetShaderResources(static_cast<UINT>(EShaderResourceSlot::ERS_LightingTex), 1, lightingTex.GetAddressOfSRV());
+
     meshWorld = meshTransform.ToMatrix().Transpose();
     WorldCBuffer->UpdateConstBuffer();
     WorldCBuffer->VSSetConstantBuffer(EConstBufferSlot::CB_World, 1);
-    D3D::Get()->GetDeviceContext()->DrawIndexed(meshData.Indices.size(), 0, 0);
+
+    SmokeMeshInfoCPU.meshWorldInv = meshWorld.Invert();
+    SmokeMeshInfoGPU->UpdateConstBuffer();
+    SmokeMeshInfoGPU->PSSetConstantBuffer(EConstBufferSlot::CB_SmokeMesh, 1);
+
+    m_volumeConstsGpu->PSSetConstantBuffer(EConstBufferSlot::CB_VolumeSmoke, 1);
+
+    context->DrawIndexed(meshData.Indices.size(), 0, 0);
     
 }

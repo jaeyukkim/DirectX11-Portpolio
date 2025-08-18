@@ -17,7 +17,7 @@ VertexOutput VS_Main(VertexShaderInput input, uint instanceID : SV_InstanceID)
 
     output.texCoord = input.texCoord;
     output.color = input.modelColor;
-
+    output.posModel = input.posModel;
 
     float4 tangentWorld = float4(input.tangent, 0.0f);
     tangentWorld = mul(tangentWorld, InstanceDatas[instanceID].Inst_World);

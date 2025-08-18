@@ -1,16 +1,8 @@
 #include "../Noise/TileableNoise.hlsli"
+#include "../Smoke.hlsli"
 
 RWTexture3D<float> densityTex : register(u0);
 
-cbuffer Consts : register(b0)
-{
-    float3 uvwOffset;
-    float lightAbsorptionCoeff = 5.0;
-    float3 lightDir = float3(0, 1, 0);
-    float densityAbsorption = 10.0;
-    float3 lightColor = float3(1, 1, 1) * 40.0;
-    float aniso = 0.3;
-}
 
 float cloudDensity(float3 uvw)
 {
@@ -33,6 +25,7 @@ float cloudDensity(float3 uvw)
     
     return saturate(cloud);
 }
+
 
 [numthreads(16, 16, 4)]
 void CS_Main(uint3 dtID : SV_DispatchThreadID)

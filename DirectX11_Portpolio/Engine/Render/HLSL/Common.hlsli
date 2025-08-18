@@ -31,6 +31,7 @@ cbuffer CB_Time : register(b10)
 
 struct VertexOutput
 {
+    float3 posModel : MODEL;
     float4 posProj : SV_POSITION; // Screen position
     float3 posWorld : POSITION; // World position (조명 계산에 사용)
     float3 modelNormal : NORMAL;

@@ -39,6 +39,7 @@ public:
         const vector<D3D_SHADER_MACRO> shaderMacros = {/* Empty default */});
     void Assert_IF_FailedCompile(HRESULT hr, const ComPtr<ID3DBlob>& errorBlob);
 
+    void InitVolumeShader();
     
 private:
     void InitShaderAndState();
@@ -56,7 +57,7 @@ private:
     void InitBlendState();
     void InitPSO();
 
-
+    
 
 public:
     static bool DrawAsWire;
@@ -94,7 +95,7 @@ public:
     FPSO FrustumCullingPSO;
     FPSO FrustumCullingSkinnedPSO;
     FPSO SimpleTexturePSO;
-
+    FPSO VolumeSmokePSO;
     
 private:
     static FGlobalPSO* Instance;
@@ -129,6 +130,7 @@ private:
     ComPtr<ID3D11PixelShader> DepthOnlyPS;
     ComPtr<ID3D11PixelShader> PostEffectsPS;
     ComPtr<ID3D11PixelShader> SimpleTexturePS;
+    ComPtr<ID3D11PixelShader> VolumeSmokePS;
 
 
     // GeometryShader
@@ -160,7 +162,7 @@ private:
     
     // Blend States
     ComPtr<ID3D11BlendState> MirrorBS;
-
+    ComPtr<ID3D11BlendState> AlphaBS;
     // InputLayout
     ComPtr<ID3D11InputLayout> MeshIL;
     ComPtr<ID3D11InputLayout> SkeletalMeshIL;
@@ -206,6 +208,6 @@ private:
     const wstring CombinePSPath = HlslPath + L"PS_Combine.hlsl";
     const wstring SimpleTexturePSPath = HlslPath + L"PS_SimpleTexture.hlsl";
 
-    
+    const wstring VolumeSmokePSPath = HlslPath + L"PS_VolumeSmoke.hlsl";
     
 };

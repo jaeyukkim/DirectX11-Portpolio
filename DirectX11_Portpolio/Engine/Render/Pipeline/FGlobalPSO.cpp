@@ -363,9 +363,32 @@ void FGlobalPSO::InitBlendState()
         mirrorBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
         mirrorBlendDesc.RenderTarget[0].RenderTargetWriteMask =
             D3D11_COLOR_WRITE_ENABLE_ALL;
+
+        HRESULT hr = D3D::Get()->GetDevice()->CreateBlendState(&mirrorBlendDesc, MirrorBS.GetAddressOf());
+        AssertHR(hr, "Create MirrorBS failed");
     }
-    HRESULT hr = D3D::Get()->GetDevice()->CreateBlendState(&mirrorBlendDesc, MirrorBS.GetAddressOf());
-    AssertHR(hr, "Create MirrorBS failed");
+    
+
+    
+    D3D11_BLEND_DESC AlphaBlendDesc;
+    {
+        ZeroMemory(&AlphaBlendDesc, sizeof(D3D11_BLEND_DESC));
+        AlphaBlendDesc.AlphaToCoverageEnable = false; // <- 주의: FALSE
+        AlphaBlendDesc.IndependentBlendEnable = false;
+        AlphaBlendDesc.RenderTarget[0].BlendEnable = true;
+        AlphaBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+        AlphaBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+        AlphaBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+        AlphaBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+        AlphaBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+        AlphaBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        AlphaBlendDesc.RenderTarget[0].RenderTargetWriteMask =
+            D3D11_COLOR_WRITE_ENABLE_ALL;
+        
+        HRESULT hr = D3D::Get()->GetDevice()->CreateBlendState(&AlphaBlendDesc, AlphaBS.GetAddressOf());
+        AssertHR(hr, "Create AlphaBS failed");
+    }
+    
  
 }
 
@@ -529,10 +552,18 @@ void FGlobalPSO::InitPSO()
     FrustumCullingSkinnedPSO.m_computeShader = FrustumCullingSkinnedCS;
 }
 
+void FGlobalPSO::InitVolumeShader()
+{
+    CompilePS(VolumeSmokePSPath, VolumeSmokePS);
+    VolumeSmokePSO = SimpleTexturePSO;
+    VolumeSmokePSO.m_pixelShader = VolumeSmokePS;
+    VolumeSmokePSO.m_blendState = AlphaBS;
+}
+
 
 void FGlobalPSO::CompileVSAndInputLayout(const wstring& path, ComPtr<ID3D11VertexShader>& InVertexShader,
-    const vector<D3D11_INPUT_ELEMENT_DESC> &InIE, ComPtr<ID3D11InputLayout>& InIL,
-    const vector<D3D_SHADER_MACRO> shaderMacros)
+                                         const vector<D3D11_INPUT_ELEMENT_DESC> &InIE, ComPtr<ID3D11InputLayout>& InIL,
+                                         const vector<D3D_SHADER_MACRO> shaderMacros)
 {
     ComPtr<ID3DBlob> Blob;
     ComPtr<ID3DBlob> ErrorBlob;
